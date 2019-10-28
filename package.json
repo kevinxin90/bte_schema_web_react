@@ -1,4 +1,5 @@
 {
+  "start": "PORT=8855 react-scripts start",
   "name": "confusion",
   "version": "0.1.0",
   "private": true,
