@@ -55,10 +55,10 @@ class Main extends Component {
       <div>
         <Header />
         <Switch>
-          <Route path="/home" component={HomePage} />
-          <Route exact path="/idresolver" component={IDResolver} />
-          <Route exact path="/singlehop" component={() => <SingleHop options={this.props.options} />} />
-          <Redirect to="/home" />
+          <Route path="/explorer_kgs/home" component={HomePage} />
+          <Route exact path="/explorer_kgs/idresolver" component={IDResolver} />
+          <Route exact path="/explorer_kgs/singlehop" component={() => <SingleHop options={this.props.options} />} />
+          <Redirect to="/explorer_kgs/home" />
         </Switch>
         <Footer />
       </div>
