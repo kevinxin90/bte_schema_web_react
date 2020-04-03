@@ -44,34 +44,24 @@ class Header extends Component {
                   <div className="container">
                     <NavbarToggler onClick={this.toggleNav} />
                     <NavbarBrand className="mr-auto" href="/">
-                        <img src="assets/images/biothings-explorer-text.png" height="40" width="50"
+                        <img src="/assets/images/biothings-explorer-text.png" height="40" width="50"
                             alt="BioThings Explorer" />
                     </NavbarBrand>
                     <Collapse isOpen={this.state.isNavOpen} navbar>
                         <Nav navbar>
                             <NavItem>
-                                <NavLink className="nav-link" to="/home">
+                                <NavLink className="nav-link" to="/explorer_kgs/home">
                                     Home
                                 </NavLink>
                             </NavItem>
                             <NavItem>
-                                <NavLink className="nav-link" to="/idresolver">
-                                    ID Resolver
+                                <NavLink className="nav-link" to="/explorer_kgs/explain">
+                                    EXPLAIN
                                 </NavLink>
                             </NavItem>
                             <NavItem>
-                                <NavLink className="nav-link" to="/singlehop">
-                                    Single-Hop Query
-                                </NavLink>
-                            </NavItem>
-                            <NavItem>
-                                <NavLink className="nav-link" to="/multihop">
-                                     Multi-Hops Query
-                                </NavLink>
-                            </NavItem>
-                            <NavItem>
-                                <NavLink className="nav-link" to="/connect">
-                                    Connect
+                                <NavLink className="nav-link" to="/explorer_kgs/predict">
+                                    PREDICT
                                 </NavLink>
                             </NavItem>
                         </Nav>
@@ -81,9 +71,13 @@ class Header extends Component {
                 <Jumbotron>
                     <div className="container">
                         <div className="row row-header justify-content-center">
-                            <div className="col-12 col-sm-12 col-md-7">
+                            <div className="col-6 col-sm-12 col-md-6">
                                 <h1>BioThings Explorer</h1>
                                 <p>BioThings Explorer allows users to query a vast amount of biological and chemical databases in a central place by calling APIs which distribute these data on the fly. </p>
+                            </div>
+                            <div className="col-6 col-sm-12 col-md-6">
+                                <img src="/assets/images/bte_metro.png" height="150px"
+                                    alt="BioThings Explorer" />
                             </div>
                         </div>
                     </div>
