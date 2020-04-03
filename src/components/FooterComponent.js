@@ -9,10 +9,8 @@ function Footer(props) {
                 <div className="col-4 offset-1 col-sm-5">
                     <h5>Links</h5>
                     <ul className="list-unstyled">
-                        <li><Link to="/idresolver">ID Resolver</Link></li>
-                        <li><Link to="/singlehop">Single Hop Query</Link></li>
-                        <li><Link to="/multihop">Multi Hop Query</Link></li>
-                        <li><Link to="/connect">Connect</Link></li>
+                        <li><Link to="/predict">PREDICT</Link></li>
+                        <li><Link to="/explain">EXPLAIN</Link></li>
                     </ul>
                 </div>
                 <div className="col-7 col-sm-5">
@@ -29,7 +27,7 @@ function Footer(props) {
             </div>
             <div className="row justify-content-center">             
                 <div className="col-auto">
-                    <p>© Copyright 2017-2019 The Su/Wu Lab.</p>
+                    <p>© Copyright 2017-2020 The Su/Wu Lab.</p>
                 </div>
             </div>
         </div>
