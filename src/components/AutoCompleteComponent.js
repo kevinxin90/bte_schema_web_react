@@ -1,24 +1,29 @@
 import React, { Component } from 'react';
 import { Search } from 'semantic-ui-react'
 
-const initialState = { isLoading: false, results: [], value: '', selected: {} }
-
-
 export default class AutoComplete extends Component {
   constructor(props) {
     super(props);
-    this.state = initialState
+    this.state = {isLoading: false,
+                  results: [],
+                  value: this.props.value ? this.props.value : '',
+                  selected: this.props.selected ? this.props.selected : {} }
   }
-
+  //This needs to be moved to the parent class
   handleResultSelect = (e, { result }) => {
     this.setState({ value: result.title, selected: result });
-    this.props.handleinputselect(result);
+    this.props.handleselect(result);
   }
 
   handleSearchChange = (e, { value }) => {
     this.setState({ isLoading: true, value })
-    fetch('https://biothings.io/explorer_kgs/api/v1/hint?q=' + value)
-    .then(response => response.json())
+    fetch('http://localhost:8856/explorer_api/v1/hint?q=' + value)
+    .then(response => {
+      if (response.ok) {
+          return response.json();
+      } else {
+        return {}
+      }})
     .then(response => {
       var new_response = {};
       for (var semantic_type in response) {
@@ -41,20 +46,15 @@ export default class AutoComplete extends Component {
   }
 
   render() {
-    const { isLoading, value, results } = this.state
-
     return (
       <React.Fragment>
-        <div className="inputlabel">
-          <p>Input</p>
-        </div>
         <Search
           category
-          loading={isLoading}
+          loading={this.state.isLoading}
           onResultSelect={this.handleResultSelect}
           onSearchChange={this.handleSearchChange}
-          results={results}
-          value={value}
+          results={this.state.results}
+          value={this.state.value}
           {...this.props}
         />
       </React.Fragment>
