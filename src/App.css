@@ -41,12 +41,13 @@
 
 .footer{
     background-color: #D1C4E9;
-    margin:0px auto;
-    padding: 20px 0px 20px 0px;
+    margin:30px auto;
+    padding: 20px 20px 20px 0px;
 }
 .jumbotron {
     padding:70px 30px 70px 30px;
-    margin:0px auto;
+    margin:30px auto;
+    margin-top: 0;
     background: #9575CD ;
     color:floralwhite;
 }
@@ -64,3 +65,9 @@ address{
 .media-body {
     margin-left: 5%;
 }
+
+.steps {
+    margin-bottom: 10px;
+}
+
+.hidden { display:none; }
