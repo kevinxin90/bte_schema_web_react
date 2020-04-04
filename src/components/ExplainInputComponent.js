@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import AutoComplete from './AutoCompleteComponent';
-import { Form, Button, Segment } from 'semantic-ui-react'
+import { Form, Button, Segment, Popup } from 'semantic-ui-react'
 
 export default class ExplainInput extends Component {
   state = {
@@ -36,7 +36,7 @@ export default class ExplainInput extends Component {
                                 <hr />
                             </Form.Group>
                             <div>
-                                <h3> Source Node</h3>
+                                <Popup content="The ending node of the paths" header="Source Node" trigger={<h3>Source Node</h3>}/>
                             </div>
                             <br />
                             <Form.Group>
@@ -45,7 +45,7 @@ export default class ExplainInput extends Component {
                                 />
                             </Form.Group>
                             <div>
-                                <h3> Target Node</h3>
+                            <Popup content="The ending node of the paths" header="Target Node" trigger={<h3>Target Node</h3>}/>
                             </div>
                             <br />
                             <Form.Group>
