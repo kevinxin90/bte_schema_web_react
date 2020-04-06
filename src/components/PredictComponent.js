@@ -7,7 +7,6 @@ import Steps from './StepsComponent';
 import PredictInput from './PredictInputComponent';
 import MetaPathForm from './MetaPathFormComponent';
 import PredictQueryResult from './PredictQueryResultComponent';
-import TreeGraph from './TreeGraphComponent';
 
 class Predict extends Component {
 
@@ -274,7 +273,6 @@ class Predict extends Component {
                     handleSelect={this.handleQueryResultSelect}
                     graph={this.state.graph}
                 />
-                <TreeGraph />
             </div>
         )
     }
