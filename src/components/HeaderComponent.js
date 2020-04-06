@@ -71,12 +71,13 @@ class Header extends Component {
                 <Jumbotron>
                     <div className="container">
                         <div className="row row-header justify-content-center">
-                            <div className="col-6 col-sm-12 col-md-6">
+                            <div className="col-6 col-sm-12 col-md-6 intro">
                                 <h1>BioThings Explorer</h1>
+                                <br></br>
                                 <p>BioThings Explorer allows users to query a vast amount of biological and chemical databases in a central place by calling APIs which distribute these data on the fly. </p>
                             </div>
                             <div className="col-6 col-sm-12 col-md-6">
-                                <img src="/assets/images/bte_metro.png" height="150px"
+                                <img src="/assets/images/network.png" width="90%"
                                     alt="BioThings Explorer" />
                             </div>
                         </div>

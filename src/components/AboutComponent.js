@@ -80,11 +80,6 @@ function About(props) {
                     <h2>Corporate Leadership</h2>
                 </div>
                 <div className="col-12">
-                    <Media list>
-                        {props.leaders.map((leader) => (
-                            <RenderLeader leader={leader} />
-                        ))}
-                    </Media>
                 </div>
             </div>
         </div>
