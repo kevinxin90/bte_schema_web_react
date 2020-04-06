@@ -41,12 +41,12 @@
 
 .footer{
     background-color: #D1C4E9;
-    margin:30px auto;
-    padding: 20px 20px 20px 0px;
+    margin:30px 0px 0px 0px;
+    padding: 20px;
 }
 .jumbotron {
     padding:70px 30px 70px 30px;
-    margin:30px auto;
+    margin:30px auto ;
     margin-top: 0;
     background: #9575CD ;
     color:floralwhite;
@@ -97,4 +97,11 @@ path.link {
 
 .cardImage {
     height: 30vh;
+}
+
+.intro h1 {
+    font-size: 2.5rem;
+}
+.intro p {
+    font-size: 1.5rem;
 }
