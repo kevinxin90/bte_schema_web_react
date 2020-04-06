@@ -1,5 +1,5 @@
 import D3Graph from './D3GraphComponent';
-import ExplainTable from './ExplainTableComponent';
+import BTETable from './BTETableComponent';
 import ReactLoader from './DimerComponent';
 import React, { Component } from 'react';
 import { Segment, Divider, Dimmer, Loader, Image } from 'semantic-ui-react';
@@ -13,7 +13,7 @@ export default class ExplainQueryResult extends Component {
                     <div className="col-12">
                         <Segment color='blue'>
                             {this.props.resultReady ? null: <ReactLoader />}
-                            <ExplainTable
+                            <BTETable
                                 resultReady={this.props.resultReady}
                                 content={this.props.content}
                                 handleSelect={this.props.handleSelect}
