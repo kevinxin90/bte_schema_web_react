@@ -3,9 +3,9 @@ import Home from './HomeComponent';
 import Header from './HeaderComponent';
 import Footer from './FooterComponent';
 import IDResolver from './IDResolverComponent';
+import About from './AboutComponent';
 import Explain from "./ExplainComponent";
 import Predict from "./PredictComponent";
-import About from './AboutComponent';
 import { Switch, Route, Redirect, withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { postComment, fetchDishes, fetchComments, fetchPromos } from '../redux/ActionCreators';
@@ -57,6 +57,7 @@ class Main extends Component {
         <Header />
         <Switch>
           <Route path="/explorer_kgs/home" component={HomePage} />
+          <Route path="/explorer_kgs/about" component={About} />
           <Route exact path="/explorer_kgs/predict" component={() => <Predict options={this.props.options} />} />
           <Route exact path="/explorer_kgs/explain" component={() => <Explain options={this.props.options} />} />
           <Redirect to="/explorer_kgs/home" />
