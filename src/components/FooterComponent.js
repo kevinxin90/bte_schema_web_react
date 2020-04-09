@@ -9,8 +9,8 @@ function Footer(props) {
                 <div className="col-4 offset-1 col-sm-5">
                     <h5>Links</h5>
                     <ul className="list-unstyled">
-                        <li><Link to={`${process.env.REACT_APP_API_URL}/predict`}>PREDICT</Link></li>
-                        <li><Link to={`${process.env.REACT_APP_API_URL}/explain`}>EXPLAIN</Link></li>
+                        <li><Link to='/predict'>PREDICT</Link></li>
+                        <li><Link to='/explain'>EXPLAIN</Link></li>
                     </ul>
                 </div>
                 <div className="col-7 col-sm-5">
