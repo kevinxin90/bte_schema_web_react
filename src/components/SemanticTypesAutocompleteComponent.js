@@ -8,7 +8,7 @@ export default class SearchSemanticTypeComponent extends Component {
   state = initialState
   
   componentDidMount() {
-    fetch('http://localhost:8856/explorer_api/v1/semantictypes')
+    fetch('https://geneanalysis.ncats.io/explorer_api/v1/semantictypes')
             .then(response => {
                 if (response.ok) {
                     return response;

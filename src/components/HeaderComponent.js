@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Navbar, NavbarBrand, Nav, NavbarToggler, Collapse, NavItem, Jumbotron,
     Button, Modal, ModalHeader, ModalBody,
     Form, FormGroup, Label, Input} from 'reactstrap';
-import { NavLink } from 'react-router-dom';
+import { NavLink, Link } from 'react-router-dom';
 
 class Header extends Component {
 
@@ -50,17 +50,17 @@ class Header extends Component {
                     <Collapse isOpen={this.state.isNavOpen} navbar>
                         <Nav navbar>
                             <NavItem>
-                                <NavLink className="nav-link" to="/explorer_kgs/home">
-                                    Home
+                            <NavLink className="nav-link" to={`${process.env.REACT_APP_API_URL}/explorer/`}>
+                                    HOME
                                 </NavLink>
                             </NavItem>
                             <NavItem>
-                                <NavLink className="nav-link" to="/explorer_kgs/explain">
+                                <NavLink className="nav-link" to={`${process.env.REACT_APP_API_URL}/explorer/explain`}>
                                     EXPLAIN
                                 </NavLink>
                             </NavItem>
                             <NavItem>
-                                <NavLink className="nav-link" to="/explorer_kgs/predict">
+                                <NavLink className="nav-link" to={`${process.env.REACT_APP_API_URL}/explorer/predict`}>
                                     PREDICT
                                 </NavLink>
                             </NavItem>

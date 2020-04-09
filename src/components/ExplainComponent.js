@@ -98,7 +98,7 @@ class Explain extends Component {
             showMetaPath: true,
             showResult: false
         })
-        fetch('http://localhost:8856/explorer_api/v1/find_metapath?input_cls=' + this.state.selectedInput.type + '&output_cls=' + this.state.selectedOutput.type)
+        fetch('https://geneanalysis.ncats.io/explorer_api/v1/find_metapath?input_cls=' + this.state.selectedInput.type + '&output_cls=' + this.state.selectedOutput.type)
             .then(response => {
                 if (response.ok) {
                     return response;
@@ -144,7 +144,7 @@ class Explain extends Component {
             showResult: true,
             resultReady: false
         })
-        let url = new URL('http://localhost:8856/explorer_api/v1/connect')
+        let url = new URL('https:/geneanalysis.ncats.io/explorer_api/v1/connect')
 
         var params = {input_obj: JSON.stringify(this.state.selectedInput),
                       output_obj: JSON.stringify(this.state.selectedOutput),
@@ -227,7 +227,7 @@ class Explain extends Component {
                 <div className="row">
                     <div className="col-12">
                         <Breadcrumb>
-                        <Breadcrumb.Section><Link to="/home">Home</Link></Breadcrumb.Section>
+                        <Breadcrumb.Section><Link to={`${process.env.REACT_APP_API_URL}/`}>Home</Link></Breadcrumb.Section>
                         <Breadcrumb.Divider />
                         <Breadcrumb.Section active>Explain</Breadcrumb.Section>
                         </Breadcrumb>

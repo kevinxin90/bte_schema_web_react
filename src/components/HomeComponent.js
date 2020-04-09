@@ -13,7 +13,7 @@ const Home = () => (
             <CardBody>
                 <CardTitle><h1>Explain</h1></CardTitle>
                 <CardText>EXPLAIN queries are designed to identify plausible reasoning chains to explain the relationship between two entities.</CardText>
-                <Link to="/explorer_kgs/explain"><Button>Try it Out</Button></Link>
+                <Link to={`${process.env.REACT_APP_API_URL}/explain`}><Button>Try it Out</Button></Link>
             </CardBody>
         </Card>
       </Grid.Column>
@@ -23,7 +23,7 @@ const Home = () => (
             <CardBody>
                 <CardTitle><h1>Predict</h1></CardTitle>
                 <CardText>PREDICT queries are designed to predict plausible relationships between one entity and an entity class, such as Gene.</CardText>
-                <Link to="/explorer_kgs/predict"><Button>Try it Out</Button></Link>
+                <Link to={`${process.env.REACT_APP_API_URL}/predict`}><Button>Try it Out</Button></Link>
             </CardBody>
         </Card>
       </Grid.Column>

@@ -17,7 +17,7 @@ export default class AutoComplete extends Component {
 
   handleSearchChange = (e, { value }) => {
     this.setState({ isLoading: true, value })
-    fetch('http://localhost:8856/explorer_api/v1/hint?q=' + value)
+    fetch('https://geneanalysis.ncats.io/explorer_api/v1/hint?q=' + value)
     .then(response => {
       if (response.ok) {
           return response.json();
