@@ -5,7 +5,7 @@ import Footer from './FooterComponent';
 import About from './AboutComponent';
 import Explain from "./ExplainComponent";
 import Predict from "./PredictComponent";
-import { BrowserRouter as Router, Route, Redirect, withRouter } from 'react-router-dom';
+import { Route, withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { postComment, fetchDishes, fetchComments, fetchPromos } from '../redux/ActionCreators';
 import { actions } from 'react-redux-form';
@@ -48,16 +48,12 @@ class Main extends Component {
 
     return (
       <div>
-        <Router basename='/explorer'>
-          <div>
-            <Header />
-            <Route exact path='/' component={Home}></Route>
-            <Route exact path='/about' component={About}></Route>
-            <Route exact path='/predict' component={Predict}></Route>
-            <Route exact path='/explain' component={Explain}></Route>
-            <Footer />
-          </div>
-        </Router>
+          <Header />
+          <Route exact path='/' component={Home}></Route>
+          <Route exact path='/about' component={About}></Route>
+          <Route exact path='/predict' component={Predict}></Route>
+          <Route exact path='/explain' component={Explain}></Route>
+          <Footer />
       </div>
     );
   }
