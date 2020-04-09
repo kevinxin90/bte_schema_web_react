@@ -57,12 +57,12 @@ class Header extends Component {
                                 </NavLink>
                             </NavItem>
                             <NavItem>
-                                <NavLink className="nav-link" to='/explorer/explain'>
+                                <NavLink className="nav-link" to='/explain'>
                                     EXPLAIN
                                 </NavLink>
                             </NavItem>
                             <NavItem>
-                                <NavLink className="nav-link" to='/explorer/predict'>
+                                <NavLink className="nav-link" to='/predict'>
                                     PREDICT
                                 </NavLink>
                             </NavItem>

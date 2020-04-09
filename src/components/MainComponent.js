@@ -48,16 +48,16 @@ class Main extends Component {
 
     return (
       <div>
-        <Header />
         <Router basename='/explorer'>
           <div>
-          <Route exact path='/' component={Home}></Route>
-          <Route path='/about' component={About}></Route>
-          <Route path='/predict' component={Predict}></Route>
-          <Route path='/explain' component={Explain}></Route>
+            <Header />
+            <Route exact path='/' component={Home}></Route>
+            <Route exact path='/about' component={About}></Route>
+            <Route exact path='/predict' component={Predict}></Route>
+            <Route exact path='/explain' component={Explain}></Route>
+            <Footer />
           </div>
         </Router>
-        <Footer />
       </div>
     );
   }
