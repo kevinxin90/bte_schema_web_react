@@ -95,8 +95,12 @@ path.link {
 	stroke-width: 1.5px;
 }
 
-.cardImage {
-    height: 30vh;
+.homeCard img {
+    height: 30vh !important;
+}
+
+.homeCard {
+    width: 80% !important;
 }
 
 .intro h1 {

@@ -1,6 +1,5 @@
 import React from 'react'
-import { Divider, Grid, Image, Segment } from 'semantic-ui-react'
-import { Row, Col, Card, CardImg, CardText, CardBody, CardTitle, CardSubtitle, Button } from 'reactstrap';
+import { Divider, Button, Card, Grid, Image, Segment } from 'semantic-ui-react'
 import { Link } from 'react-router-dom';
 import explain from './assets/bte-explain.png';
 import predict from './assets/bte-predict.png';
@@ -10,23 +9,31 @@ const Home = () => (
   <Segment>
     <Grid columns={2} relaxed='very'>
       <Grid.Column>
-        <Card body outline color="secondary" className="text-center">
-            <CardImg bottom src={explain} alt="Single Hop Query" className="cardImage"/>
-            <CardBody>
-                <CardTitle><h1>Explain</h1></CardTitle>
-                <CardText>EXPLAIN queries are designed to identify plausible reasoning chains to explain the relationship between two entities.</CardText>
-                <Link to='/explain'><Button>Try it Out</Button></Link>
-            </CardBody>
+        <Card centered href="/explorer/explain" color="red" className="homeCard">
+          <Image src={explain} wrapped ui={false} />
+          <Card.Content textAlign="center">
+            <Card.Header>EXPLAIN</Card.Header>
+            <Card.Description>
+            EXPLAIN queries are designed to identify plausible reasoning chains to explain the relationship between two entities.
+            </Card.Description>
+          </Card.Content>
+          <Card.Content extra textAlign="center">
+            <Link to='/explain'><Button>Try it Out</Button></Link>
+          </Card.Content>
         </Card>
       </Grid.Column>
       <Grid.Column>
-      <Card body outline color="secondary" className="text-center">
-            <CardImg bottom src={predict} alt="Single Hop Query" className="cardImage"/>
-            <CardBody>
-                <CardTitle><h1>Predict</h1></CardTitle>
-                <CardText>PREDICT queries are designed to predict plausible relationships between one entity and an entity class, such as Gene.</CardText>
-                <Link to='/predict'><Button>Try it Out</Button></Link>
-            </CardBody>
+        <Card centered href="/explorer/predict" color="green" className="homeCard">
+          <Image src={predict} wrapped ui={false} />
+          <Card.Content textAlign="center">
+            <Card.Header>PREDICT</Card.Header>
+            <Card.Description>
+            PREDICT queries are designed to predict plausible relationships between one entity and an entity class, such as Gene.
+            </Card.Description>
+          </Card.Content>
+          <Card.Content extra textAlign="center">
+            <Link to='/predict'><Button>Try it Out</Button></Link>
+          </Card.Content>
         </Card>
       </Grid.Column>
     </Grid>
