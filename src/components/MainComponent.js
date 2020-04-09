@@ -52,10 +52,10 @@ class Main extends Component {
         <Header />
         <Router basename='/explorer'>
           <div>
-          <Route exact path={`${process.env.REACT_APP_API_URL}/`} component={Home}></Route>
-          <Route path={`${process.env.REACT_APP_API_URL}/about`} component={About}></Route>
-          <Route path={`${process.env.REACT_APP_API_URL}/predict`} component={Predict}></Route>
-          <Route path={`${process.env.REACT_APP_API_URL}/explain`} component={Explain}></Route>
+          <Route exact path='/' component={Home}></Route>
+          <Route path='/about' component={About}></Route>
+          <Route path='/predict' component={Predict}></Route>
+          <Route path='/explain' component={Explain}></Route>
           </div>
         </Router>
         <Footer />

@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "proxy": "http://localhost:8856/",
+  "homepage": "https://biothings.io/explorer/",
   "dependencies": {
     "axios": "^0.19.2",
     "bootstrap": "^4.3.1",
