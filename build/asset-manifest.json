@@ -1,19 +1,23 @@
 {
   "files": {
     "main.css": "/explorer/static/css/main.175a9542.chunk.css",
-    "main.js": "/explorer/static/js/main.3220e1e1.chunk.js",
-    "main.js.map": "/explorer/static/js/main.3220e1e1.chunk.js.map",
+    "main.js": "/explorer/static/js/main.b989fa8f.chunk.js",
+    "main.js.map": "/explorer/static/js/main.b989fa8f.chunk.js.map",
     "runtime-main.js": "/explorer/static/js/runtime-main.2cd93e0a.js",
     "runtime-main.js.map": "/explorer/static/js/runtime-main.2cd93e0a.js.map",
     "static/css/2.0711081c.chunk.css": "/explorer/static/css/2.0711081c.chunk.css",
-    "static/js/2.d0f10cff.chunk.js": "/explorer/static/js/2.d0f10cff.chunk.js",
-    "static/js/2.d0f10cff.chunk.js.map": "/explorer/static/js/2.d0f10cff.chunk.js.map",
+    "static/js/2.ab81eced.chunk.js": "/explorer/static/js/2.ab81eced.chunk.js",
+    "static/js/2.ab81eced.chunk.js.map": "/explorer/static/js/2.ab81eced.chunk.js.map",
     "index.html": "/explorer/index.html",
-    "precache-manifest.123a9574d0486fdcc5e7b23f75bfcebc.js": "/explorer/precache-manifest.123a9574d0486fdcc5e7b23f75bfcebc.js",
+    "precache-manifest.a565604489b10bd905ed33fa926c4109.js": "/explorer/precache-manifest.a565604489b10bd905ed33fa926c4109.js",
     "service-worker.js": "/explorer/service-worker.js",
     "static/css/2.0711081c.chunk.css.map": "/explorer/static/css/2.0711081c.chunk.css.map",
     "static/css/main.175a9542.chunk.css.map": "/explorer/static/css/main.175a9542.chunk.css.map",
+    "static/media/biothings-explorer-text.png": "/explorer/static/media/biothings-explorer-text.8ec6e86e.png",
     "static/media/semantic.min.css": "/explorer/static/media/outline-icons.ef60a4f6.woff",
-    "static/media/font-awesome.min.css": "/explorer/static/media/fontawesome-webfont.fee66e71.woff"
+    "static/media/bte-explain.png": "/explorer/static/media/bte-explain.3398c417.png",
+    "static/media/bte-predict.png": "/explorer/static/media/bte-predict.16a4b950.png",
+    "static/media/font-awesome.min.css": "/explorer/static/media/fontawesome-webfont.fee66e71.woff",
+    "static/media/network.png": "/explorer/static/media/network.e94e244a.png"
   }
 }
