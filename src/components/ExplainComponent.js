@@ -227,7 +227,7 @@ class Explain extends Component {
                 <div className="row">
                     <div className="col-12">
                         <Breadcrumb>
-                        <Breadcrumb.Section><Link to={`${process.env.REACT_APP_API_URL}/`}>Home</Link></Breadcrumb.Section>
+                        <Breadcrumb.Section><Link to='/'>Home</Link></Breadcrumb.Section>
                         <Breadcrumb.Divider />
                         <Breadcrumb.Section active>Explain</Breadcrumb.Section>
                         </Breadcrumb>

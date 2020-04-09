@@ -3,6 +3,8 @@ import { Navbar, NavbarBrand, Nav, NavbarToggler, Collapse, NavItem, Jumbotron,
     Button, Modal, ModalHeader, ModalBody,
     Form, FormGroup, Label, Input} from 'reactstrap';
 import { NavLink, Link } from 'react-router-dom';
+import bte from './assets/biothings-explorer-text.png';
+import network from './assets/network.png';
 
 class Header extends Component {
 
@@ -44,23 +46,23 @@ class Header extends Component {
                   <div className="container">
                     <NavbarToggler onClick={this.toggleNav} />
                     <NavbarBrand className="mr-auto" href="/">
-                        <img src="/assets/images/biothings-explorer-text.png" height="40" width="50"
+                        <img src={bte} height="40" width="50"
                             alt="BioThings Explorer" />
                     </NavbarBrand>
                     <Collapse isOpen={this.state.isNavOpen} navbar>
                         <Nav navbar>
                             <NavItem>
-                            <NavLink className="nav-link" to={`${process.env.REACT_APP_API_URL}/explorer/`}>
+                            <NavLink className="nav-link" to='/'>
                                     HOME
                                 </NavLink>
                             </NavItem>
                             <NavItem>
-                                <NavLink className="nav-link" to={`${process.env.REACT_APP_API_URL}/explorer/explain`}>
+                                <NavLink className="nav-link" to='/explorer/explain'>
                                     EXPLAIN
                                 </NavLink>
                             </NavItem>
                             <NavItem>
-                                <NavLink className="nav-link" to={`${process.env.REACT_APP_API_URL}/explorer/predict`}>
+                                <NavLink className="nav-link" to='/explorer/predict'>
                                     PREDICT
                                 </NavLink>
                             </NavItem>
@@ -77,7 +79,7 @@ class Header extends Component {
                                 <p>BioThings Explorer allows users to query a vast amount of biological and chemical databases in a central place by calling APIs which distribute these data on the fly. </p>
                             </div>
                             <div className="col-6 col-sm-12 col-md-6">
-                                <img src="/assets/images/network.png" width="90%"
+                                <img src={network} width="90%"
                                     alt="BioThings Explorer" />
                             </div>
                         </div>

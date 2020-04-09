@@ -45,7 +45,6 @@ class Main extends Component {
   }
 
   render() {
-    console.log('env', process.env.REACT_APP_API_URL);
 
     return (
       <div>
