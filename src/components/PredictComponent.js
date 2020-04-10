@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-//import { BreadcrumbItem, Breadcrumb } from 'reactstrap';
 import { Breadcrumb } from 'semantic-ui-react'
 import { Link } from 'react-router-dom';
 import AccordionComponent from './PredictHelpComponent';

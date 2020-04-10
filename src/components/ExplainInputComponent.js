@@ -1,13 +1,15 @@
 import React, { Component } from 'react';
 import AutoComplete from './AutoCompleteComponent';
-import { Form, Button, Segment, Popup } from 'semantic-ui-react'
+import { Form, Button, Segment, Popup, Modal } from 'semantic-ui-react'
+import ModalExampleControlled from './NoInpuModalComponent';
 
 export default class ExplainInput extends Component {
   state = {
       sourceValue: '',
       sourceSelected: {},
       targetValue: '',
-      targetSelected: {}
+      targetSelected: {},
+      showModal: false
   }
 
   setExample1 = () => {
@@ -27,6 +29,7 @@ export default class ExplainInput extends Component {
   render() {
     return (
         <div className={this.props.shouldHide ? '' : 'hidden'}>
+            <ModalExampleControlled modalOpen={this.props.showModal} handleClose={this.props.handleClose}/>
             <div className="row ">
                 <div className="col-12">
                     <Segment color="green">

@@ -7,26 +7,26 @@ import { Segment, Divider, Dimmer, Loader, Image } from 'semantic-ui-react';
 
 export default class ExplainQueryResult extends Component {
     render() {
+        const clsName = "row " + this.props.shouldHide ? '' : 'hidden';
+        console.log('clsName', clsName);
         return (
-            <div className={this.props.shouldHide ? '' : 'hidden'}>
-                <div className="row">
-                    <div className="col-12">
-                        <Segment color='blue'>
-                            {this.props.resultReady ? null: <ReactLoader />}
-                            <BTETable
+            <div className={clsName}>
+                <div className="col-12">
+                    <Segment color='blue'>
+                        {this.props.resultReady ? null: <ReactLoader />}
+                        <BTETable
+                            resultReady={this.props.resultReady}
+                            content={this.props.content}
+                            handleSelect={this.props.handleSelect}
+                        />
+                        <Divider />
+                        <div className={this.props.shouldHide ? '' : 'hidden'}>
+                            <D3Graph
+                                graph={this.props.graph}
                                 resultReady={this.props.resultReady}
-                                content={this.props.content}
-                                handleSelect={this.props.handleSelect}
                             />
-                            <Divider />
-                            <div className={this.props.shouldHide ? '' : 'hidden'}>
-                                <D3Graph
-                                    graph={this.props.graph}
-                                    resultReady={this.props.resultReady}
-                                />
-                            </div>
-                        </Segment>
-                    </div>
+                        </div>
+                    </Segment>
                 </div>
             </div>
         )

@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-//import { BreadcrumbItem, Breadcrumb } from 'reactstrap';
 import { Breadcrumb } from 'semantic-ui-react'
 import { Link } from 'react-router-dom';
 import AccordionComponent from './AccordionComponent';
@@ -7,6 +6,7 @@ import Steps from './StepsComponent';
 import ExplainInput from './ExplainInputComponent';
 import MetaPathForm from './MetaPathFormComponent';
 import ExplainQueryResult from './ExplainQueryResultComponent';
+let _ = require('lodash');
 
 class Explain extends Component {
 
@@ -30,6 +30,7 @@ class Explain extends Component {
             showInput: true,
             showMetaPath: false,
             showResult: false,
+            showModal: false,
         };
         this.handleStep1Submit = this.handleStep1Submit.bind(this);
         this.handleStep2Submit = this.handleStep2Submit.bind(this);
@@ -40,6 +41,7 @@ class Explain extends Component {
         this.handleBackToStep1 = this.handleBackToStep1.bind(this);
         this.handleBackToStep2 = this.handleBackToStep2.bind(this);
         this.handleBackToStep3 = this.handleBackToStep3.bind(this);
+        this.handleClose = this.handleClose.bind(this);
     };
 
     //this function will be passed to autocomplete component
@@ -80,46 +82,57 @@ class Explain extends Component {
                         graph: graph })
     }
 
+    handleClose = () => this.setState({
+        showModal: false
+    })
+
 
     handleStep1Submit(event) {
         event.preventDefault();
-        this.setState({
-            step1Active: false,
-            step1Complete: true,
-            step2Active: true,
-            step3Active: false,
-            step2Complete: false,
-            step3Complete: false,
-            selectedPaths: new Set(),
-            queryResults: {},
-            selectedQueryResults: new Set(),
-            graph: {nodes: [{id: 'kevin'}], links: []},
-            showInput: false,
-            showMetaPath: true,
-            showResult: false
-        })
-        fetch('https://geneanalysis.ncats.io/explorer_api/v1/find_metapath?input_cls=' + this.state.selectedInput.type + '&output_cls=' + this.state.selectedOutput.type)
-            .then(response => {
-                if (response.ok) {
-                    return response;
-                }
-                else {
-                    var error = new Error('Error ' + response.status + ': ' + response.statsText);
-                    error.response = response;
-                    throw error;
-                }
-            },
-            error => {
-                var errmess = new Error(error.message);
-                throw errmess;
-            })
-            .then(response => response.json())
-            .then(response => {
-                this.setState({
-                    paths: response['edges']
-                });
-            })
-            .catch(error => { console.log('post comments', error.message); alert('Your comment could not be posted\nError: '+error.message); });
+        if (_.isEmpty(this.state.selectedInput) || _.isEmpty(this.state.selectedOutput)){
+            this.setState({
+                showModal: true
+            });
+        } else {
+            this.setState({
+                step1Active: false,
+                step1Complete: true,
+                step2Active: true,
+                step3Active: false,
+                step2Complete: false,
+                step3Complete: false,
+                selectedPaths: new Set(),
+                queryResults: {},
+                selectedQueryResults: new Set(),
+                graph: {nodes: [{id: 'kevin'}], links: []},
+                showInput: false,
+                showMetaPath: true,
+                showResult: false
+            });
+            fetch('https://geneanalysis.ncats.io/explorer_api/v1/find_metapath?input_cls=' + this.state.selectedInput.type + '&output_cls=' + this.state.selectedOutput.type)
+                .then(response => {
+                    if (response.ok) {
+                        return response;
+                    }
+                    else {
+                        var error = new Error('Error ' + response.status + ': ' + response.statsText);
+                        error.response = response;
+                        throw error;
+                    }
+                },
+                error => {
+                    var errmess = new Error(error.message);
+                    throw errmess;
+                })
+                .then(response => response.json())
+                .then(response => {
+                    this.setState({
+                        paths: response['edges']
+                    });
+                })
+                .catch(error => { console.log('MetaPath could not be found', error.message); alert('Sorry! Metapath could not be found.\nError: '+error.message); });
+        }
+        
     }
 
     handleBackToStep1(event) {
@@ -252,6 +265,8 @@ class Explain extends Component {
                 />
                 <ExplainInput
                     shouldHide={this.state.showInput}
+                    showModal={this.state.showModal}
+                    handleClose={this.handleClose}
                     handleStep1Submit={this.handleStep1Submit}
                     handleInputSelect={this.handleInputSelect}
                     handleOutputSelect={this.handleOutputSelect}
