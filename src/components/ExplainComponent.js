@@ -25,7 +25,7 @@ class Explain extends Component {
             paths: [],
             selectedPaths: new Set(),
             queryResults: {},
-            queryLog: {},
+            queryLog: [],
             selectedQueryResults: new Set(),
             graph: {nodes: [{id: 'kevin'}], links: []},
             showInput: true,
@@ -286,6 +286,7 @@ class Explain extends Component {
                     shouldHide={this.state.showResult}
                     resultReady={this.state.resultReady}
                     content={this.state.queryResults}
+                    logs={this.state.queryLog}
                     handleSelect={this.handleQueryResultSelect}
                     graph={this.state.graph}
                 />

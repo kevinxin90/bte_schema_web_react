@@ -24,6 +24,7 @@ class Predict extends Component {
             paths: [],
             selectedPaths: new Set(),
             queryResults: {},
+            queryLog: [],
             selectedQueryResults: new Set(),
             graph: {nodes: [{id: 'kevin'}], links: []},
             showInput: true,
@@ -171,6 +172,7 @@ class Predict extends Component {
             .then(response => {
                 this.setState({
                     queryResults: response['data'],
+                    queryLog: response['log'],
                     resultReady: true,
                     step3Complete: true
                 });
@@ -271,6 +273,7 @@ class Predict extends Component {
                     shouldHide={this.state.showResult}
                     resultReady={this.state.resultReady}
                     content={this.state.queryResults}
+                    logs={this.state.queryLog}
                     handleSelect={this.handleQueryResultSelect}
                     graph={this.state.graph}
                 />
