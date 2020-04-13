@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Breadcrumb } from 'semantic-ui-react'
+import { Breadcrumb, Container } from 'semantic-ui-react'
 import { Link } from 'react-router-dom';
 import AccordionComponent from './AccordionComponent';
 import Steps from './StepsComponent';
@@ -25,6 +25,7 @@ class Explain extends Component {
             paths: [],
             selectedPaths: new Set(),
             queryResults: {},
+            queryLog: {},
             selectedQueryResults: new Set(),
             graph: {nodes: [{id: 'kevin'}], links: []},
             showInput: true,
@@ -182,8 +183,10 @@ class Explain extends Component {
             })
             .then(response => response.json())
             .then(response => {
+                console.log('response', response);
                 this.setState({
                     queryResults: response['data'],
+                    queryLog: response['log'],
                     resultReady: true,
                     step3Complete: true
                 });
@@ -236,7 +239,8 @@ class Explain extends Component {
       }
     render() {
         return (
-            <div className="container">
+            <div className="feature">
+                <Container>
                 <div className="row">
                     <div className="col-12">
                         <Breadcrumb>
@@ -285,6 +289,7 @@ class Explain extends Component {
                     handleSelect={this.handleQueryResultSelect}
                     graph={this.state.graph}
                 />
+            </Container>
             </div>
         )
     }

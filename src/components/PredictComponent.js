@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Breadcrumb } from 'semantic-ui-react'
+import { Breadcrumb, Container } from 'semantic-ui-react'
 import { Link } from 'react-router-dom';
 import AccordionComponent from './PredictHelpComponent';
 import Steps from './StepsComponent';
@@ -59,6 +59,7 @@ class Predict extends Component {
 
     handleMetaPathSelect(event){
         const selectedPaths = this.state.selectedPaths;
+        console.log('meta path select', event)
         if (event.target.checked) {
             selectedPaths.add(event.target.name)
         } else {
@@ -225,7 +226,8 @@ class Predict extends Component {
       }
     render() {
         return (
-            <div className="container">
+            <div className="feature">
+            <Container>
                 <div className="row">
                     <div className="col-12">
                         <Breadcrumb>
@@ -272,6 +274,7 @@ class Predict extends Component {
                     handleSelect={this.handleQueryResultSelect}
                     graph={this.state.graph}
                 />
+            </Container>
             </div>
         )
     }
