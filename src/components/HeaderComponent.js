@@ -1,9 +1,11 @@
 import React, { Component } from 'react';
-import { Navbar, NavbarBrand, Nav, NavbarToggler, Collapse, NavItem, Jumbotron } from 'reactstrap';
-import { NavLink, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+
+import { Jumbotron } from 'reactstrap';
 import { Message } from 'semantic-ui-react';
 import bte from './assets/biothings-explorer-text.png';
 import network from './assets/network.png';
+import { Menu, Grid, Image } from 'semantic-ui-react';
 
 class Header extends Component {
 
@@ -14,78 +16,59 @@ class Header extends Component {
             isNavOpen: false,
             isModalOpen: false
         };
-        this.toggleNav = this.toggleNav.bind(this);
-        this.toggleModal = this.toggleModal.bind(this);
-        this.handleLogin = this.handleLogin.bind(this);
     }
 
-    toggleNav() {
-        this.setState({
-            isNavOpen: !this.state.isNavOpen
-        })
-    }
-
-    toggleModal() {
-        this.setState({
-            isModalOpen: !this.state.isModalOpen
-        })
-    }
-
-    handleLogin(event) {
-        this.toggleModal();
-        alert("Username: " + this.username.value + ", Password: " + this.password.value
-            + ", Remember: " + this.remember.checked);
-        event.preventDefault();
-    }
+    handleItemClick = (e, { name }) => this.setState({ activeItem: name })
 
     render() {
+        const { activeItem } = this.state
         return(
             <React.Fragment>
-                <Navbar dark expand="md">
-                  <div className="container">
-                    <NavbarToggler onClick={this.toggleNav} />
-                    <NavbarBrand className="mr-auto" href="/explorer">
-                        <img src={bte} height="40" width="50"
-                            alt="BioThings Explorer" />
-                    </NavbarBrand>
-                    <Collapse isOpen={this.state.isNavOpen} navbar>
-                        <Nav navbar>
-                            <NavItem>
-                            <NavLink className="nav-link" to='/'>
-                                    HOME
-                                </NavLink>
-                            </NavItem>
-                            <NavItem>
-                                <NavLink className="nav-link" to='/explain'>
-                                    EXPLAIN
-                                </NavLink>
-                            </NavItem>
-                            <NavItem>
-                                <NavLink className="nav-link" to='/predict'>
-                                    PREDICT
-                                </NavLink>
-                            </NavItem>
-                        </Nav>
-                    </Collapse>
-                  </div>
-                </Navbar>
-                <Jumbotron>
-                    <div className="container">
-                        <div className="row row-header justify-content-center">
-                            <div className="col-6 col-sm-12 col-md-6 intro">
-                                <h1>BioThings Explorer</h1>
-                                <br></br>
-                                <p>BioThings Explorer allows users to query a vast amount of biological and chemical databases in a central place by calling APIs which distribute these data on the fly. </p>
-                            </div>
-                            <div className="col-6 col-sm-12 col-md-6">
-                                <img src={network} width="90%"
-                                    alt="BioThings Explorer" />
-                            </div>
-                        </div>
-                    </div>
-                </Jumbotron>
+                <Menu color="violet" inverted>
+                    <Menu.Item>
+                        <img src={bte} alt="BioThings Explorer" />
+                    </Menu.Item>
+                    <Menu.Item
+                        name='HOME'
+                        active={activeItem === 'HOME'}
+                        onClick={this.handleItemClick}
+                        >
+                        <Link to='/'>HOME</Link>
+                    </Menu.Item>
+
+                    <Menu.Item
+                        name='PREDICT'
+                        active={activeItem === 'PREDICT'}
+                        onClick={this.handleItemClick}
+                        >
+                        <Link to='/predict'>PREDICT</Link>
+                    </Menu.Item>
+
+                    <Menu.Item
+                        name='EXPLAIN'
+                        active={activeItem === 'EXPLAIN'}
+                        onClick={this.handleItemClick}
+                        >
+                        <Link to='/explain'>EXPLAIN</Link>
+                    </Menu.Item>
+                </Menu>
+                <Grid style={{'background-color': '#9f7de8'}} textAlign='center' divided="vertically">
+                    <Grid.Row columns={2}>
+                        <Grid.Column>
+                            <Image src={network} />
+                        </Grid.Column>
+                        <Grid.Column>
+                            <br></br>
+                            <br></br>
+                            <h1 style={{'color': '#e2e1e6'}}>BioThings Explorer</h1>
+                            <br></br>
+                            <h3 style={{'color': '#e2e1e6', 'fontSize': '1.5rem'}}>BioThings Explorer allows users to query a vast amount of biological and chemical databases in a central place by calling APIs which distribute these data on the fly. </h3>
+                        </Grid.Column>
+                    </Grid.Row>
+                </Grid>
+
                 <Message warning>
-                    <Message.Header>This web service is a simple demo for our <a href="https://github.com/biothings/biothings_explorer" target="_blank">Python Client</a>.</Message.Header>
+                    <Message.Header>This web service is a simple demo for our <a href="https://github.com/biothings/biothings_explorer" target="_blank" rel="noopener noreferrer">Python Client</a>.</Message.Header>
                 </Message>
             </React.Fragment>
         )
