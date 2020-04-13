@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import * as d3 from 'd3';
-import { Graph } from 'react-d3-graph';
 
 const Viz = (props) => {
   useEffect(() => {
