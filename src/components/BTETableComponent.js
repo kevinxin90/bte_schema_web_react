@@ -54,8 +54,6 @@ export default class BTETable extends Component {
 
     const formData = () => (
       <Form>
-            <h2> Step 3: Select the Query Result you want to display.</h2>
-            <hr />
             <h3>Your Query Results</h3>
             <Table sortable celled fixed>
               <Table.Header>
