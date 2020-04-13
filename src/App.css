@@ -46,8 +46,7 @@
 }
 .jumbotron {
     padding:70px 30px 70px 30px;
-    margin:30px auto ;
-    margin-top: 0;
+    margin: auto ;
     background: #9575CD ;
     color:floralwhite;
 }
