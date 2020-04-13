@@ -1,4 +1,4 @@
-import { Button, Form, Segment, Checkbox, Table } from 'semantic-ui-react'
+import { Button, Segment, Table } from 'semantic-ui-react'
 import React, { Component } from 'react';
 import Viz from './Viz.js';
 import LabelViz from './VizLabel';
@@ -16,21 +16,7 @@ class MetaPathForm extends Component {
 
 
     render() {
-        const radios1 = this.props.paths.map((path) => {
-            return (
-                <Form.Field key={path} label={path} name={path} value={path} control='input' type='checkbox' onChange={this.props.handleSelect}></Form.Field>
-            );
-          });
-        
-          const radios2 = this.props.paths.map((path) => {
-            return (
-                <li>
-                    <Checkbox><label><Viz className={path} /></label></Checkbox>
-                    
-                </li>
-            );
-          });
-        const radios = this.props.paths.map((path) => {
+        const rows = this.props.paths.map((path) => {
             return (
                 <Table.Row textAlign='right'>
                     <Table.Cell>
@@ -61,7 +47,7 @@ class MetaPathForm extends Component {
                                     </Table.Row>
                                 </Table.Header>
                                 <Table.Body>
-                                    {radios}
+                                    {rows}
                                 </Table.Body>
                             </Table>
                             <p>Color Schema</p>
