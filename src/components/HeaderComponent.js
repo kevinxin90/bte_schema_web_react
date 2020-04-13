@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
-import { Navbar, NavbarBrand, Nav, NavbarToggler, Collapse, NavItem, Jumbotron,
-    Button, Modal, ModalHeader, ModalBody,
-    Form, FormGroup, Label, Input} from 'reactstrap';
+import { Navbar, NavbarBrand, Nav, NavbarToggler, Collapse, NavItem, Jumbotron } from 'reactstrap';
 import { NavLink, Link } from 'react-router-dom';
+import { Message } from 'semantic-ui-react';
 import bte from './assets/biothings-explorer-text.png';
 import network from './assets/network.png';
 
@@ -85,6 +84,9 @@ class Header extends Component {
                         </div>
                     </div>
                 </Jumbotron>
+                <Message warning>
+                    <Message.Header>This web service is a simple demo for our <a href="https://github.com/biothings/biothings_explorer" target="_blank">Python Client</a>.</Message.Header>
+                </Message>
             </React.Fragment>
         )
     }
