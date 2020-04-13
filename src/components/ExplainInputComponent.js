@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import AutoComplete from './AutoCompleteComponent';
-import { Form, Button, Segment, Popup, Modal } from 'semantic-ui-react'
+import { Form, Button, Segment, Popup } from 'semantic-ui-react'
 import ModalExampleControlled from './NoInpuModalComponent';
 
 export default class ExplainInput extends Component {
