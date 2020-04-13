@@ -1,7 +1,5 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
-
-import { Jumbotron } from 'reactstrap';
 import { Message } from 'semantic-ui-react';
 import bte from './assets/biothings-explorer-text.png';
 import network from './assets/network.png';
@@ -52,20 +50,18 @@ class Header extends Component {
                         <Link to='/explain'>EXPLAIN</Link>
                     </Menu.Item>
                 </Menu>
-                <Grid style={{'background-color': '#9f7de8'}} textAlign='center' divided="vertically">
-                    <Grid.Row columns={2}>
-                        <Grid.Column>
+                    <Grid style={{'background-color': '#9f7de8'}} textAlign='center'>
+                        <Grid.Column mobile={16} tablet={8} computer={8}>
                             <Image src={network} />
                         </Grid.Column>
-                        <Grid.Column>
+                        <Grid.Column mobile={16} tablet={8} computer={8}>
                             <br></br>
                             <br></br>
                             <h1 style={{'color': '#e2e1e6'}}>BioThings Explorer</h1>
                             <br></br>
                             <h3 style={{'color': '#e2e1e6', 'fontSize': '1.5rem'}}>BioThings Explorer allows users to query a vast amount of biological and chemical databases in a central place by calling APIs which distribute these data on the fly. </h3>
                         </Grid.Column>
-                    </Grid.Row>
-                </Grid>
+                    </Grid>
 
                 <Message warning>
                     <Message.Header>This web service is a simple demo for our <a href="https://github.com/biothings/biothings_explorer" target="_blank" rel="noopener noreferrer">Python Client</a>.</Message.Header>
