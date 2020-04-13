@@ -112,3 +112,7 @@ path.link {
 .feature {
     margin-bottom: 2rem;
 }
+
+.modal .description {
+    margin: 2rem;
+}
