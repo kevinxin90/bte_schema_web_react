@@ -1,8 +1,7 @@
-import D3Graph from './D3GraphComponent';
 import BTETable from './BTETableComponent';
 import ReactLoader from './DimerComponent';
 import React, { Component } from 'react';
-import { Segment, Divider, Dimmer, Loader, Image } from 'semantic-ui-react';
+import { Segment, Divider } from 'semantic-ui-react';
 import TreeGraph from './TreeGraphComponent';
 
 export default class PredictQueryResult extends Component {
