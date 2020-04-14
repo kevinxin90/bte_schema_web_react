@@ -33,10 +33,6 @@ export default class ExplainQueryResult extends Component {
                     />
                     <Divider />
                     <div className={this.props.shouldHide ? '' : 'hidden'}>
-                        <svg width="400" height="400">
-                            <g class="links"></g>
-                            <g class="nodes"></g>
-                        </svg>
                         <D3Graph
                             graph={this.props.graph}
                             resultReady={this.props.resultReady}

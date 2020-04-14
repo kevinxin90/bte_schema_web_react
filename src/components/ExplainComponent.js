@@ -222,18 +222,20 @@ class Explain extends Component {
         records = Array.from(records);
         let graph = {nodes: [{id: 'kevin'}], links: []};
         if (Array.isArray(records) && records.length) {
-          graph['nodes'] = [{id: records[0].split('||')[0], color: 'green'},
-                            {id: records[0].split('||')[14], color: 'blue'}]
+          graph['nodes'] = [{id: records[0].split('||')[0], color: 'green', x: 20, y: 200},
+                            {id: records[0].split('||')[14], color: 'blue', x: 700, y:200}]
         };
         for (let i = 0; i < records.length; i++) {
-          let rec = records[i].split('||')
-          graph['links'].push({'source': rec[0],
-                               'target': rec[7],
-                               'label': rec[2]})
-          graph['links'].push({'source': rec[7],
-                               'target': rec[14],
-                               'label': rec[9]})
-          graph['nodes'].push({id: rec[7], color: 'red'})
+            if (i < 10) {
+                let rec = records[i].split('||')
+                graph['links'].push({'source': rec[0],
+                                     'target': rec[7],
+                                     'label': rec[2]})
+                graph['links'].push({'source': rec[7],
+                                     'target': rec[14],
+                                     'label': rec[9]})
+                graph['nodes'].push({id: rec[7], color: 'red', x: 360, y: i*40 + 20})
+            }
         }
         return graph
       }

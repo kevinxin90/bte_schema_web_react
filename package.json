@@ -7,7 +7,7 @@
   "dependencies": {
     "axios": "^0.19.2",
     "cross-fetch": "2.1.0",
-    "d3": "^5.15.1",
+    "d3": "^4.13.0",
     "faker": "^4.1.0",
     "font-awesome": "4.7.0",
     "lodash": "^4.17.15",
