@@ -8,10 +8,6 @@ export default class D3Graph extends Component {
 
     render() {
         // graph payload (with minimalist structure)
-        const data = {
-            nodes: [{ id: "Harry", x: 30, y: 200, color: 'red' }, { id: "Sally", x: 360 }, { id: "kevin", x: 360 }, { id: "Alice", x: 700, y:200, color: 'green' }],
-            links: [{ source: "Harry", target: "Sally", label: 'A-B' }, { source: "Harry", target: "kevin", label: 'A-B' }, { source: "Sally", target: "Alice", label: 'B-C' }, { source: "kevin", target: "Alice", label: 'B-C' }],
-        };
         
         // the graph configuration, you only need to pass down properties
         // that you want to override, otherwise default ones will be used
@@ -53,7 +49,7 @@ export default class D3Graph extends Component {
               "mouseCursor": "pointer",
               "opacity": 1,
               "renderLabel": true,
-              "size": 500,
+              "size": 50,
               "strokeColor": "none",
               "strokeWidth": 2,
               "svg": "",
