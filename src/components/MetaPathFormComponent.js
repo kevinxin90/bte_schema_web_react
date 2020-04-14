@@ -16,9 +16,9 @@ class MetaPathForm extends Component {
 
 
     render() {
-        const rows = this.props.paths.map((path) => {
+        const rows = this.props.paths.map((path, i) => {
             return (
-                <Table.Row textAlign='right'>
+                <Table.Row textAlign='right' key={i}>
                     <Table.Cell>
                         <label>
                             <input type="checkbox"
