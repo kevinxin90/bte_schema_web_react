@@ -6,6 +6,7 @@ import Steps from './StepsComponent';
 import PredictInput from './PredictInputComponent';
 import MetaPathForm from './MetaPathFormComponent';
 import PredictQueryResult from './PredictQueryResultComponent';
+let _ = require('lodash');
 
 class Predict extends Component {
 
@@ -25,8 +26,15 @@ class Predict extends Component {
             selectedPaths: new Set(),
             queryResults: {},
             queryLog: [],
+            table: {
+                column: null,
+                display: [],
+                direction: null,
+                activePage: 1,
+                totalPages: 1
+            },
             selectedQueryResults: new Set(),
-            graph: {nodes: [{id: 'kevin'}], links: []},
+            graph: {},
             showInput: true,
             showMetaPath: false,
             showResult: false,
@@ -40,6 +48,8 @@ class Predict extends Component {
         this.handleBackToStep1 = this.handleBackToStep1.bind(this);
         this.handleBackToStep2 = this.handleBackToStep2.bind(this);
         this.handleBackToStep3 = this.handleBackToStep3.bind(this);
+        this.handlePaginationChange = this.handlePaginationChange.bind(this);
+        this.handleSort = this.handleSort.bind(this);
     };
 
     //this function will be passed to autocomplete component
@@ -60,7 +70,6 @@ class Predict extends Component {
 
     handleMetaPathSelect(event){
         const selectedPaths = this.state.selectedPaths;
-        console.log('meta path select', event)
         if (event.target.checked) {
             selectedPaths.add(event.target.name)
         } else {
@@ -94,7 +103,7 @@ class Predict extends Component {
             selectedPaths: new Set(),
             queryResults: {},
             selectedQueryResults: new Set(),
-            graph: {nodes: [{id: 'kevin'}], links: []},
+            graph: {},
             showInput: false,
             showMetaPath: true,
             showResult: false
@@ -173,6 +182,11 @@ class Predict extends Component {
                 this.setState({
                     queryResults: response['data'],
                     queryLog: response['log'],
+                    table: {
+                        ...this.state.table,
+                        display: response['data'].slice(this.state.table.activePage*10 - 10, this.state.table.activePage*10),
+                        totalPages: Math.ceil(response['data'].length/10)
+                    },
                     resultReady: true,
                     step3Complete: true
                 });
@@ -202,6 +216,43 @@ class Predict extends Component {
             showMetaPath: false,
             showResult: true
         }) 
+    }
+
+    handleSort(event) {
+        let clickedColumn = event.target.className.split(' ').slice(-1)[0];
+        
+        const { column, direction } = this.state.table;
+    
+        if (column !== clickedColumn) {
+            this.setState({
+                table: {
+                    ...this.state.table,
+                    column: clickedColumn,
+                    direction: 'descending',
+                },
+                queryResults: _.sortBy(this.state.queryResults, [clickedColumn])
+          });
+          return
+        }
+    
+        this.setState({
+            table: {
+                ...this.state.table,
+                direction: direction === 'ascending' ? 'descending' : 'ascending',
+                display: this.state.queryResults.slice(this.state.table.activePage*10 - 10, this.state.table.activePage*10),
+            },
+            queryResults: this.state.queryResults.reverse(),
+        });
+    }
+    
+    handlePaginationChange = (e, { activePage }) => {
+        this.setState({
+            table:{
+                ...this.state.table,
+                display: this.state.queryResults.slice(activePage*10 - 10, activePage*10),
+                activePage: activePage
+            }      
+        });
     }
 
     recordsToTreeGraph(records) {
@@ -273,6 +324,9 @@ class Predict extends Component {
                     shouldHide={this.state.showResult}
                     resultReady={this.state.resultReady}
                     content={this.state.queryResults}
+                    table={this.state.table}
+                    handleSort={this.handleSort}
+                    handlePaginationChange={this.handlePaginationChange}
                     logs={this.state.queryLog}
                     handleSelect={this.handleQueryResultSelect}
                     graph={this.state.graph}

@@ -24,8 +24,15 @@ class Explain extends Component {
             selectedOutput: {},
             paths: [],
             selectedPaths: new Set(),
-            queryResults: {},
+            queryResults: [],
             queryLog: [],
+            table: {
+                column: null,
+                display: [],
+                direction: null,
+                activePage: 1,
+                totalPages: 1
+            },
             selectedQueryResults: new Set(),
             graph: {nodes: [{id: 'kevin'}], links: []},
             showInput: true,
@@ -43,6 +50,8 @@ class Explain extends Component {
         this.handleBackToStep2 = this.handleBackToStep2.bind(this);
         this.handleBackToStep3 = this.handleBackToStep3.bind(this);
         this.handleClose = this.handleClose.bind(this);
+        this.handlePaginationChange = this.handlePaginationChange.bind(this);
+        this.handleSort = this.handleSort.bind(this);
     };
 
     //this function will be passed to autocomplete component
@@ -183,9 +192,13 @@ class Explain extends Component {
             })
             .then(response => response.json())
             .then(response => {
-                console.log('response', response);
                 this.setState({
                     queryResults: response['data'],
+                    table: {
+                        ...this.state.table,
+                        display: response['data'].slice(this.state.table.activePage*10 - 10, this.state.table.activePage*10),
+                        totalPages: Math.ceil(response['data'].length/10)
+                    },
                     queryLog: response['log'],
                     resultReady: true,
                     step3Complete: true
@@ -218,10 +231,47 @@ class Explain extends Component {
         }) 
     }
 
+    handleSort(event) {
+        let clickedColumn = event.target.className.split(' ').slice(-1)[0];
+        
+        const { column, direction } = this.state.table;
+    
+        if (column !== clickedColumn) {
+            this.setState({
+                table: {
+                    ...this.state.table,
+                    column: clickedColumn,
+                    direction: 'descending',
+                },
+                queryResults: _.sortBy(this.state.queryResults, [clickedColumn])
+          });
+          return
+        }
+    
+        this.setState({
+            table: {
+                ...this.state.table,
+                direction: direction === 'ascending' ? 'descending' : 'ascending',
+                display: this.state.queryResults.slice(this.state.table.activePage*10 - 10, this.state.table.activePage*10),
+            },
+            queryResults: this.state.queryResults.reverse(),
+        });
+    }
+    
+    handlePaginationChange = (e, { activePage }) => {
+        this.setState({
+            table:{
+                ...this.state.table,
+                display: this.state.queryResults.slice(activePage*10 - 10, activePage*10),
+                activePage: activePage
+            }      
+        });
+    }
+
     posOrNeg(num) {
         if (num === 0) {
             return 0
-        } else if(num % 2 === 0) {
+        } else if (num % 2 === 0) {
             return 1
         } else {
             return -1
@@ -232,8 +282,20 @@ class Explain extends Component {
         records = Array.from(records);
         let graph = {nodes: [{id: 'kevin'}], links: []};
         if (Array.isArray(records) && records.length) {
-          graph['nodes'] = [{id: records[0].split('||')[0], color: 'green', x: 20, y: 200},
-                            {id: records[0].split('||')[14], color: 'blue', x: 700, y:200}]
+            graph['nodes'] = [
+                {
+                    id: records[0].split('||')[0],
+                    color: 'green',
+                    x: 20,
+                    y: 200
+                },
+                {
+                    id: records[0].split('||')[14],
+                    color: 'blue',
+                    x: 700,
+                    y:200
+                }
+            ]
         };
         for (let i = 0; i < records.length; i++) {
             if (i < 10) {
@@ -298,6 +360,9 @@ class Explain extends Component {
                     shouldHide={this.state.showResult}
                     resultReady={this.state.resultReady}
                     content={this.state.queryResults}
+                    table={this.state.table}
+                    handleSort={this.handleSort}
+                    handlePaginationChange={this.handlePaginationChange}
                     logs={this.state.queryLog}
                     handleSelect={this.handleQueryResultSelect}
                     graph={this.state.graph}

@@ -29,14 +29,17 @@ export default class PredictQueryResult extends Component {
                         resultReady={this.props.resultReady}
                         content={this.props.content}
                         handleSelect={this.props.handleSelect}
+                        table={this.props.table}
+                        handleSort={this.props.handleSort}
+                        handlePaginationChange={this.props.handlePaginationChange}
                     />
                     <Divider />
-                    <div className={this.props.shouldHide ? '' : 'hidden'}>
+                    {Object.keys(this.props.graph).length === 0 ? null: 
                         <TreeGraph
                             graph={this.props.graph}
                             resultReady={this.props.resultReady}
                         />
-                    </div>
+                    }           
                 </Segment>
             </div>
         )
