@@ -218,6 +218,16 @@ class Explain extends Component {
         }) 
     }
 
+    posOrNeg(num) {
+        if (num === 0) {
+            return 0
+        } else if(num % 2 === 0) {
+            return 1
+        } else {
+            return -1
+        }
+    }
+
     recordsToGraph(records) {
         records = Array.from(records);
         let graph = {nodes: [{id: 'kevin'}], links: []};
@@ -234,7 +244,7 @@ class Explain extends Component {
                 graph['links'].push({'source': rec[7],
                                      'target': rec[14],
                                      'label': rec[9]})
-                graph['nodes'].push({id: rec[7], color: 'red', x: 360, y: i*40 + 20})
+                graph['nodes'].push({id: rec[7], color: 'red', x: 360, y: 200 + this.posOrNeg(i) * Math.ceil(i/2) * 30})
             }
         }
         return graph
