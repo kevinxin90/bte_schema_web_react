@@ -4,16 +4,18 @@ import { Table, Form, Pagination } from 'semantic-ui-react'
 
 export default class BTETable extends Component {
   render() {
-
+    const headers = this.props.table.display.length > 0 ? Object.keys(this.props.table.display[0]) : [];
+    console.log('header', headers)
     const formData = () => (
         <Form>
             <h3>Your Query Results</h3>
-            <Table sortable celled fixed>
+            <Table sortable celled compact>
                 <Table.Header>
                     <Table.Row>
                         <Table.HeaderCell />
-                        {_.map(['source_node', 'pred1', 'intermediate_node', 'pred2', 'targetNode'], (item) => (
+                        {_.map(headers, (item) => (
                             <Table.HeaderCell
+                                key={item}
                                 className={item}
                                 value={item}
                                 sorted={this.props.table.column === item ? this.props.table.direction : null}
@@ -22,25 +24,23 @@ export default class BTETable extends Component {
                                 {item}
                             </Table.HeaderCell>
                         ))}
-                        </Table.Row>
-                    </Table.Header>
+                    </Table.Row>
+                </Table.Header>
                 <Table.Body>
                     {_.map(this.props.table.display, (item) => (
                     <Table.Row key={Object.values(item).join('||')}>
-                    <Table.Cell collapsing>
-                        <label>
-                        <input type="checkbox"
-                            name={Object.values(item).join('||')}
-                            onChange={this.props.handleSelect} 
-                            defaultChecked={false} /> 
-                        display
-                        </label>
-                    </Table.Cell>
-                    <Table.Cell>{item['input']}</Table.Cell>
-                    <Table.Cell>{item['pred1']}</Table.Cell>
-                    <Table.Cell>{item['node1_name']}</Table.Cell>
-                    <Table.Cell>{item['pred2']}</Table.Cell>
-                    <Table.Cell>{item['output_name']}</Table.Cell>
+                        <Table.Cell key='checkbox'>
+                            <label>
+                            <input type="checkbox"
+                                name={Object.values(item).join('||')}
+                                onChange={this.props.handleSelect} 
+                                defaultChecked={false} /> 
+                            display
+                            </label>
+                        </Table.Cell>
+                        {_.map(headers, (col) => (
+                            <Table.Cell>{item[col]}</Table.Cell>
+                        ))}
                     </Table.Row>
                 ))}
                 </Table.Body>

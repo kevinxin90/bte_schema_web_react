@@ -290,7 +290,7 @@ class Explain extends Component {
                     y: 200
                 },
                 {
-                    id: records[0].split('||')[14],
+                    id: records[0].split('||')[7],
                     color: 'blue',
                     x: 700,
                     y:200
@@ -301,12 +301,12 @@ class Explain extends Component {
             if (i < 10) {
                 let rec = records[i].split('||')
                 graph['links'].push({'source': rec[0],
+                                     'target': rec[3],
+                                     'label': rec[1]})
+                graph['links'].push({'source': rec[3],
                                      'target': rec[7],
-                                     'label': rec[2]})
-                graph['links'].push({'source': rec[7],
-                                     'target': rec[14],
-                                     'label': rec[9]})
-                graph['nodes'].push({id: rec[7], color: 'red', x: 360, y: 200 + this.posOrNeg(i) * Math.ceil(i/2) * 30})
+                                     'label': rec[5]})
+                graph['nodes'].push({id: rec[3], color: 'red', x: 360, y: 200 + this.posOrNeg(i) * Math.ceil(i/2) * 30})
             }
         }
         return graph

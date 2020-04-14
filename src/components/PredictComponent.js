@@ -264,10 +264,10 @@ class Predict extends Component {
         };
         for (let i = 0; i < records.length; i++) {
           let rec = records[i].split('||')
-          if (!(rec[7] in tree_dict)) {
-              tree_dict[rec[7]] = new Set([rec[14]]);
+          if (!(rec[3] in tree_dict)) {
+              tree_dict[rec[3]] = new Set([rec[7]]);
           } else {
-              tree_dict[rec[7]].add(rec[14])
+              tree_dict[rec[3]].add(rec[7])
           }
         };
         for (const prop in tree_dict) {
@@ -338,5 +338,3 @@ class Predict extends Component {
 }
 
 export default Predict;
-
-
