@@ -32,12 +32,11 @@ export default class ExplainQueryResult extends Component {
                         handleSelect={this.props.handleSelect}
                     />
                     <Divider />
-                    <div className={this.props.shouldHide ? '' : 'hidden'}>
+                    {this.props.graph.links.length === 0 ? null: 
                         <D3Graph
                             graph={this.props.graph}
                             resultReady={this.props.resultReady}
-                        />
-                    </div>
+                    /> }
                 </Segment>
             </div>
         )
