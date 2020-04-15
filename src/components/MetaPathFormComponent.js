@@ -19,7 +19,7 @@ class MetaPathForm extends Component {
         const rows = this.props.paths.map((path, i) => {
             return (
                 <Table.Row textAlign='right' key={i}>
-                    <Table.Cell>
+                    <Table.Cell key="checkbox">
                         <label>
                             <input type="checkbox"
                                 name={path}
@@ -27,7 +27,7 @@ class MetaPathForm extends Component {
                                 defaultChecked={false} /> 
                         </label>
                     </Table.Cell>
-                    <Table.Cell><Viz className={path} /></Table.Cell>
+                    <Table.Cell key={path}><Viz className={path} /></Table.Cell>
                 </Table.Row>
             )
         })
