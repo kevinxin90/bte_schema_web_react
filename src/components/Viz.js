@@ -4,7 +4,7 @@ import * as d3 from 'd3';
 const Viz = (props) => {
   useEffect(() => {
    draw(props)
- }, [2])
+ }, [0])
   return <div className={props.className} />
 }
 

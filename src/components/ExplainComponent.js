@@ -56,7 +56,7 @@ class Explain extends Component {
 
     //this function will be passed to autocomplete component
     //in order to retrieve the selected input
-    handleInputSelect(value) {    
+    handleInputSelect(value) {   
         this.setState({
           selectedInput: value
         });

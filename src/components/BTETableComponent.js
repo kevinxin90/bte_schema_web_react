@@ -38,8 +38,8 @@ export default class BTETable extends Component {
                             display
                             </label>
                         </Table.Cell>
-                        {_.map(headers, (col) => (
-                            <Table.Cell>{item[col]}</Table.Cell>
+                        {_.map(headers, (col, i) => (
+                            <Table.Cell key={i}>{item[col]}</Table.Cell>
                         ))}
                     </Table.Row>
                 ))}
