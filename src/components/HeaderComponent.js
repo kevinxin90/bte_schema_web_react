@@ -50,7 +50,7 @@ class Header extends Component {
                         <Link to='/explain'>EXPLAIN</Link>
                     </Menu.Item>
                 </Menu>
-                    <Grid style={{'background-color': '#9f7de8'}} textAlign='center'>
+                    <Grid style={{'backgroundColor': '#9f7de8'}} textAlign='center'>
                         <Grid.Column mobile={16} tablet={8} computer={8}>
                             <Image src={network} />
                         </Grid.Column>
