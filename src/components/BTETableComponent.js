@@ -5,7 +5,6 @@ import { Table, Form, Pagination } from 'semantic-ui-react'
 export default class BTETable extends Component {
   render() {
     const headers = this.props.table.display.length > 0 ? Object.keys(this.props.table.display[0]) : [];
-    console.log('header', headers)
     const formData = () => (
         <Form>
             <h3>Your Query Results</h3>
