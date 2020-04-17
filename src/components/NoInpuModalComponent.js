@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Button, Header, Icon, Modal } from 'semantic-ui-react'
+import { Button, Icon, Modal } from 'semantic-ui-react'
 
 export default class ModalExampleControlled extends Component {
 
@@ -11,9 +11,9 @@ export default class ModalExampleControlled extends Component {
         basic
         size='small'
       >
-        <Header icon='browser' content='User Input Error' />
+        <Modal.Header>User Input Error</Modal.Header>
         <Modal.Content>
-          <h3>You haven't selected the input/output yet.</h3>
+          <h3>You haven't selected the {this.props.field} yet.</h3>
         </Modal.Content>
         <Modal.Actions>
           <Button color='green' onClick={this.props.handleClose} inverted>

@@ -143,7 +143,7 @@ export default class ExplainInput extends Component {
   render() {
     return (
         <div className={this.props.shouldHide ? '' : 'hidden'}>
-            <ModalExampleControlled modalOpen={this.props.showModal} handleClose={this.props.handleClose}/>
+            <ModalExampleControlled field='input/output' modalOpen={this.props.showModal} handleClose={this.props.handleClose}/>
             <div className="row ">
                 <div className="col-12">
                     <Segment color="green">
