@@ -164,7 +164,7 @@ class Predict extends Component {
 
             var params = {input_obj: JSON.stringify(this.state.selectedInput),
                         output_obj: JSON.stringify(this.state.selectedOutput),
-                        intermediate_nodes: JSON.stringify(['Gene'])} 
+                        intermediate_nodes: JSON.stringify(intermediate_nodes)} 
             url.search = new URLSearchParams(params).toString();
 
             fetch(url)
@@ -197,7 +197,7 @@ class Predict extends Component {
                     });
                 })
                 .catch(error => { 
-                    console.log('post comments', error.message);
+                    console.log('Query returns no hits', error.message);
                     this.setState({
                         resultReady: true,
                         step3Complete: true,
@@ -205,6 +205,10 @@ class Predict extends Component {
                     })
                 });
         }
+    }
+
+    getIntermediateNodes(metaPaths) {
+        return [...metaPaths].map(x => x.split('-').slice(1)[0])
     }
 
     handleBackToStep2(event) {
