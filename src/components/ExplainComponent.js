@@ -112,7 +112,7 @@ class Explain extends Component {
                 step2Complete: false,
                 step3Complete: false,
                 selectedPaths: new Set(),
-                queryResults: {},
+                queryResults: [],
                 selectedQueryResults: new Set(),
                 graph: {nodes: [{id: 'kevin'}], links: []},
                 showInput: false,
@@ -159,52 +159,72 @@ class Explain extends Component {
 
     handleStep2Submit(event) {
         event.preventDefault();
-        this.setState({
-            step2Active: false,
-            step2Complete: true,
-            step3Active: true,
-            showMetaPath: false,
-            showResult: true,
-            resultReady: false
-        })
-        let url = new URL('https:/geneanalysis.ncats.io/explorer_api/v1/connect')
+        let intermediate_nodes = this.getIntermediateNodes(this.state.selectedPaths);
+        if (intermediate_nodes.length === 0) {
+            this.setState({
+                showModal: true
+            });
+        } else {
+            let url = new URL('https:/geneanalysis.ncats.io/explorer_api/v1/connect');
+            this.setState({
+                step2Active: false,
+                step2Complete: true,
+                step3Active: true,
+                showMetaPath: false,
+                showResult: true,
+                resultReady: false
+            });
+            var params = {
+                input_obj: JSON.stringify(this.state.selectedInput),
+                output_obj: JSON.stringify(this.state.selectedOutput),
+                intermediate_nodes: JSON.stringify(intermediate_nodes)
+            };
+            url.search = new URLSearchParams(params).toString();
 
-        var params = {input_obj: JSON.stringify(this.state.selectedInput),
-                      output_obj: JSON.stringify(this.state.selectedOutput),
-                      intermediate_nodes: JSON.stringify(['Gene'])} 
-        url.search = new URLSearchParams(params).toString();
+            fetch(url)
+                .then(response => {
+                    if (response.ok) {
+                        return response;
+                    }
+                    else {
+                        var error = new Error('Error ' + response.status + ': ' + response.statsText);
+                        error.response = response;
+                        throw error;
+                    }
+                },
+                error => {
+                    var errmess = new Error(error.message);
+                    throw errmess;
+                })
+                .then(response => response.json())
+                .then(response => {
+                    this.setState({
+                        queryResults: response['data'],
+                        table: {
+                            ...this.state.table,
+                            display: response['data'].slice(this.state.table.activePage*10 - 10, this.state.table.activePage*10),
+                            totalPages: Math.ceil(response['data'].length/10)
+                        },
+                        queryLog: response['log'],
+                        resultReady: true,
+                        step3Complete: true
+                    });
+                })
+                .catch(error => { 
+                    console.log('Query Results could not be retrieved ', error.message); 
+                    this.setState({
+                        resultReady: true,
+                        step3Complete: true,
+                        queryResults: []
+                    })
 
-        fetch(url
-        )
-            .then(response => {
-                if (response.ok) {
-                    return response;
-                }
-                else {
-                    var error = new Error('Error ' + response.status + ': ' + response.statsText);
-                    error.response = response;
-                    throw error;
-                }
-            },
-            error => {
-                var errmess = new Error(error.message);
-                throw errmess;
-            })
-            .then(response => response.json())
-            .then(response => {
-                this.setState({
-                    queryResults: response['data'],
-                    table: {
-                        ...this.state.table,
-                        display: response['data'].slice(this.state.table.activePage*10 - 10, this.state.table.activePage*10),
-                        totalPages: Math.ceil(response['data'].length/10)
-                    },
-                    queryLog: response['log'],
-                    resultReady: true,
-                    step3Complete: true
                 });
-            })
-            .catch(error => { console.log('post comments', error.message); alert('Your comment could not be posted\nError: '+error.message); });
+                }
+                
+    }
+
+    getIntermediateNodes(metaPaths) {
+        return [...metaPaths].map(x => x.split('-').slice(1)[0])
     }
 
     handleBackToStep2(event) {
@@ -351,6 +371,8 @@ class Explain extends Component {
                 />
                 <MetaPathForm
                     shouldHide={this.state.showMetaPath}
+                    showModal={this.state.showModal}
+                    handleClose={this.handleClose}
                     paths={this.state.paths}
                     handleSelect={this.handleMetaPathSelect}
                     handleSubmit={this.handleStep2Submit}

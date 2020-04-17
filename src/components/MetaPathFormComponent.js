@@ -2,6 +2,8 @@ import { Button, Segment, Table } from 'semantic-ui-react'
 import React, { Component } from 'react';
 import Viz from './Viz.js';
 import LabelViz from './VizLabel';
+import ModalExampleControlled from './NoInpuModalComponent';
+
 
 
 class MetaPathForm extends Component {
@@ -34,31 +36,28 @@ class MetaPathForm extends Component {
 
         return (
             <div className={this.props.shouldHide ? '' : 'hidden'}>
-                <div className="row">
-                    <div className="col-12">
-                        <Segment color='red'>
-                            <h2> Step 2: Select the MetaPath you want to execute.</h2>
-                            <hr />
-                            <Table singleLine>
-                                <Table.Header>
-                                    <Table.Row>
-                                        <Table.HeaderCell width={1}></Table.HeaderCell>
-                                        <Table.HeaderCell>MetaPath</Table.HeaderCell>
-                                    </Table.Row>
-                                </Table.Header>
-                                <Table.Body>
-                                    {rows}
-                                </Table.Body>
-                            </Table>
-                            <p>Color Schema</p>
-                            <LabelViz />
-                            <div className="col text-center">
-                                <Button type='submit' onClick={this.props.handleBackToStep1}>Back</Button>
-                                <Button type='submit' onClick={this.props.handleSubmit}>Continue</Button>
-                            </div>
-                        </Segment>
+                <ModalExampleControlled field="metapath" modalOpen={this.props.showModal} handleClose={this.props.handleClose}/>
+                <Segment color='red'>
+                    <h2> Step 2: Select the MetaPath you want to execute.</h2>
+                    <hr />
+                    <Table singleLine>
+                        <Table.Header>
+                            <Table.Row>
+                                <Table.HeaderCell width={1}></Table.HeaderCell>
+                                <Table.HeaderCell>MetaPath</Table.HeaderCell>
+                            </Table.Row>
+                        </Table.Header>
+                        <Table.Body>
+                            {rows}
+                        </Table.Body>
+                    </Table>
+                    <p>Color Schema</p>
+                    <LabelViz />
+                    <div className="col text-center">
+                        <Button type='submit' onClick={this.props.handleBackToStep1}>Back</Button>
+                        <Button type='submit' onClick={this.props.handleSubmit}>Continue</Button>
                     </div>
-                </div>
+                </Segment>
             </div>
         )
     }

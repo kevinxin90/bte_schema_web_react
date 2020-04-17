@@ -24,7 +24,7 @@ class Predict extends Component {
             selectedOutput: {},
             paths: [],
             selectedPaths: new Set(),
-            queryResults: {},
+            queryResults: [],
             queryLog: [],
             table: {
                 column: null,
@@ -101,7 +101,7 @@ class Predict extends Component {
             step2Complete: false,
             step3Complete: false,
             selectedPaths: new Set(),
-            queryResults: {},
+            queryResults: [],
             selectedQueryResults: new Set(),
             graph: {},
             showInput: false,
@@ -191,7 +191,14 @@ class Predict extends Component {
                     step3Complete: true
                 });
             })
-            .catch(error => { console.log('post comments', error.message); alert('Your comment could not be posted\nError: '+error.message); });
+            .catch(error => { 
+                console.log('post comments', error.message);
+                this.setState({
+                    resultReady: true,
+                    step3Complete: true,
+                    queryResults: []
+                })
+            });
     }
 
     handleBackToStep2(event) {
@@ -315,6 +322,7 @@ class Predict extends Component {
                 />
                 <MetaPathForm
                     shouldHide={this.state.showMetaPath}
+                    showModal={this.state.showModal}
                     paths={this.state.paths}
                     handleSelect={this.handleMetaPathSelect}
                     handleSubmit={this.handleStep2Submit}
