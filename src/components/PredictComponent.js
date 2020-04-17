@@ -146,59 +146,65 @@ class Predict extends Component {
 
     handleStep2Submit(event) {
         event.preventDefault();
-        this.setState({
-            step2Active: false,
-            step2Complete: true,
-            step3Active: true,
-            showMetaPath: false,
-            showResult: true,
-            resultReady: false
-        })
-        let url = new URL('https://geneanalysis.ncats.io/explorer_api/v1/connect')
-
-        var params = {input_obj: JSON.stringify(this.state.selectedInput),
-                      output_obj: JSON.stringify(this.state.selectedOutput),
-                      intermediate_nodes: JSON.stringify(['Gene'])} 
-        url.search = new URLSearchParams(params).toString();
-
-        fetch(url
-        )
-            .then(response => {
-                if (response.ok) {
-                    return response;
-                }
-                else {
-                    var error = new Error('Error ' + response.status + ': ' + response.statsText);
-                    error.response = response;
-                    throw error;
-                }
-            },
-            error => {
-                var errmess = new Error(error.message);
-                throw errmess;
-            })
-            .then(response => response.json())
-            .then(response => {
-                this.setState({
-                    queryResults: response['data'],
-                    queryLog: response['log'],
-                    table: {
-                        ...this.state.table,
-                        display: response['data'].slice(this.state.table.activePage*10 - 10, this.state.table.activePage*10),
-                        totalPages: Math.ceil(response['data'].length/10)
-                    },
-                    resultReady: true,
-                    step3Complete: true
-                });
-            })
-            .catch(error => { 
-                console.log('post comments', error.message);
-                this.setState({
-                    resultReady: true,
-                    step3Complete: true,
-                    queryResults: []
-                })
+        let intermediate_nodes = this.getIntermediateNodes(this.state.selectedPaths);
+        if (intermediate_nodes.length === 0) {
+            this.setState({
+                showModal: true
             });
+        } else {
+            this.setState({
+                step2Active: false,
+                step2Complete: true,
+                step3Active: true,
+                showMetaPath: false,
+                showResult: true,
+                resultReady: false
+            })
+            let url = new URL('https://geneanalysis.ncats.io/explorer_api/v1/connect')
+
+            var params = {input_obj: JSON.stringify(this.state.selectedInput),
+                        output_obj: JSON.stringify(this.state.selectedOutput),
+                        intermediate_nodes: JSON.stringify(['Gene'])} 
+            url.search = new URLSearchParams(params).toString();
+
+            fetch(url)
+                .then(response => {
+                    if (response.ok) {
+                        return response;
+                    }
+                    else {
+                        var error = new Error('Error ' + response.status + ': ' + response.statsText);
+                        error.response = response;
+                        throw error;
+                    }
+                },
+                error => {
+                    var errmess = new Error(error.message);
+                    throw errmess;
+                })
+                .then(response => response.json())
+                .then(response => {
+                    this.setState({
+                        queryResults: response['data'],
+                        queryLog: response['log'],
+                        table: {
+                            ...this.state.table,
+                            display: response['data'].slice(this.state.table.activePage*10 - 10, this.state.table.activePage*10),
+                            totalPages: Math.ceil(response['data'].length/10)
+                        },
+                        resultReady: true,
+                        step3Complete: true
+                    });
+                })
+                .catch(error => { 
+                    console.log('post comments', error.message);
+                    this.setState({
+                        resultReady: true,
+                        step3Complete: true,
+                        queryResults: []
+                    })
+                });
+        }
     }
 
     handleBackToStep2(event) {
