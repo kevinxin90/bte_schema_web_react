@@ -1,8 +1,8 @@
 import React from 'react'
 import { Divider, Button, Card, Grid, Image, Segment } from 'semantic-ui-react'
 import { Link } from 'react-router-dom';
-import explain from './assets/bte-explain.png';
-import predict from './assets/bte-predict.png';
+import explain from '../assets/bte-explain.png';
+import predict from '../assets/bte-predict.png';
 
 const Home = () => (
   <div className="container">

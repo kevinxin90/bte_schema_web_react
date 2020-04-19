@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import { Message } from 'semantic-ui-react';
-import bte from './assets/biothings-explorer-text.png';
-import network from './assets/network.png';
+import bte from '../assets/biothings-explorer-text.png';
+import network from '../assets/network.png';
 import { Menu, Grid, Image } from 'semantic-ui-react';
 
 class Header extends Component {
