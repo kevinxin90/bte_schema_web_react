@@ -41,3 +41,26 @@ export const recordsToD3Graph = (records) => {
     }
     return graph
 }
+
+export const recordsToTreeGraph = (records) => {
+    records = Array.from(records);
+    let tree_dict = {};
+    let tree = {children: []}
+    if (Array.isArray(records) && records.length) {
+        tree['name'] = records[0].split('||')[0];
+    };
+    for (let i = 0; i < records.length; i++) {
+        let rec = records[i].split('||')
+        if (!(rec[3] in tree_dict)) {
+            tree_dict[rec[3]] = new Set([rec[7]]);
+        } else {
+            tree_dict[rec[3]].add(rec[7])
+        }
+    };
+    for (const prop in tree_dict) {
+        let rec = {name: prop, pathProps: prop, children: []};
+        rec['children'] = Array.from(tree_dict[prop]).map(item=>({name: item, children: []}));
+        tree['children'].push(rec);
+    }
+    return tree
+}

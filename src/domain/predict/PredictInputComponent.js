@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import AutoComplete from '../../components/AutoCompleteComponent';
 import SearchSemanticTypeComponent from '../../components/SemanticTypesAutocompleteComponent';
-import { Form, Button, Segment, Popup } from 'semantic-ui-react'
+import { Form, Button, Segment, Popup } from 'semantic-ui-react';
+import ErrorMessage from '../../components/DisplayErrorComponent';
 
 export default class PredictInput extends Component {
     constructor(props) {
@@ -60,41 +61,38 @@ export default class PredictInput extends Component {
     render() {
         return (
             <div className={this.props.shouldHide ? '' : 'hidden'}>
-                <div className="row ">
-                    <div className="col-12">
-                        <Segment color="green">
-                            <Form onSubmit={this.props.handleStep1Submit}>
-                                <Form.Group>
-                                    <h2> Step 1: Specify source and target nodes.</h2>
-                                    <hr />
-                                </Form.Group>
-                                <div>
-                                    <Popup content="The starting node of the paths" trigger={<h3>Source Node</h3>}/>
-                                </div>
-                                <br />
-                                <Form.Group>
-                                    <AutoComplete 
-                                        handleselect={this.props.handleInputSelect}
-                                        handleSearchChange={this.handleSearchChange1}
-                                        state={this.state.autocomplete1}
-                                    />
-                                </Form.Group>
-                                <div>
-                                    <Popup content="The ending node of the paths" trigger={<h3>Target Node</h3>}/>
-                                </div>
-                                <br />
-                                <Form.Group>
-                                    <SearchSemanticTypeComponent 
-                                        handleSelect={this.props.handleOutputSelect}
-                                    />
-                                </Form.Group>
-                                <div className="col text-center">
-                                    <Button type='submit' onClick={this.props.handleStep1Submit}>Continue</Button>
-                                </div>
-                            </Form>
-                        </Segment>
-                    </div>
-                </div>
+                <ErrorMessage field='input/output' modalOpen={this.props.showModal} handleClose={this.props.handleClose} />
+                <Segment color="green">
+                    <Form onSubmit={this.props.handleStep1Submit}>
+                        <Form.Group>
+                            <h2> Step 1: Specify source and target nodes.</h2>
+                            <hr />
+                        </Form.Group>
+                        <div>
+                            <Popup content="The starting node of the paths" trigger={<h3>Source Node</h3>}/>
+                        </div>
+                        <br />
+                        <Form.Group>
+                            <AutoComplete 
+                                handleselect={this.props.handleInputSelect}
+                                handleSearchChange={this.handleSearchChange1}
+                                state={this.state.autocomplete1}
+                            />
+                        </Form.Group>
+                        <div>
+                            <Popup content="The ending node of the paths" trigger={<h3>Target Node</h3>}/>
+                        </div>
+                        <br />
+                        <Form.Group>
+                            <SearchSemanticTypeComponent 
+                                handleSelect={this.props.handleOutputSelect}
+                            />
+                        </Form.Group>
+                        <div className="col text-center">
+                            <Button type='submit' onClick={this.props.handleStep1Submit}>Continue</Button>
+                        </div>
+                    </Form>
+                </Segment>
             </div>
         )
     }

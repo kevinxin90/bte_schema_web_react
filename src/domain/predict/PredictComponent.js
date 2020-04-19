@@ -4,8 +4,10 @@ import { Link } from 'react-router-dom';
 import AccordionComponent from './PredictHelpComponent';
 import Steps from '../../components/StepsComponent';
 import PredictInput from './PredictInputComponent';
-import MetaPathForm from '../../components/MetaPathFormComponent';
+import {MetaPathForm} from '../../components/MetaPathFormComponent';
 import PredictQueryResult from './PredictQueryResultComponent';
+import {recordsToTreeGraph} from '../../shared/utils';
+
 let _ = require('lodash');
 
 class Predict extends Component {
@@ -20,6 +22,8 @@ class Predict extends Component {
             step2Complete: false,
             step3Complete: false,
             resultReady: false,
+            step1ShowError: false,
+            step2ShowError: false,
             selectedInput: {},
             selectedOutput: {},
             paths: [],
@@ -50,6 +54,8 @@ class Predict extends Component {
         this.handleBackToStep3 = this.handleBackToStep3.bind(this);
         this.handlePaginationChange = this.handlePaginationChange.bind(this);
         this.handleSort = this.handleSort.bind(this);
+        this.handleStep1Close = this.handleStep1Close.bind(this);
+        this.handleStep2Close = this.handleStep2Close.bind(this);
     };
 
     //this function will be passed to autocomplete component
@@ -85,51 +91,66 @@ class Predict extends Component {
         } else {
             selectedQueryResults.delete(event.target.name)
         }
-        const graph = this.recordsToTreeGraph(selectedQueryResults)
+        const graph = recordsToTreeGraph(selectedQueryResults)
         this.setState({ selectedQueryResults: selectedQueryResults,
                         graph: graph })
     }
 
+    handleStep1Close = () => this.setState({
+        step1ShowError: false
+    })
+
+    handleStep2Close = () => this.setState({
+        step2ShowError: false
+    })
+
 
     handleStep1Submit(event) {
         event.preventDefault();
-        this.setState({
-            step1Active: false,
-            step1Complete: true,
-            step2Active: true,
-            step3Active: false,
-            step2Complete: false,
-            step3Complete: false,
-            selectedPaths: new Set(),
-            queryResults: [],
-            selectedQueryResults: new Set(),
-            graph: {},
-            showInput: false,
-            showMetaPath: true,
-            showResult: false
-        })
-        fetch('https://geneanalysis.ncats.io/explorer_api/v1/find_metapath?input_cls=' + this.state.selectedInput.type + '&output_cls=' + this.state.selectedOutput)
-            .then(response => {
-                if (response.ok) {
-                    return response;
-                }
-                else {
-                    var error = new Error('Error ' + response.status + ': ' + response.statsText);
-                    error.response = response;
-                    throw error;
-                }
-            },
-            error => {
-                var errmess = new Error(error.message);
-                throw errmess;
+        if (_.isEmpty(this.state.selectedInput) || _.isEmpty(this.state.selectedOutput)){
+            this.setState({
+                step1ShowError: true
+            });
+        } else {
+            this.setState({
+                step1Active: false,
+                step1Complete: true,
+                step2Active: true,
+                step3Active: false,
+                step2Complete: false,
+                step3Complete: false,
+                selectedPaths: new Set(),
+                queryResults: [],
+                selectedQueryResults: new Set(),
+                graph: {},
+                showInput: false,
+                showMetaPath: true,
+                showResult: false
             })
-            .then(response => response.json())
-            .then(response => {
-                this.setState({
-                    paths: response['edges']
-                });
-            })
-            .catch(error => { console.log('find metapath failed', error.message); alert('Find MetaPath Failed.\nError: '+error.message); });
+            fetch('https://geneanalysis.ncats.io/explorer_api/v1/find_metapath?input_cls=' + this.state.selectedInput.type + '&output_cls=' + this.state.selectedOutput)
+                .then(response => {
+                    if (response.ok) {
+                        return response;
+                    }
+                    else {
+                        var error = new Error('Error ' + response.status + ': ' + response.statsText);
+                        error.response = response;
+                        throw error;
+                    }
+                },
+                error => {
+                    var errmess = new Error(error.message);
+                    throw errmess;
+                })
+                .then(response => response.json())
+                .then(response => {
+                    this.setState({
+                        paths: response['edges']
+                    });
+                })
+                .catch(error => { console.log('find metapath failed', error.message); alert('Find MetaPath Failed.\nError: '+error.message); 
+            });
+        }
     }
 
     handleBackToStep1(event) {
@@ -149,7 +170,7 @@ class Predict extends Component {
         let intermediate_nodes = this.getIntermediateNodes(this.state.selectedPaths);
         if (intermediate_nodes.length === 0) {
             this.setState({
-                showModal: true
+                step2ShowError: true
             });
         } else {
             this.setState({
@@ -162,9 +183,12 @@ class Predict extends Component {
             })
             let url = new URL('https://geneanalysis.ncats.io/explorer_api/v1/connect')
 
-            var params = {input_obj: JSON.stringify(this.state.selectedInput),
-                        output_obj: JSON.stringify(this.state.selectedOutput),
-                        intermediate_nodes: JSON.stringify(intermediate_nodes)} 
+            var params = {
+                input_obj: JSON.stringify(this.state.selectedInput),
+                output_obj: JSON.stringify(this.state.selectedOutput),
+                intermediate_nodes: JSON.stringify(intermediate_nodes)
+            } 
+
             url.search = new URLSearchParams(params).toString();
 
             fetch(url)
@@ -272,28 +296,6 @@ class Predict extends Component {
         });
     }
 
-    recordsToTreeGraph(records) {
-        records = Array.from(records);
-        let tree_dict = {};
-        let tree = {children: []}
-        if (Array.isArray(records) && records.length) {
-          tree['name'] = records[0].split('||')[0];
-        };
-        for (let i = 0; i < records.length; i++) {
-          let rec = records[i].split('||')
-          if (!(rec[3] in tree_dict)) {
-              tree_dict[rec[3]] = new Set([rec[7]]);
-          } else {
-              tree_dict[rec[3]].add(rec[7])
-          }
-        };
-        for (const prop in tree_dict) {
-            let rec = {name: prop, pathProps: prop, children: []};
-            rec['children'] = Array.from(tree_dict[prop]).map(item=>({name: item, children: []}));
-            tree['children'].push(rec);
-        }
-        return tree
-      }
     render() {
         return (
             <div className="feature">
@@ -326,13 +328,16 @@ class Predict extends Component {
                 />
                 <PredictInput
                     shouldHide={this.state.showInput}
+                    showModal={this.state.step1ShowError}
+                    handleClose={this.handleStep1Close}
                     handleStep1Submit={this.handleStep1Submit}
                     handleInputSelect={this.handleInputSelect}
                     handleOutputSelect={this.handleOutputSelect}
                 />
                 <MetaPathForm
                     shouldHide={this.state.showMetaPath}
-                    showModal={this.state.showModal}
+                    showModal={this.state.step2ShowError}
+                    handleClose={this.handleStep2Close}
                     paths={this.state.paths}
                     handleSelect={this.handleMetaPathSelect}
                     handleSubmit={this.handleStep2Submit}

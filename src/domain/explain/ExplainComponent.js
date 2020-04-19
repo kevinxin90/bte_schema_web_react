@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import AccordionComponent from '../../components/AccordionComponent';
 import Steps from '../../components/StepsComponent';
 import ExplainInput from './ExplainInputComponent';
-import MetaPathForm from '../../components/MetaPathFormComponent';
+import {MetaPathForm} from '../../components/MetaPathFormComponent';
 import ExplainQueryResult from './ExplainQueryResultComponent';
 import { recordsToD3Graph as recordsToGraph } from '../../shared/utils';
 
