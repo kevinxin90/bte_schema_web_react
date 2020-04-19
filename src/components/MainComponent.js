@@ -2,8 +2,8 @@ import React, { Component } from 'react';
 import Home from './HomeComponent';
 import Header from './HeaderComponent';
 import Footer from './FooterComponent';
-import Explain from "./ExplainComponent";
-import Predict from "./PredictComponent";
+import Explain from "../domain/explain/ExplainComponent";
+import Predict from "../domain/predict/PredictComponent";
 import { Route, withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { postComment, fetchDishes, fetchComments, fetchPromos } from '../redux/ActionCreators';
@@ -36,10 +36,6 @@ class Main extends Component {
     this.state = {
       options: []
     }
-  }
-  //when the main component is mounted, fetch dishes will be called and load into redux store
-  componentDidMount() {
-
   }
 
   render() {

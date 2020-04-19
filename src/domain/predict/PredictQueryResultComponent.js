@@ -1,8 +1,8 @@
-import BTETable from './BTETableComponent';
-import ReactLoader from './DimerComponent';
+import BTETable from '../../components/DisplayTableResult';
+import ReactLoader from '../../components/DimerComponent';
 import React, { Component } from 'react';
 import { Segment, Divider, Modal, Button } from 'semantic-ui-react';
-import TreeGraph from './TreeGraphComponent';
+import TreeGraph from '../../components/TreeGraphComponent';
 
 export default class PredictQueryResult extends Component {
     render() {
@@ -40,10 +40,7 @@ export default class PredictQueryResult extends Component {
                     /> : null}
                     <Divider />
                     {Object.keys(this.props.graph).length === 0 ? null: 
-                        <TreeGraph
-                            graph={this.props.graph}
-                            resultReady={this.props.resultReady}
-                        />
+                        <TreeGraph graph={this.props.graph} />
                     }           
                 </Segment>
             </div>

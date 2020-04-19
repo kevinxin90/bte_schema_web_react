@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
 import { Breadcrumb, Container } from 'semantic-ui-react'
 import { Link } from 'react-router-dom';
-import AccordionComponent from './AccordionComponent';
-import Steps from './StepsComponent';
+import AccordionComponent from '../../components/AccordionComponent';
+import Steps from '../../components/StepsComponent';
 import ExplainInput from './ExplainInputComponent';
-import MetaPathForm from './MetaPathFormComponent';
+import MetaPathForm from '../../components/MetaPathFormComponent';
 import ExplainQueryResult from './ExplainQueryResultComponent';
 let _ = require('lodash');
 
@@ -38,7 +38,8 @@ class Explain extends Component {
             showInput: true,
             showMetaPath: false,
             showResult: false,
-            showModal: false,
+            step1ShowError: false,
+            step2ShowError: false
         };
         this.handleStep1Submit = this.handleStep1Submit.bind(this);
         this.handleStep2Submit = this.handleStep2Submit.bind(this);
@@ -49,7 +50,8 @@ class Explain extends Component {
         this.handleBackToStep1 = this.handleBackToStep1.bind(this);
         this.handleBackToStep2 = this.handleBackToStep2.bind(this);
         this.handleBackToStep3 = this.handleBackToStep3.bind(this);
-        this.handleClose = this.handleClose.bind(this);
+        this.handleStep1Close = this.handleStep1Close.bind(this);
+        this.handleStep2Close = this.handleStep2Close.bind(this);
         this.handlePaginationChange = this.handlePaginationChange.bind(this);
         this.handleSort = this.handleSort.bind(this);
     };
@@ -58,7 +60,7 @@ class Explain extends Component {
     //in order to retrieve the selected input
     handleInputSelect(value) {   
         this.setState({
-          selectedInput: value
+            selectedInput: value
         });
     }
 
@@ -66,7 +68,7 @@ class Explain extends Component {
     //in order to retrieve the selected output
     handleOutputSelect(value) {    
         this.setState({
-          selectedOutput: value
+            selectedOutput: value
         });
     }
 
@@ -92,16 +94,19 @@ class Explain extends Component {
                         graph: graph })
     }
 
-    handleClose = () => this.setState({
-        showModal: false
+    handleStep1Close = () => this.setState({
+        step1ShowError: false
     })
 
+    handleStep2Close = () => this.setState({
+        step2ShowError: false
+    })
 
     handleStep1Submit(event) {
         event.preventDefault();
         if (_.isEmpty(this.state.selectedInput) || _.isEmpty(this.state.selectedOutput)){
             this.setState({
-                showModal: true
+                step1ShowError: true
             });
         } else {
             this.setState({
@@ -162,7 +167,7 @@ class Explain extends Component {
         let intermediate_nodes = this.getIntermediateNodes(this.state.selectedPaths);
         if (intermediate_nodes.length === 0) {
             this.setState({
-                showModal: true
+                step2ShowError: true
             });
         } else {
             let url = new URL('https:/geneanalysis.ncats.io/explorer_api/v1/connect');
@@ -362,17 +367,17 @@ class Explain extends Component {
                     handleBackToStep3={this.handleBackToStep3}
                 />
                 <ExplainInput
-                    shouldHide={this.state.showInput}
-                    showModal={this.state.showModal}
-                    handleClose={this.handleClose}
+                    shouldDisplay={this.state.showInput}
+                    showModal={this.state.step1ShowError}
+                    handleClose={this.handleStep1Close}
                     handleStep1Submit={this.handleStep1Submit}
                     handleInputSelect={this.handleInputSelect}
                     handleOutputSelect={this.handleOutputSelect}
                 />
                 <MetaPathForm
                     shouldHide={this.state.showMetaPath}
-                    showModal={this.state.showModal}
-                    handleClose={this.handleClose}
+                    showModal={this.state.step2ShowError}
+                    handleClose={this.handleStep2Close}
                     paths={this.state.paths}
                     handleSelect={this.handleMetaPathSelect}
                     handleSubmit={this.handleStep2Submit}

@@ -1,12 +1,13 @@
 import React, { useEffect } from 'react';
+import {colorSchema, semanticTypeShorthand} from '../shared/semanticTypes'
 import * as d3 from 'd3';
 import _ from 'lodash';
 
-const Viz = () => {
-  useEffect(() => {
-   draw()
- }, [2])
-  return <div className='node-label' />
+const Labels = () => {
+    useEffect(() => {
+        draw()
+    }, [])
+    return <div className='node-label' />
 }
 
 const draw = () => {
@@ -15,47 +16,9 @@ const draw = () => {
                 .attr('width', "100%")
                 .attr('id', 'svg-viz-node-label')
 
-    const color = {
-        G: '#02b3e4',
-        SV: "#e91e63", 
-        CS: '#fa750f',
-        PF: '#1b03fc',
-        PW: '#607d8b',
-        T: '#7d4d3e',
-        A: '#4caf50',
-        GE: "#e11F63",
-        P: "#f21e37",
-        CL: '#175442',
-        BS: '#815499',
-        D: '#7761f2',
-        C: '#d8e339',
-        CC: '#3107d9',
-        BP: '#236b44',
-        MA: '#0366fc',
-    }
+    const fullName = _.invert(semanticTypeShorthand);
 
-    const shorthand = {
-        Gene: "G",
-        SequenceVariant: "SV",
-        ChemicalSubstance: "CS",
-        PhenotypicFeature: "PF",
-        Pathway: "PW",
-        Transcript: "T",
-        AnatomicalEntity: "A",
-        GenomicEntity: "GE",
-        Protein: "P",
-        CellLine: "CL",
-        Biosample: "BS",
-        DiseaseOrPhenotypicFeature: "D",
-        Cell: "C",
-        CellularComponent: "CC",
-        BiologicalProcess: "BP",
-        MolecularActivity: "MA"
-    }
-
-    const fullName = _.invert(shorthand);
-
-    const dataArray = Object.keys(color);
+    const dataArray = Object.keys(colorSchema);
 
     svg.selectAll("circle")
         .data(dataArray)
@@ -63,7 +26,7 @@ const draw = () => {
                     .attr("r", "10")
                     .attr("cx", (d, i) => (i%4)*160 + 10)
                     .attr("cy", (d, i) => Math.floor(i/4) * 30 + 10)
-                    .attr("fill", (d) => color[d])
+                    .attr("fill", (d) => colorSchema[d])
 
     function drawOneLabel(label, index) {
 
@@ -90,7 +53,6 @@ const draw = () => {
     for (let i = 0; i < dataArray.length; i++) {
         drawOneLabel(dataArray[i], i)
     }
+}
 
-
-  }
-export default Viz
+export default Labels

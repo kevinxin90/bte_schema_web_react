@@ -1,8 +1,8 @@
 import { Button, Segment, Table } from 'semantic-ui-react'
 import React, { Component } from 'react';
-import Viz from './Viz.js';
-import LabelViz from './VizLabel';
-import ModalExampleControlled from './NoInpuModalComponent';
+import MetaPath from './DrawMetaPath.js';
+import MetaPathLabels from './DrawMetaPathLabels';
+import ErrorMessage from './DisplayErrorComponent';
 
 
 
@@ -29,14 +29,14 @@ class MetaPathForm extends Component {
                                 defaultChecked={false} /> 
                         </label>
                     </Table.Cell>
-                    <Table.Cell key={path}><Viz className={path} /></Table.Cell>
+                    <Table.Cell key={path}><MetaPath className={path} /></Table.Cell>
                 </Table.Row>
             )
         })
 
         return (
             <div className={this.props.shouldHide ? '' : 'hidden'}>
-                <ModalExampleControlled field="metapath" modalOpen={this.props.showModal} handleClose={this.props.handleClose}/>
+                <ErrorMessage field="metapath" modalOpen={this.props.showModal} handleClose={this.props.handleClose}/>
                 <Segment color='red'>
                     <h2> Step 2: Select the MetaPath you want to execute.</h2>
                     <hr />
@@ -52,7 +52,7 @@ class MetaPathForm extends Component {
                         </Table.Body>
                     </Table>
                     <p>Color Schema</p>
-                    <LabelViz />
+                    <MetaPathLabels />
                     <div className="col text-center">
                         <Button type='submit' onClick={this.props.handleBackToStep1}>Back</Button>
                         <Button type='submit' onClick={this.props.handleSubmit}>Continue</Button>

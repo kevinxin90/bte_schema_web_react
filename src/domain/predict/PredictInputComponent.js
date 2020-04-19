@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import AutoComplete from './AutoCompleteComponent';
-import SearchSemanticTypeComponent from './SemanticTypesAutocompleteComponent';
+import AutoComplete from '../../components/AutoCompleteComponent';
+import SearchSemanticTypeComponent from '../../components/SemanticTypesAutocompleteComponent';
 import { Form, Button, Segment, Popup } from 'semantic-ui-react'
 
 export default class PredictInput extends Component {

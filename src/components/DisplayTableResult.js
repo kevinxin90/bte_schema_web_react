@@ -1,11 +1,12 @@
 import _ from 'lodash'
-import React, { Component } from 'react'
+import React from 'react'
 import { Table, Form, Pagination } from 'semantic-ui-react'
 
-export default class BTETable extends Component {
-  render() {
-    const headers = this.props.table.display.length > 0 ? Object.keys(this.props.table.display[0]) : [];
-    const formData = () => (
+export default function BTETable(props) {
+
+    const headers = props.table.display.length > 0 ? Object.keys(props.table.display[0]) : [];
+        
+    return (
         <Form>
             <h3>Your Query Results</h3>
             <Table sortable celled compact>
@@ -17,8 +18,8 @@ export default class BTETable extends Component {
                                 key={item}
                                 className={item}
                                 value={item}
-                                sorted={this.props.table.column === item ? this.props.table.direction : null}
-                                onClick={this.props.handleSort}
+                                sorted={props.table.column === item ? props.table.direction : null}
+                                onClick={props.handleSort}
                             >
                                 {item}
                             </Table.HeaderCell>
@@ -26,13 +27,13 @@ export default class BTETable extends Component {
                     </Table.Row>
                 </Table.Header>
                 <Table.Body>
-                    {_.map(this.props.table.display, (item) => (
+                    {_.map(props.table.display, (item) => (
                     <Table.Row key={Object.values(item).join('||')}>
                         <Table.Cell key='checkbox'>
                             <label>
                             <input type="checkbox"
                                 name={Object.values(item).join('||')}
-                                onChange={this.props.handleSelect} 
+                                onChange={props.handleSelect} 
                                 defaultChecked={false} /> 
                             display
                             </label>
@@ -45,17 +46,12 @@ export default class BTETable extends Component {
                 </Table.Body>
             </Table>
             <Pagination
-                onPageChange={this.props.handlePaginationChange}
+                onPageChange={props.handlePaginationChange}
                 defaultActivePage={1}
-                totalPages={this.props.table.totalPages}
+                totalPages={props.table.totalPages}
                 siblingRange={1}
                 // Heads up! All items are powered by shorthands, if you want to hide one of them, just pass `null` as value
             />
         </Form>
     )
-
-    return (
-        this.props.resultReady ? formData(): null
-    )
-  }
 }

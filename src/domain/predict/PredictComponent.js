@@ -2,9 +2,9 @@ import React, { Component } from 'react';
 import { Breadcrumb, Container } from 'semantic-ui-react'
 import { Link } from 'react-router-dom';
 import AccordionComponent from './PredictHelpComponent';
-import Steps from './StepsComponent';
+import Steps from '../../components/StepsComponent';
 import PredictInput from './PredictInputComponent';
-import MetaPathForm from './MetaPathFormComponent';
+import MetaPathForm from '../../components/MetaPathFormComponent';
 import PredictQueryResult from './PredictQueryResultComponent';
 let _ = require('lodash');
 

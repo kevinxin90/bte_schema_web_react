@@ -1,6 +1,6 @@
-import D3Graph from './D3GraphComponent';
-import BTETable from './BTETableComponent';
-import ReactLoader from './DimerComponent';
+import D3Graph from '../../components/D3GraphComponent';
+import BTETable from '../../components/DisplayTableResult';
+import ReactLoader from '../../components/DimerComponent';
 import React, { Component } from 'react';
 import { Segment, Divider, Button,  Modal } from 'semantic-ui-react';
 
@@ -31,7 +31,6 @@ export default class ExplainQueryResult extends Component {
                     
                     {this.props.resultReady ? null: <ReactLoader />}
                     {this.props.resultReady && this.props.content.length > 0 ? <BTETable
-                        resultReady={this.props.resultReady}
                         handleSelect={this.props.handleSelect}
                         content={this.props.content}
                         table={this.props.table}
