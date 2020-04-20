@@ -64,3 +64,38 @@ export const recordsToTreeGraph = (records) => {
     }
     return tree
 }
+
+export const getIntermediateNodes = (metaPaths) => {
+    return [...metaPaths].map(x => x.split('-').slice(1)[0])
+}
+
+export async function findMetaPath(input_type, output_type) {
+    try {
+        let response = await fetch('https://geneanalysis.ncats.io/explorer_api/v1/find_metapath?input_cls=' + input_type + '&output_cls=' + output_type);
+        response = await response.json();
+        return response['edges'];
+    } catch(err) {
+        return [];
+    }
+}
+
+export async function fetchQueryResult(input, output, intermediate) {
+    let url = new URL('https:/geneanalysis.ncats.io/explorer_api/v1/connect');
+    let params = {
+        input_obj: JSON.stringify(input),
+        output_obj: JSON.stringify(output),
+        intermediate_nodes: JSON.stringify(intermediate)
+    };
+    url.search = new URLSearchParams(params).toString();
+    try {
+        let response = await fetch(url);
+        if (!response.ok) {
+            return {'data': [], 'log': []}
+        };
+        response = await response.json();
+        return response
+    } catch(err) {
+        return {'data': [], 'log': []}
+    }
+}
+

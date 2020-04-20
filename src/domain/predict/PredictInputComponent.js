@@ -60,7 +60,7 @@ export default class PredictInput extends Component {
 
     render() {
         return (
-            <div className={this.props.shouldHide ? '' : 'hidden'}>
+            <div className={this.props.shouldDisplay ? '' : 'hidden'}>
                 <ErrorMessage field='input/output' modalOpen={this.props.showModal} handleClose={this.props.handleClose} />
                 <Segment color="green">
                     <Form onSubmit={this.props.handleStep1Submit}>

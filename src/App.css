@@ -116,3 +116,16 @@ path.link {
 .modal .description {
     margin: 2rem;
 }
+
+.logButton {
+    margin-bottom: 1rem !important;
+}
+
+.emptyQueryResult {
+    color: red;
+    padding-top: 5rem;
+    padding-bottom: 5rem;
+    margin-left: 2rem;
+    margin-bottom: 10rem;
+    margin-top: 10rem;
+}

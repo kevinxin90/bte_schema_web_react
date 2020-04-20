@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
-import { Breadcrumb, Container } from 'semantic-ui-react'
-import { Link } from 'react-router-dom';
+import { Container } from 'semantic-ui-react';
+import { Navigation } from '../../components/Breadcrumb';
 import AccordionComponent from '../../components/AccordionComponent';
 import Steps from '../../components/StepsComponent';
 import ExplainInput from './ExplainInputComponent';
 import {MetaPathForm} from '../../components/MetaPathFormComponent';
 import ExplainQueryResult from './ExplainQueryResultComponent';
-import { recordsToD3Graph as recordsToGraph } from '../../shared/utils';
+import { recordsToD3Graph as recordsToGraph, getIntermediateNodes, findMetaPath, fetchQueryResult } from '../../shared/utils';
 
 let _ = require('lodash');
 
@@ -15,9 +15,7 @@ class Explain extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            step1Active: true,
-            step2Active: false,
-            step3Active: false,
+            currentStep: 1,
             step1Complete: false,
             step2Complete: false,
             step3Complete: false,
@@ -26,8 +24,7 @@ class Explain extends Component {
             selectedOutput: {},
             paths: [],
             selectedPaths: new Set(),
-            queryResults: [],
-            queryLog: [],
+            queryResults: {'data': [], 'log': []},
             table: {
                 column: null,
                 display: [],
@@ -36,10 +33,7 @@ class Explain extends Component {
                 totalPages: 1
             },
             selectedQueryResults: new Set(),
-            graph: {nodes: [{id: 'kevin'}], links: []},
-            showInput: true,
-            showMetaPath: false,
-            showResult: false,
+            graph: {nodes: [], links: []},
             step1ShowError: false,
             step2ShowError: false
         };
@@ -52,8 +46,8 @@ class Explain extends Component {
         this.handleBackToStep1 = this.handleBackToStep1.bind(this);
         this.handleBackToStep2 = this.handleBackToStep2.bind(this);
         this.handleBackToStep3 = this.handleBackToStep3.bind(this);
-        this.handleStep1Close = this.handleStep1Close.bind(this);
-        this.handleStep2Close = this.handleStep2Close.bind(this);
+        this.handleStep1Close = this.handleClose.bind(this, 'step1ShowError');
+        this.handleStep2Close = this.handleClose.bind(this, 'step2ShowError');
         this.handlePaginationChange = this.handlePaginationChange.bind(this);
         this.handleSort = this.handleSort.bind(this);
     };
@@ -92,19 +86,17 @@ class Explain extends Component {
             selectedQueryResults.delete(event.target.name)
         }
         const graph = recordsToGraph(selectedQueryResults)
-        this.setState({ selectedQueryResults: selectedQueryResults,
-                        graph: graph })
+        this.setState({ 
+            selectedQueryResults: selectedQueryResults,
+            graph: graph 
+        })
     }
 
-    handleStep1Close = () => this.setState({
-        step1ShowError: false
+    handleClose = (item) => this.setState({
+        [item]: false
     })
 
-    handleStep2Close = () => this.setState({
-        step2ShowError: false
-    })
-
-    handleStep1Submit(event) {
+    async handleStep1Submit(event) {
         event.preventDefault();
         if (_.isEmpty(this.state.selectedInput) || _.isEmpty(this.state.selectedOutput)){
             this.setState({
@@ -112,149 +104,93 @@ class Explain extends Component {
             });
         } else {
             this.setState({
-                step1Active: false,
+                currentStep: 2,
                 step1Complete: true,
-                step2Active: true,
-                step3Active: false,
                 step2Complete: false,
                 step3Complete: false,
                 selectedPaths: new Set(),
-                queryResults: [],
+                queryResults: {'data': [], 'log': []},
                 selectedQueryResults: new Set(),
-                graph: {nodes: [{id: 'kevin'}], links: []},
-                showInput: false,
-                showMetaPath: true,
-                showResult: false
-            });
-            fetch('https://geneanalysis.ncats.io/explorer_api/v1/find_metapath?input_cls=' + this.state.selectedInput.type + '&output_cls=' + this.state.selectedOutput.type)
-                .then(response => {
-                    if (response.ok) {
-                        return response;
-                    }
-                    else {
-                        var error = new Error('Error ' + response.status + ': ' + response.statsText);
-                        error.response = response;
-                        throw error;
-                    }
+                graph: {nodes: [], links: []},
+                table: {
+                    column: null,
+                    display: [],
+                    direction: null,
+                    activePage: 1,
+                    totalPages: 1
                 },
-                error => {
-                    var errmess = new Error(error.message);
-                    throw errmess;
-                })
-                .then(response => response.json())
-                .then(response => {
-                    this.setState({
-                        paths: response['edges']
-                    });
-                })
-                .catch(error => { console.log('MetaPath could not be found', error.message); alert('Sorry! Metapath could not be found.\nError: '+error.message); });
+            });
+            let edges = await findMetaPath(this.state.selectedInput.type,
+                                           this.state.selectedOutput.type);
+            this.setState({
+                paths: edges
+            });
         }
-        
     }
 
     handleBackToStep1(event) {
         event.preventDefault();
         this.setState({
-            step1Active: true,
-            step2Active: false,
-            step3Active: false,
-            showInput: true,
-            showMetaPath: false,
-            showResult: false
+            currentStep: 1
         }) 
     }
 
-    handleStep2Submit(event) {
+    async handleStep2Submit(event) {
         event.preventDefault();
-        let intermediate_nodes = this.getIntermediateNodes(this.state.selectedPaths);
+        let intermediate_nodes = getIntermediateNodes(this.state.selectedPaths);
         if (intermediate_nodes.length === 0) {
             this.setState({
                 step2ShowError: true
             });
         } else {
-            let url = new URL('https:/geneanalysis.ncats.io/explorer_api/v1/connect');
             this.setState({
-                step2Active: false,
+                currentStep: 3,
                 step2Complete: true,
-                step3Active: true,
-                showMetaPath: false,
-                showResult: true,
-                resultReady: false
-            });
-            var params = {
-                input_obj: JSON.stringify(this.state.selectedInput),
-                output_obj: JSON.stringify(this.state.selectedOutput),
-                intermediate_nodes: JSON.stringify(intermediate_nodes)
-            };
-            url.search = new URLSearchParams(params).toString();
-
-            fetch(url)
-                .then(response => {
-                    if (response.ok) {
-                        return response;
-                    }
-                    else {
-                        var error = new Error('Error ' + response.status + ': ' + response.statsText);
-                        error.response = response;
-                        throw error;
-                    }
+                resultReady: false,
+                table: {
+                    column: null,
+                    display: [],
+                    direction: null,
+                    activePage: 1,
+                    totalPages: 1
                 },
-                error => {
-                    var errmess = new Error(error.message);
-                    throw errmess;
+            });
+            let response = await fetchQueryResult(this.state.selectedInput,
+                this.state.selectedOutput,
+                intermediate_nodes)
+            console.log(response);
+            if (response.data.length === 0) {
+                this.setState({
+                    resultReady: true,
+                    step3Complete: true,
+                    queryResults: {'data': [], 'log': []}
                 })
-                .then(response => response.json())
-                .then(response => {
-                    this.setState({
-                        queryResults: response['data'],
-                        table: {
-                            ...this.state.table,
-                            display: response['data'].slice(this.state.table.activePage*10 - 10, this.state.table.activePage*10),
-                            totalPages: Math.ceil(response['data'].length/10)
-                        },
-                        queryLog: response['log'],
-                        resultReady: true,
-                        step3Complete: true
-                    });
-                })
-                .catch(error => { 
-                    console.log('Query Results could not be retrieved ', error.message); 
-                    this.setState({
-                        resultReady: true,
-                        step3Complete: true,
-                        queryResults: []
-                    })
-
+            } else {
+                this.setState({
+                    queryResults: response,
+                    table: {
+                        ...this.state.table,
+                        display: response['data'].slice(this.state.table.activePage*10 - 10, this.state.table.activePage*10),
+                        totalPages: Math.ceil(response['data'].length/10)
+                    },
+                    resultReady: true,
+                    step3Complete: true
                 });
-                }
-                
-    }
-
-    getIntermediateNodes(metaPaths) {
-        return [...metaPaths].map(x => x.split('-').slice(1)[0])
+            }
+        }         
     }
 
     handleBackToStep2(event) {
         event.preventDefault();
         this.setState({
-            step1Active: false,
-            step2Active: true,
-            step3Active: false,
-            showInput: false,
-            showMetaPath: true,
-            showResult: false
+            currentStep: 2
         }) 
     }
 
     handleBackToStep3(event) {
         event.preventDefault();
         this.setState({
-            step1Active: false,
-            step2Active: false,
-            step3Active: true,
-            showInput: false,
-            showMetaPath: false,
-            showResult: true
+            currentStep: 3
         }) 
     }
 
@@ -270,8 +206,11 @@ class Explain extends Component {
                     column: clickedColumn,
                     direction: 'descending',
                 },
-                queryResults: _.sortBy(this.state.queryResults, [clickedColumn])
-          });
+                queryResults: {
+                    ...this.state.queryResults,
+                    data: _.sortBy(this.state.queryResults['data'], [clickedColumn])
+                }
+            });
           return
         }
     
@@ -279,9 +218,12 @@ class Explain extends Component {
             table: {
                 ...this.state.table,
                 direction: direction === 'ascending' ? 'descending' : 'ascending',
-                display: this.state.queryResults.slice(this.state.table.activePage*10 - 10, this.state.table.activePage*10),
+                display: this.state.queryResults['data'].slice(this.state.table.activePage*10 - 10, this.state.table.activePage*10),
             },
-            queryResults: this.state.queryResults.reverse(),
+            queryResults: {
+                ...this.state.queryResults,
+                data: this.state.queryResults['data'].reverse()
+            }
         });
     }
     
@@ -289,7 +231,7 @@ class Explain extends Component {
         this.setState({
             table:{
                 ...this.state.table,
-                display: this.state.queryResults.slice(activePage*10 - 10, activePage*10),
+                display: this.state.queryResults['data'].slice(activePage*10 - 10, activePage*10),
                 activePage: activePage
             }      
         });
@@ -297,27 +239,12 @@ class Explain extends Component {
 
     render() {
         return (
-            <div className="feature">
-                <Container>
-                <div className="row">
-                    <div className="col-12">
-                        <Breadcrumb>
-                        <Breadcrumb.Section><Link to='/'>Home</Link></Breadcrumb.Section>
-                        <Breadcrumb.Divider />
-                        <Breadcrumb.Section active>Explain</Breadcrumb.Section>
-                        </Breadcrumb>
-                    </div>
-                    <div className="col-12">
-                        <AccordionComponent />
-                        
-                        <hr />
-                    </div>
-                </div>
-                
+            <Container className="feature">
+                <Navigation name="Explain"></Navigation>
+                <AccordionComponent />
+                <hr />            
                 <Steps
-                    step1Active={this.state.step1Active}
-                    step2Active={this.state.step2Active}
-                    step3Active={this.state.step3Active}
+                    currentStep={this.state.currentStep}
                     step1Complete={this.state.step1Complete}
                     step2Complete={this.state.step2Complete}
                     step3Complete={this.state.step3Complete}
@@ -326,7 +253,7 @@ class Explain extends Component {
                     handleBackToStep3={this.handleBackToStep3}
                 />
                 <ExplainInput
-                    shouldDisplay={this.state.showInput}
+                    shouldDisplay={this.state.currentStep === 1}
                     showModal={this.state.step1ShowError}
                     handleClose={this.handleStep1Close}
                     handleStep1Submit={this.handleStep1Submit}
@@ -334,7 +261,7 @@ class Explain extends Component {
                     handleOutputSelect={this.handleOutputSelect}
                 />
                 <MetaPathForm
-                    shouldHide={this.state.showMetaPath}
+                    shouldDisplay={this.state.currentStep === 2}
                     showModal={this.state.step2ShowError}
                     handleClose={this.handleStep2Close}
                     paths={this.state.paths}
@@ -343,22 +270,19 @@ class Explain extends Component {
                     handleBackToStep1={this.handleBackToStep1}
                 />
                 <ExplainQueryResult
-                    shouldHide={this.state.showResult}
+                    shouldDisplay={this.state.currentStep === 3}
                     resultReady={this.state.resultReady}
-                    content={this.state.queryResults}
+                    content={this.state.queryResults['data']}
                     table={this.state.table}
                     handleSort={this.handleSort}
                     handlePaginationChange={this.handlePaginationChange}
-                    logs={this.state.queryLog}
+                    logs={this.state.queryResults['log']}
                     handleSelect={this.handleQueryResultSelect}
                     graph={this.state.graph}
                 />
             </Container>
-            </div>
         )
     }
 }
 
 export default Explain;
-
-

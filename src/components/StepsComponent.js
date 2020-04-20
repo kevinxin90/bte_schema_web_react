@@ -6,7 +6,7 @@ export default function BTESteps(props) {
         {
             key: "input",
             icon: 'pencil',
-            active: props.step1Active,
+            active: props.currentStep === 1,
             link: true,
             onClick: props.handleBackToStep1,
             title: 'Step 1: Input',
@@ -16,7 +16,7 @@ export default function BTESteps(props) {
         {
             key: "metapath",
             icon: 'tasks',
-            active: props.step2Active,
+            active: props.currentStep === 2,
             link: true,
             onClick: props.handleBackToStep2,
             disabled: props.step1Complete ? false: true,
@@ -27,7 +27,7 @@ export default function BTESteps(props) {
         {
             key: "result",
             icon: 'table',
-            active: props.step3Active,
+            active: props.currentStep === 3,
             link: true,
             onClick: props.handleBackToStep3,
             disabled: props.step2Complete ? false: true,

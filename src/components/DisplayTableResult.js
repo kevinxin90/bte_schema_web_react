@@ -49,7 +49,7 @@ export default function BTETable(props) {
                 onPageChange={props.handlePaginationChange}
                 defaultActivePage={1}
                 totalPages={props.table.totalPages}
-                siblingRange={1}
+                siblingRange={2}
                 // Heads up! All items are powered by shorthands, if you want to hide one of them, just pass `null` as value
             />
         </Form>

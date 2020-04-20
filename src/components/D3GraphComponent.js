@@ -1,7 +1,7 @@
 import { Graph } from "react-d3-graph";
 import React from 'react';
  
-export default function D3Graph(props) {
+export default function D3Graph({graph}) {
 
     // graph payload (with minimalist structure)
     
@@ -71,7 +71,7 @@ export default function D3Graph(props) {
     };
     return <Graph
             id="d3-graph" // id is mandatory, if no id is defined rd3g will throw an error
-            data={props.graph}
+            data={graph}
             config={myConfig}
             />
 }

@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
-import { Breadcrumb, Container } from 'semantic-ui-react'
-import { Link } from 'react-router-dom';
+import { Container } from 'semantic-ui-react';
+import { Navigation } from '../../components/Breadcrumb';
 import AccordionComponent from './PredictHelpComponent';
 import Steps from '../../components/StepsComponent';
 import PredictInput from './PredictInputComponent';
 import {MetaPathForm} from '../../components/MetaPathFormComponent';
 import PredictQueryResult from './PredictQueryResultComponent';
-import {recordsToTreeGraph} from '../../shared/utils';
+import {recordsToTreeGraph, getIntermediateNodes, findMetaPath, fetchQueryResult} from '../../shared/utils';
 
 let _ = require('lodash');
 
@@ -15,13 +15,10 @@ class Predict extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            step1Active: true,
-            step2Active: false,
-            step3Active: false,
+            currentStep: 1,
             step1Complete: false,
             step2Complete: false,
             step3Complete: false,
-            resultReady: false,
             step1ShowError: false,
             step2ShowError: false,
             selectedInput: {},
@@ -39,9 +36,6 @@ class Predict extends Component {
             },
             selectedQueryResults: new Set(),
             graph: {},
-            showInput: true,
-            showMetaPath: false,
-            showResult: false,
         };
         this.handleStep1Submit = this.handleStep1Submit.bind(this);
         this.handleStep2Submit = this.handleStep2Submit.bind(this);
@@ -54,15 +48,15 @@ class Predict extends Component {
         this.handleBackToStep3 = this.handleBackToStep3.bind(this);
         this.handlePaginationChange = this.handlePaginationChange.bind(this);
         this.handleSort = this.handleSort.bind(this);
-        this.handleStep1Close = this.handleStep1Close.bind(this);
-        this.handleStep2Close = this.handleStep2Close.bind(this);
+        this.handleStep1Close = this.handleClose.bind(this, 'step1ShowError');
+        this.handleStep2Close = this.handleClose.bind(this, 'step2ShowError');
     };
 
     //this function will be passed to autocomplete component
     //in order to retrieve the selected input
     handleInputSelect(value) {    
         this.setState({
-          selectedInput: value
+            selectedInput: value
         });
     }
 
@@ -70,7 +64,7 @@ class Predict extends Component {
     //in order to retrieve the selected output
     handleOutputSelect(value) {    
         this.setState({
-          selectedOutput: value
+            selectedOutput: value
         });
     }
 
@@ -96,16 +90,11 @@ class Predict extends Component {
                         graph: graph })
     }
 
-    handleStep1Close = () => this.setState({
-        step1ShowError: false
+    handleClose = (item) => this.setState({
+        [item]: false
     })
 
-    handleStep2Close = () => this.setState({
-        step2ShowError: false
-    })
-
-
-    handleStep1Submit(event) {
+    async handleStep1Submit(event) {
         event.preventDefault();
         if (_.isEmpty(this.state.selectedInput) || _.isEmpty(this.state.selectedOutput)){
             this.setState({
@@ -113,42 +102,19 @@ class Predict extends Component {
             });
         } else {
             this.setState({
-                step1Active: false,
+                currentStep: 2,
                 step1Complete: true,
-                step2Active: true,
-                step3Active: false,
                 step2Complete: false,
                 step3Complete: false,
                 selectedPaths: new Set(),
                 queryResults: [],
                 selectedQueryResults: new Set(),
                 graph: {},
-                showInput: false,
-                showMetaPath: true,
-                showResult: false
             })
-            fetch('https://geneanalysis.ncats.io/explorer_api/v1/find_metapath?input_cls=' + this.state.selectedInput.type + '&output_cls=' + this.state.selectedOutput)
-                .then(response => {
-                    if (response.ok) {
-                        return response;
-                    }
-                    else {
-                        var error = new Error('Error ' + response.status + ': ' + response.statsText);
-                        error.response = response;
-                        throw error;
-                    }
-                },
-                error => {
-                    var errmess = new Error(error.message);
-                    throw errmess;
-                })
-                .then(response => response.json())
-                .then(response => {
-                    this.setState({
-                        paths: response['edges']
-                    });
-                })
-                .catch(error => { console.log('find metapath failed', error.message); alert('Find MetaPath Failed.\nError: '+error.message); 
+            let edges = await findMetaPath(this.state.selectedInput.type,
+                this.state.selectedOutput);
+            this.setState({
+                paths: edges
             });
         }
     }
@@ -156,106 +122,57 @@ class Predict extends Component {
     handleBackToStep1(event) {
         event.preventDefault();
         this.setState({
-            step1Active: true,
-            step2Active: false,
-            step3Active: false,
-            showInput: true,
-            showMetaPath: false,
-            showResult: false
+            currentStep: 1
         }) 
     }
 
-    handleStep2Submit(event) {
+    async handleStep2Submit(event) {
         event.preventDefault();
-        let intermediate_nodes = this.getIntermediateNodes(this.state.selectedPaths);
+        let intermediate_nodes = getIntermediateNodes(this.state.selectedPaths);
         if (intermediate_nodes.length === 0) {
             this.setState({
                 step2ShowError: true
             });
         } else {
             this.setState({
-                step2Active: false,
-                step2Complete: true,
-                step3Active: true,
-                showMetaPath: false,
-                showResult: true,
-                resultReady: false
+                currentStep: 3,
+                step2Complete: true
             })
-            let url = new URL('https://geneanalysis.ncats.io/explorer_api/v1/connect')
-
-            var params = {
-                input_obj: JSON.stringify(this.state.selectedInput),
-                output_obj: JSON.stringify(this.state.selectedOutput),
-                intermediate_nodes: JSON.stringify(intermediate_nodes)
-            } 
-
-            url.search = new URLSearchParams(params).toString();
-
-            fetch(url)
-                .then(response => {
-                    if (response.ok) {
-                        return response;
-                    }
-                    else {
-                        var error = new Error('Error ' + response.status + ': ' + response.statsText);
-                        error.response = response;
-                        throw error;
-                    }
-                },
-                error => {
-                    var errmess = new Error(error.message);
-                    throw errmess;
+            let response = await fetchQueryResult(this.state.selectedInput,
+                this.state.selectedOutput,
+                intermediate_nodes)
+            if (response.data.length === 0) {
+                this.setState({
+                    step3Complete: true,
+                    queryResults: []
                 })
-                .then(response => response.json())
-                .then(response => {
-                    this.setState({
-                        queryResults: response['data'],
-                        queryLog: response['log'],
-                        table: {
-                            ...this.state.table,
-                            display: response['data'].slice(this.state.table.activePage*10 - 10, this.state.table.activePage*10),
-                            totalPages: Math.ceil(response['data'].length/10)
-                        },
-                        resultReady: true,
-                        step3Complete: true
-                    });
-                })
-                .catch(error => { 
-                    console.log('Query returns no hits', error.message);
-                    this.setState({
-                        resultReady: true,
-                        step3Complete: true,
-                        queryResults: []
-                    })
+            } else {
+                this.setState({
+                    queryResults: response['data'],
+                    table: {
+                        ...this.state.table,
+                        display: response['data'].slice(this.state.table.activePage*10 - 10, this.state.table.activePage*10),
+                        totalPages: Math.ceil(response['data'].length/10)
+                    },
+                    queryLog: response['log'],                    step3Complete: true
                 });
+            }
         }
     }
 
-    getIntermediateNodes(metaPaths) {
-        return [...metaPaths].map(x => x.split('-').slice(1)[0])
-    }
+    
 
     handleBackToStep2(event) {
         event.preventDefault();
         this.setState({
-            step1Active: false,
-            step2Active: true,
-            step3Active: false,
-            showInput: false,
-            showMetaPath: true,
-            showResult: false
+            currentStep: 2
         }) 
     }
 
     handleBackToStep3(event) {
         event.preventDefault();
         this.setState({
-            step1Active: false,
-            step2Active: false,
-            step3Active: true,
-            showInput: false,
-            showMetaPath: false,
-            showResult: true
+            currentStep: 3
         }) 
     }
 
@@ -298,27 +215,11 @@ class Predict extends Component {
 
     render() {
         return (
-            <div className="feature">
-            <Container>
-                <div className="row">
-                    <div className="col-12">
-                        <Breadcrumb>
-                        <Breadcrumb.Section><Link to='/'>Home</Link></Breadcrumb.Section>
-                        <Breadcrumb.Divider />
-                        <Breadcrumb.Section active>Predict</Breadcrumb.Section>
-                        </Breadcrumb>
-                    </div>
-                    <div className="col-12">
-                        <AccordionComponent />
-                        
-                        <hr />
-                    </div>
-                </div>
-                
+            <Container className="feature">
+                <Navigation name="Predict" />
+                <AccordionComponent />
                 <Steps
-                    step1Active={this.state.step1Active}
-                    step2Active={this.state.step2Active}
-                    step3Active={this.state.step3Active}
+                    currentStep={this.state.currentStep}
                     step1Complete={this.state.step1Complete}
                     step2Complete={this.state.step2Complete}
                     step3Complete={this.state.step3Complete}
@@ -327,7 +228,7 @@ class Predict extends Component {
                     handleBackToStep3={this.handleBackToStep3}
                 />
                 <PredictInput
-                    shouldHide={this.state.showInput}
+                    shouldDisplay={this.state.currentStep === 1}
                     showModal={this.state.step1ShowError}
                     handleClose={this.handleStep1Close}
                     handleStep1Submit={this.handleStep1Submit}
@@ -335,7 +236,7 @@ class Predict extends Component {
                     handleOutputSelect={this.handleOutputSelect}
                 />
                 <MetaPathForm
-                    shouldHide={this.state.showMetaPath}
+                    shouldDisplay={this.state.currentStep === 2}
                     showModal={this.state.step2ShowError}
                     handleClose={this.handleStep2Close}
                     paths={this.state.paths}
@@ -344,8 +245,8 @@ class Predict extends Component {
                     handleBackToStep1={this.handleBackToStep1}
                 />
                 <PredictQueryResult
-                    shouldHide={this.state.showResult}
-                    resultReady={this.state.resultReady}
+                    shouldDisplay={this.state.currentStep === 3}
+                    resultReady={this.state.step3Complete}
                     content={this.state.queryResults}
                     table={this.state.table}
                     handleSort={this.handleSort}
@@ -354,8 +255,7 @@ class Predict extends Component {
                     handleSelect={this.handleQueryResultSelect}
                     graph={this.state.graph}
                 />
-            </Container>
-            </div>
+            </Container>        
         )
     }
 }
