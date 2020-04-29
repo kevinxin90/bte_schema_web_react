@@ -29,7 +29,7 @@ export const semanticTypeShorthand = {
     Protein: "P",
     CellLine: "CL",
     Biosample: "BS",
-    DiseaseOrPhenotypicFeature: "D",
+    Disease: "D",
     Cell: "C",
     CellularComponent: "CC",
     BiologicalProcess: "BP",
