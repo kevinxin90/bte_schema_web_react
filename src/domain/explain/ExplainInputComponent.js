@@ -117,9 +117,9 @@ export default class ExplainInput extends Component {
                 value: 'chronic myelogenous leukemia'
             }
         });
-        const IMATINIB = {"chembl": "CHEMBL941", "drugbank": "DB00619", "name": "Imatinib", "pubchem": 5291, "umls": "C0935989", "mesh": "D000068877", "chebi": "CHEBI:45783", "smiles": "Cc1ccc(NC(=O)c2ccc(CN3CCN(C)CC3)cc2)cc1Nc1nccc(-c2cccnc2)n1", "display": "chembl(CHEMBL941) drugbank(DB00619) name(Imatinib) pubchem(5291) umls(C0935989) mesh(D000068877) chebi(CHEBI:45783) smiles(Cc1ccc(NC(=O)c2ccc(CN3CCN(C)CC3)cc2)cc1Nc1nccc(-c2cccnc2)n1) ", "type": "ChemicalSubstance", "primary": {"identifier": "chembl", "cls": "ChemicalSubstance", "value": "CHEMBL941"}};
+        const IMATINIB = {"CHEMBL.COMPOUND": "CHEMBL941", "DRUGBANK": "DB00619", "name": "Imatinib", "PUBCHEM": 5291, "UMLS": "C0935989", "MESH": "D000068877", "CHEBI": "CHEBI:45783", "smiles": "Cc1ccc(NC(=O)c2ccc(CN3CCN(C)CC3)cc2)cc1Nc1nccc(-c2cccnc2)n1", "display": "chembl(CHEMBL941) drugbank(DB00619) name(Imatinib) pubchem(5291) umls(C0935989) mesh(D000068877) chebi(CHEBI:45783) smiles(Cc1ccc(NC(=O)c2ccc(CN3CCN(C)CC3)cc2)cc1Nc1nccc(-c2cccnc2)n1) ", "type": "ChemicalSubstance", "primary": {"identifier": "CHEMBL.COMPOUND", "cls": "ChemicalSubstance", "value": "CHEMBL941"}};
         this.props.handleInputSelect(IMATINIB);
-        const CML = {"mondo": "MONDO:0011996", "doid": "DOID:8552", "umls": "C1292772", "mesh": "D015464", "name": "chronic myelogenous leukemia", "display": "mondo(MONDO:0011996) doid(DOID:8552) umls(C1292772) mesh(D015464) name(chronic myelogenous leukemia) ", "type": "DiseaseOrPhenotypicFeature", "primary": {"identifier": "mondo", "cls": "DiseaseOrPhenotypicFeature", "value": "MONDO:0011996"}};
+        const CML = {"MONDO": "MONDO:0011996", "DOID": "DOID:8552", "UMLS": "C1292772", "MESH": "D015464", "name": "chronic myelogenous leukemia", "display": "mondo(MONDO:0011996) doid(DOID:8552) umls(C1292772) mesh(D015464) name(chronic myelogenous leukemia) ", "type": "DiseaseOrPhenotypicFeature", "primary": {"identifier": "MONDO", "cls": "Disease", "value": "MONDO:0011996"}};
         this.props.handleOutputSelect(CML);
     }
 
