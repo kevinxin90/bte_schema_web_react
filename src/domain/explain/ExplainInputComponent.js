@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { autocomplete } from 'biomedical-id-autocomplete';
 import AutoComplete from '../../components/AutoCompleteComponent';
 import { Form, Button, Segment, Popup } from 'semantic-ui-react'
 import ErrorMessage from '../../components/DisplayErrorComponent';
@@ -32,13 +33,7 @@ export default class ExplainInput extends Component {
                 value
             }
         })
-        fetch('https://geneanalysis.ncats.io/explorer_api/v1/hint?q=' + value)
-        .then(response => {
-        if (response.ok) {
-            return response.json();
-        } else {
-            return {}
-        }})
+        autocomplete(value)
         .then(response => {
             var new_response = {};
             for (var semantic_type in response) {
@@ -73,13 +68,7 @@ export default class ExplainInput extends Component {
                 value
             }
         })
-        fetch('https://geneanalysis.ncats.io/explorer_api/v1/hint?q=' + value)
-        .then(response => {
-        if (response.ok) {
-            return response.json();
-        } else {
-            return {}
-        }})
+        autocomplete(value)
         .then(response => {
             var new_response = {};
             for (var semantic_type in response) {
