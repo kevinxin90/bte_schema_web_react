@@ -4,7 +4,7 @@ import { Navigation } from '../../components/Breadcrumb';
 import AccordionComponent from '../../components/AccordionComponent';
 import Steps from '../../components/StepsComponent';
 import ExplainInput from './ExplainInputComponent';
-import {MetaPathForm} from '../../components/MetaPathFormComponent';
+import { MetaPathForm } from '../../components/MetaPathFormComponent';
 import ExplainQueryResult from './ExplainQueryResultComponent';
 import { recordsToD3Graph as recordsToGraph, getIntermediateNodes, findMetaPath, fetchQueryResult } from '../../shared/utils';
 
@@ -24,7 +24,7 @@ class Explain extends Component {
             selectedOutput: {},
             paths: [],
             selectedPaths: new Set(),
-            queryResults: {'data': [], 'log': []},
+            queryResults: { 'data': [], 'log': [] },
             table: {
                 column: null,
                 display: [],
@@ -33,7 +33,7 @@ class Explain extends Component {
                 totalPages: 1
             },
             selectedQueryResults: new Set(),
-            graph: {nodes: [], links: []},
+            graph: { nodes: [], links: [] },
             step1ShowError: false,
             step2ShowError: false
         };
@@ -54,7 +54,7 @@ class Explain extends Component {
 
     //this function will be passed to autocomplete component
     //in order to retrieve the selected input
-    handleInputSelect(value) {   
+    handleInputSelect(value) {
         this.setState({
             selectedInput: value
         });
@@ -62,13 +62,13 @@ class Explain extends Component {
 
     //this function will be passed to autocomplete component
     //in order to retrieve the selected output
-    handleOutputSelect(value) {    
+    handleOutputSelect(value) {
         this.setState({
             selectedOutput: value
         });
     }
 
-    handleMetaPathSelect(event){
+    handleMetaPathSelect(event) {
         const selectedPaths = this.state.selectedPaths;
         if (event.target.checked) {
             selectedPaths.add(event.target.name)
@@ -78,7 +78,7 @@ class Explain extends Component {
         this.setState({ selectedPaths: selectedPaths })
     }
 
-    handleQueryResultSelect(event){
+    handleQueryResultSelect(event) {
         const selectedQueryResults = this.state.selectedQueryResults;
         if (event.target.checked) {
             selectedQueryResults.add(event.target.name)
@@ -86,9 +86,9 @@ class Explain extends Component {
             selectedQueryResults.delete(event.target.name)
         }
         const graph = recordsToGraph(selectedQueryResults)
-        this.setState({ 
+        this.setState({
             selectedQueryResults: selectedQueryResults,
-            graph: graph 
+            graph: graph
         })
     }
 
@@ -98,7 +98,7 @@ class Explain extends Component {
 
     async handleStep1Submit(event) {
         event.preventDefault();
-        if (_.isEmpty(this.state.selectedInput) || _.isEmpty(this.state.selectedOutput)){
+        if (_.isEmpty(this.state.selectedInput) || _.isEmpty(this.state.selectedOutput)) {
             this.setState({
                 step1ShowError: true
             });
@@ -109,9 +109,9 @@ class Explain extends Component {
                 step2Complete: false,
                 step3Complete: false,
                 selectedPaths: new Set(),
-                queryResults: {'data': [], 'log': []},
+                queryResults: { 'data': [], 'log': [] },
                 selectedQueryResults: new Set(),
-                graph: {nodes: [], links: []},
+                graph: { nodes: [], links: [] },
                 table: {
                     column: null,
                     display: [],
@@ -121,7 +121,8 @@ class Explain extends Component {
                 },
             });
             let edges = await findMetaPath(this.state.selectedInput.type,
-                                           this.state.selectedOutput.type);
+                this.state.selectedOutput.type);
+            console.log('edges', edges);
             this.setState({
                 paths: edges
             });
@@ -132,7 +133,7 @@ class Explain extends Component {
         event.preventDefault();
         this.setState({
             currentStep: 1
-        }) 
+        })
     }
 
     async handleStep2Submit(event) {
@@ -163,42 +164,42 @@ class Explain extends Component {
                 this.setState({
                     resultReady: true,
                     step3Complete: true,
-                    queryResults: {'data': [], 'log': []}
+                    queryResults: { 'data': [], 'log': [] }
                 })
             } else {
                 this.setState({
                     queryResults: response,
                     table: {
                         ...this.state.table,
-                        display: response['data'].slice(this.state.table.activePage*10 - 10, this.state.table.activePage*10),
-                        totalPages: Math.ceil(response['data'].length/10)
+                        display: response['data'].slice(this.state.table.activePage * 10 - 10, this.state.table.activePage * 10),
+                        totalPages: Math.ceil(response['data'].length / 10)
                     },
                     resultReady: true,
                     step3Complete: true
                 });
             }
-        }         
+        }
     }
 
     handleBackToStep2(event) {
         event.preventDefault();
         this.setState({
             currentStep: 2
-        }) 
+        })
     }
 
     handleBackToStep3(event) {
         event.preventDefault();
         this.setState({
             currentStep: 3
-        }) 
+        })
     }
 
     handleSort(event) {
         let clickedColumn = event.target.className.split(' ').slice(-1)[0];
-        
+
         const { column, direction } = this.state.table;
-    
+
         if (column !== clickedColumn) {
             this.setState({
                 table: {
@@ -211,14 +212,14 @@ class Explain extends Component {
                     data: _.sortBy(this.state.queryResults['data'], [clickedColumn])
                 }
             });
-          return
+            return
         }
-    
+
         this.setState({
             table: {
                 ...this.state.table,
                 direction: direction === 'ascending' ? 'descending' : 'ascending',
-                display: this.state.queryResults['data'].slice(this.state.table.activePage*10 - 10, this.state.table.activePage*10),
+                display: this.state.queryResults['data'].slice(this.state.table.activePage * 10 - 10, this.state.table.activePage * 10),
             },
             queryResults: {
                 ...this.state.queryResults,
@@ -226,14 +227,14 @@ class Explain extends Component {
             }
         });
     }
-    
+
     handlePaginationChange = (e, { activePage }) => {
         this.setState({
-            table:{
+            table: {
                 ...this.state.table,
-                display: this.state.queryResults['data'].slice(activePage*10 - 10, activePage*10),
+                display: this.state.queryResults['data'].slice(activePage * 10 - 10, activePage * 10),
                 activePage: activePage
-            }      
+            }
         });
     }
 
@@ -242,7 +243,7 @@ class Explain extends Component {
             <Container className="feature">
                 <Navigation name="Explain"></Navigation>
                 <AccordionComponent />
-                <hr />            
+                <hr />
                 <Steps
                     currentStep={this.state.currentStep}
                     step1Complete={this.state.step1Complete}
