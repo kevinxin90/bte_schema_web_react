@@ -5,6 +5,7 @@
   "proxy": "http://localhost:8856/",
   "homepage": "https://biothings.io/explorer/",
   "dependencies": {
+    "@biothings-explorer/smartapi-kg": "^1.1.2",
     "axios": "^0.19.2",
     "biomedical-id-autocomplete": "^1.0.3",
     "cross-fetch": "2.1.0",
@@ -47,6 +48,18 @@
       "last 1 chrome version",
       "last 1 firefox version",
       "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@babel/plugin-proposal-class-properties": "^7.10.4"
+  },
+  "babel": {
+    "presets": [
+      "@babel/preset-env",
+      "@babel/preset-react"
+    ],
+    "plugins": [
+      "@babel/plugin-proposal-class-properties"
     ]
   }
 }
