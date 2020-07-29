@@ -7,6 +7,7 @@ import ExplainInput from './ExplainInputComponent';
 import { MetaPathForm } from '../../components/MetaPathFormComponent';
 import ExplainQueryResult from './ExplainQueryResultComponent';
 import { recordsToD3Graph as recordsToGraph, getIntermediateNodes, findMetaPath, fetchQueryResult } from '../../shared/utils';
+import query from "@biothings-explorer/explain";
 
 let _ = require('lodash');
 
@@ -156,10 +157,12 @@ class Explain extends Component {
                     totalPages: 1
                 },
             });
-            let response = await fetchQueryResult(this.state.selectedInput,
-                this.state.selectedOutput,
-                intermediate_nodes)
-            console.log(response);
+            // let response = await fetchQueryResult(this.state.selectedInput,
+            //     this.state.selectedOutput,
+            //     intermediate_nodes)
+            let q = new query();
+            q.meta_kg.ops = q.meta_kg.ops.filter(item => item.query_operation.tags.includes('biothings'));
+            let response = await q.query(this.state.selectedInput, this.state.selectedOutput, intermediate_nodes);
             if (response.data.length === 0) {
                 this.setState({
                     resultReady: true,
