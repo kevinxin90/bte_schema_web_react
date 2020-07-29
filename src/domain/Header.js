@@ -30,24 +30,30 @@ class Header extends Component {
                         name='HOME'
                         active={activeItem === 'HOME'}
                         onClick={this.handleItemClick}
+                        as={Link}
+                        to='/'
                         >
-                        <Link to='/'>HOME</Link>
+                        HOME
                     </Menu.Item>
 
                     <Menu.Item
                         name='PREDICT'
                         active={activeItem === 'PREDICT'}
                         onClick={this.handleItemClick}
+                        as={Link}
+                        to='/predict'
                         >
-                        <Link to='/predict'>PREDICT</Link>
+                        PREDICT
                     </Menu.Item>
 
                     <Menu.Item
                         name='EXPLAIN'
                         active={activeItem === 'EXPLAIN'}
                         onClick={this.handleItemClick}
+                        as={Link}
+                        to='/explain'
                         >
-                        <Link to='/explain'>EXPLAIN</Link>
+                        EXPLAIN
                     </Menu.Item>
                 </Menu>
 
