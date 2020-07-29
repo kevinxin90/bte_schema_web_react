@@ -6,11 +6,11 @@ import predict from '../assets/bte-predict.png';
 
 const Home = () => (
   <div className="container">
-  <Segment>
-    <Grid columns={2} relaxed='very'>
+  <Segment style={{ border: "none", borderRadius: 0 }}>
+    <Grid columns={2} stackable textAlign='center'>
       <Grid.Column>
         <Card centered href="/explorer/explain" color="red" className="homeCard">
-          <Image src={explain} wrapped ui={false} />
+          <Image src={explain} />
           <Card.Content textAlign="center">
             <Card.Header>EXPLAIN</Card.Header>
             <Card.Description>
@@ -22,9 +22,10 @@ const Home = () => (
           </Card.Content>
         </Card>
       </Grid.Column>
+      <Divider vertical>Or</Divider>
       <Grid.Column>
         <Card centered href="/explorer/predict" color="green" className="homeCard">
-          <Image src={predict} wrapped ui={false} />
+          <Image src={predict} />
           <Card.Content textAlign="center">
             <Card.Header>PREDICT</Card.Header>
             <Card.Description>
@@ -38,7 +39,6 @@ const Home = () => (
       </Grid.Column>
     </Grid>
 
-    <Divider vertical>Or</Divider>
   </Segment>
   </div>
 )

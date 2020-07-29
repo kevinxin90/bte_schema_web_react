@@ -5,22 +5,24 @@ import { Grid, List } from 'semantic-ui-react';
 
 function Footer(props) {
     return(
-        <Grid style={{'background-color': '#9f7de8'}} textAlign='center' centered columns={2}>
-            <Grid.Column centered textAlign='center'>
-                <br></br>
-                <p>Links</p>
+        <Grid style={{'background-color': '#9f7de8', 'padding': '0 5vw', 'padding-top': '1rem'}} textAlign='center' centered columns={3} stackable>
+            <Grid.Column centered textAlign='left'>
+                <h5>Biothings Explorer</h5>
+                <p>© Copyright 2017-2020 The Su/Wu Lab.</p>
+            </Grid.Column>
+            <Grid.Column centered textAlign='left'>
+                <h5>Links</h5>
                 <List>
                     <List.Item><Link to='/'>HOME</Link></List.Item>
                     <List.Item><Link to='/predict'>PREDICT</Link></List.Item>
                     <List.Item><Link to='/explain'>EXPLAIN</Link></List.Item>
                 </List>
             </Grid.Column>
-            <Grid.Column centered textAlign='center'>
-                <br></br>
+            <Grid.Column centered textAlign='left'>
                 <h5>Contact Us</h5>
-                <i className="fa fa-envelope fa-lg"></i>: <a href="mailto:biothings@googlegroups.com">
-                    biothings@googlegroups.com</a>
-                    <p>© Copyright 2017-2020 The Su/Wu Lab.</p>
+                <p><i className="fa fa-envelope fa-lg"></i> : <a href="mailto:biothings@googlegroups.com">biothings@googlegroups.com</a></p>
+                
+                    
             </Grid.Column>
         </Grid>
     // <div className="footer">

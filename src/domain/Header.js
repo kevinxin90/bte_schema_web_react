@@ -22,7 +22,7 @@ class Header extends Component {
         const { activeItem } = this.state
         return(
             <React.Fragment>
-                <Menu color="violet" inverted>
+                <Menu color="violet" inverted style={{ borderRadius: 0 }}>
                     <Menu.Item>
                         <img src={bte} alt="BioThings Explorer" />
                     </Menu.Item>
@@ -50,18 +50,19 @@ class Header extends Component {
                         <Link to='/explain'>EXPLAIN</Link>
                     </Menu.Item>
                 </Menu>
-                    <Grid style={{'backgroundColor': '#9f7de8'}} textAlign='center'>
-                        <Grid.Column mobile={16} tablet={8} computer={8}>
-                            <Image src={network} />
-                        </Grid.Column>
-                        <Grid.Column mobile={16} tablet={8} computer={8}>
-                            <br></br>
-                            <br></br>
-                            <h1 style={{'color': '#e2e1e6'}}>BioThings Explorer</h1>
-                            <br></br>
-                            <h3 style={{'color': '#e2e1e6', 'fontSize': '1.5rem'}}>BioThings Explorer allows users to query a vast amount of biological and chemical databases in a central place by calling APIs which distribute these data on the fly. </h3>
-                        </Grid.Column>
-                    </Grid>
+
+                <Grid style={{'backgroundColor': '#9f7de8'}} textAlign='center'>
+                    <Grid.Column mobile={16} tablet={8} computer={8}>
+                        <Image src={network} />
+                    </Grid.Column>
+                    <Grid.Column mobile={16} tablet={8} computer={8}>
+                        <br></br>
+                        <br></br>
+                        <h1 style={{'color': '#e2e1e6'}}>BioThings Explorer</h1>
+                        <br></br>
+                        <h3 style={{'color': '#e2e1e6', 'fontSize': '1.5rem'}}>BioThings Explorer allows users to query a vast amount of biological and chemical databases in a central place by calling APIs which distribute these data on the fly. </h3>
+                    </Grid.Column>
+                </Grid>
 
                 <Message warning>
                     <Message.Header>This web service is a simple demo for our <a href="https://github.com/biothings/biothings_explorer" target="_blank" rel="noopener noreferrer">Python Client</a>.</Message.Header>
