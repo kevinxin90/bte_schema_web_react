@@ -1,25 +1,12 @@
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import { Message } from 'semantic-ui-react';
 import bte from '../assets/biothings-explorer-text.png';
 import network from '../assets/network.png';
 import { Menu, Grid, Image } from 'semantic-ui-react';
 
 class Header extends Component {
-
-    constructor(props) {
-        super(props);
-
-        this.state = {
-            isNavOpen: false,
-            isModalOpen: false
-        };
-    }
-
-    handleItemClick = (e, { name }) => this.setState({ activeItem: name })
-
     render() {
-        const { activeItem } = this.state
         return(
             <React.Fragment>
                 <Menu color="violet" inverted style={{ borderRadius: 0 }}>
@@ -28,30 +15,24 @@ class Header extends Component {
                     </Menu.Item>
                     <Menu.Item
                         name='HOME'
-                        active={activeItem === 'HOME'}
-                        onClick={this.handleItemClick}
-                        as={Link}
-                        to='/'
+                        as={NavLink}
+                        exact to='/'
                         >
                         HOME
                     </Menu.Item>
 
                     <Menu.Item
                         name='PREDICT'
-                        active={activeItem === 'PREDICT'}
-                        onClick={this.handleItemClick}
-                        as={Link}
-                        to='/predict'
+                        as={NavLink}
+                        exact to='/predict'
                         >
                         PREDICT
                     </Menu.Item>
 
                     <Menu.Item
                         name='EXPLAIN'
-                        active={activeItem === 'EXPLAIN'}
-                        onClick={this.handleItemClick}
-                        as={Link}
-                        to='/explain'
+                        as={NavLink}
+                        exact to='/explain'
                         >
                         EXPLAIN
                     </Menu.Item>
