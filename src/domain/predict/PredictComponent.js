@@ -4,9 +4,9 @@ import { Navigation } from '../../components/Breadcrumb';
 import AccordionComponent from './PredictHelpComponent';
 import Steps from '../../components/StepsComponent';
 import PredictInput from './PredictInputComponent';
-import {MetaPathForm} from '../../components/MetaPathFormComponent';
+import { MetaPathForm } from '../../components/MetaPathFormComponent';
 import PredictQueryResult from './PredictQueryResultComponent';
-import {recordsToTreeGraph, getIntermediateNodes, findMetaPath, fetchQueryResult} from '../../shared/utils';
+import { recordsToTreeGraph, getIntermediateNodes, findMetaPath, fetchQueryResult } from '../../shared/utils';
 
 let _ = require('lodash');
 
@@ -54,7 +54,7 @@ class Predict extends Component {
 
     //this function will be passed to autocomplete component
     //in order to retrieve the selected input
-    handleInputSelect(value) {    
+    handleInputSelect(value) {
         this.setState({
             selectedInput: value
         });
@@ -62,13 +62,13 @@ class Predict extends Component {
 
     //this function will be passed to autocomplete component
     //in order to retrieve the selected output
-    handleOutputSelect(value) {    
+    handleOutputSelect(value) {
         this.setState({
             selectedOutput: value
         });
     }
 
-    handleMetaPathSelect(event){
+    handleMetaPathSelect(event) {
         const selectedPaths = this.state.selectedPaths;
         if (event.target.checked) {
             selectedPaths.add(event.target.name)
@@ -78,7 +78,7 @@ class Predict extends Component {
         this.setState({ selectedPaths: selectedPaths })
     }
 
-    handleQueryResultSelect(event){
+    handleQueryResultSelect(event) {
         const selectedQueryResults = this.state.selectedQueryResults;
         if (event.target.checked) {
             selectedQueryResults.add(event.target.name)
@@ -86,8 +86,10 @@ class Predict extends Component {
             selectedQueryResults.delete(event.target.name)
         }
         const graph = recordsToTreeGraph(selectedQueryResults)
-        this.setState({ selectedQueryResults: selectedQueryResults,
-                        graph: graph })
+        this.setState({
+            selectedQueryResults: selectedQueryResults,
+            graph: graph
+        })
     }
 
     handleClose = (item) => this.setState({
@@ -96,7 +98,7 @@ class Predict extends Component {
 
     async handleStep1Submit(event) {
         event.preventDefault();
-        if (_.isEmpty(this.state.selectedInput) || _.isEmpty(this.state.selectedOutput)){
+        if (_.isEmpty(this.state.selectedInput) || _.isEmpty(this.state.selectedOutput)) {
             this.setState({
                 step1ShowError: true
             });
@@ -123,7 +125,7 @@ class Predict extends Component {
         event.preventDefault();
         this.setState({
             currentStep: 1
-        }) 
+        })
     }
 
     async handleStep2Submit(event) {
@@ -151,36 +153,36 @@ class Predict extends Component {
                     queryResults: response['data'],
                     table: {
                         ...this.state.table,
-                        display: response['data'].slice(this.state.table.activePage*10 - 10, this.state.table.activePage*10),
-                        totalPages: Math.ceil(response['data'].length/10)
+                        display: response['data'].slice(this.state.table.activePage * 10 - 10, this.state.table.activePage * 10),
+                        totalPages: Math.ceil(response['data'].length / 10)
                     },
-                    queryLog: response['log'],                    step3Complete: true
+                    queryLog: response['log'], step3Complete: true
                 });
             }
         }
     }
 
-    
+
 
     handleBackToStep2(event) {
         event.preventDefault();
         this.setState({
             currentStep: 2
-        }) 
+        })
     }
 
     handleBackToStep3(event) {
         event.preventDefault();
         this.setState({
             currentStep: 3
-        }) 
+        })
     }
 
     handleSort(event) {
         let clickedColumn = event.target.className.split(' ').slice(-1)[0];
-        
+
         const { column, direction } = this.state.table;
-    
+
         if (column !== clickedColumn) {
             this.setState({
                 table: {
@@ -189,27 +191,27 @@ class Predict extends Component {
                     direction: 'descending',
                 },
                 queryResults: _.sortBy(this.state.queryResults, [clickedColumn])
-          });
-          return
+            });
+            return
         }
-    
+
         this.setState({
             table: {
                 ...this.state.table,
                 direction: direction === 'ascending' ? 'descending' : 'ascending',
-                display: this.state.queryResults.slice(this.state.table.activePage*10 - 10, this.state.table.activePage*10),
+                display: this.state.queryResults.slice(this.state.table.activePage * 10 - 10, this.state.table.activePage * 10),
             },
             queryResults: this.state.queryResults.reverse(),
         });
     }
-    
+
     handlePaginationChange = (e, { activePage }) => {
         this.setState({
-            table:{
+            table: {
                 ...this.state.table,
-                display: this.state.queryResults.slice(activePage*10 - 10, activePage*10),
+                display: this.state.queryResults.slice(activePage * 10 - 10, activePage * 10),
                 activePage: activePage
-            }      
+            }
         });
     }
 
@@ -255,7 +257,7 @@ class Predict extends Component {
                     handleSelect={this.handleQueryResultSelect}
                     graph={this.state.graph}
                 />
-            </Container>        
+            </Container>
         )
     }
 }
