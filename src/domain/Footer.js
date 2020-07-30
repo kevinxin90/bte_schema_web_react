@@ -2,7 +2,6 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Grid, List } from 'semantic-ui-react';
 
-
 function Footer(props) {
     return(
         <Grid style={{'background-color': '#9f7de8', 'padding': '0 5vw', 'padding-top': '1rem'}} textAlign='center' centered columns={3} stackable>
@@ -13,14 +12,14 @@ function Footer(props) {
             <Grid.Column centered textAlign='left'>
                 <h5>Links</h5>
                 <List>
-                    <List.Item><Link to='/'>HOME</Link></List.Item>
-                    <List.Item><Link to='/predict'>PREDICT</Link></List.Item>
-                    <List.Item><Link to='/explain'>EXPLAIN</Link></List.Item>
+                    <List.Item><Link to='/' style={{color: "rgba(0,0,0,.87)"}}>HOME</Link></List.Item>
+                    <List.Item><Link to='/predict' style={{color: "rgba(0,0,0,.87)"}}>PREDICT</Link></List.Item>
+                    <List.Item><Link to='/explain' style={{color: "rgba(0,0,0,.87)"}}>EXPLAIN</Link></List.Item>
                 </List>
             </Grid.Column>
             <Grid.Column centered textAlign='left'>
                 <h5>Contact Us</h5>
-                <p><i className="fa fa-envelope fa-lg"></i> : <a href="mailto:biothings@googlegroups.com">biothings@googlegroups.com</a></p>
+                <p><i className="fa fa-envelope fa-lg"></i> : <a href="mailto:biothings@googlegroups.com" style={{color: "rgba(0,0,0,.87)"}}>biothings@googlegroups.com</a></p>
                 
                     
             </Grid.Column>
