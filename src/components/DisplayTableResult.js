@@ -9,7 +9,7 @@ export default function BTETable(props) {
     return (
         <div>
             <h3>Your Query Results</h3>
-            <div style={{overflowX: "auto"}}>
+            <div style={{overflowX: "auto", marginBottom: "1em"}}>
                 <Table sortable celled compact>
                     <Table.Header>
                         <Table.Row>
@@ -62,7 +62,6 @@ export default function BTETable(props) {
                 defaultActivePage={1}
                 totalPages={props.table.totalPages}
                 siblingRange={2}
-                style={{ marginTop: 5 }}
                 // Heads up! All items are powered by shorthands, if you want to hide one of them, just pass `null` as value
             />
         </div>
