@@ -7,44 +7,47 @@ export default function BTETable(props) {
     const headers = props.table.display.length > 0 ? Object.keys(props.table.display[0]) : [];
         
     return (
+
         <Form>
             <h3>Your Query Results</h3>
-            <Table sortable celled compact>
-                <Table.Header>
-                    <Table.Row>
-                        <Table.HeaderCell />
-                        {_.map(headers, (item) => (
-                            <Table.HeaderCell
-                                key={item}
-                                className={item}
-                                value={item}
-                                sorted={props.table.column === item ? props.table.direction : null}
-                                onClick={props.handleSort}
-                            >
-                                {item}
-                            </Table.HeaderCell>
-                        ))}
-                    </Table.Row>
-                </Table.Header>
-                <Table.Body>
-                    {_.map(props.table.display, (item) => (
-                    <Table.Row key={Object.values(item).join('||')}>
-                        <Table.Cell key='checkbox'>
-                            <label>
-                            <input type="checkbox"
-                                name={Object.values(item).join('||')}
-                                onChange={props.handleSelect} 
-                                defaultChecked={false} /> 
-                            display
-                            </label>
-                        </Table.Cell>
-                        {_.map(headers, (col, i) => (
-                            <Table.Cell key={i}>{item[col]}</Table.Cell>
-                        ))}
-                    </Table.Row>
-                ))}
-                </Table.Body>
-            </Table>
+            <div style={{overflowX: "scroll"}}>
+                <Table sortable celled compact>
+                    <Table.Header>
+                        <Table.Row>
+                            <Table.HeaderCell />
+                            {_.map(headers, (item) => (
+                                <Table.HeaderCell
+                                    key={item}
+                                    className={item}
+                                    value={item}
+                                    sorted={props.table.column === item ? props.table.direction : null}
+                                    onClick={props.handleSort}
+                                >
+                                    {item}
+                                </Table.HeaderCell>
+                            ))}
+                        </Table.Row>
+                    </Table.Header>
+                    <Table.Body>
+                        {_.map(props.table.display, (item) => (
+                        <Table.Row key={Object.values(item).join('||')}>
+                            <Table.Cell key='checkbox'>
+                                <label>
+                                <input type="checkbox"
+                                    name={Object.values(item).join('||')}
+                                    onChange={props.handleSelect} 
+                                    defaultChecked={false} /> 
+                                display
+                                </label>
+                            </Table.Cell>
+                            {_.map(headers, (col, i) => (
+                                <Table.Cell key={i}>{item[col]}</Table.Cell>
+                            ))}
+                        </Table.Row>
+                    ))}
+                    </Table.Body>
+                </Table>
+            </div>
             <Pagination
                 onPageChange={props.handlePaginationChange}
                 defaultActivePage={1}
