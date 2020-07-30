@@ -62,9 +62,7 @@ export default function BTETable(props) {
                 defaultActivePage={1}
                 totalPages={props.table.totalPages}
                 siblingRange={2}
-                style={{
-                    marginTop: 5
-                }}
+                style={{ marginTop: 5 }}
                 // Heads up! All items are powered by shorthands, if you want to hide one of them, just pass `null` as value
             />
         </div>

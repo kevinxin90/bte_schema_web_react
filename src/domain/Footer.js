@@ -8,7 +8,7 @@ function Footer(props) {
         <Grid style={{'background-color': '#9f7de8', 'padding': '0 5vw', 'padding-top': '1rem'}} textAlign='center' centered columns={3} stackable>
             <Grid.Column centered textAlign='left'>
                 <h5>Biothings Explorer</h5>
-                <p>© Copyright 2017-2020 The Su/Wu Lab.</p>
+                <p>© Copyright 2017-{new Date().getFullYear()} The Su/Wu Lab.</p>
             </Grid.Column>
             <Grid.Column centered textAlign='left'>
                 <h5>Links</h5>
