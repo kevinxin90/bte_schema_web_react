@@ -79,12 +79,12 @@ class Explain extends Component {
         this.setState({ selectedPaths: selectedPaths })
     }
 
-    handleQueryResultSelect(event) {
+    handleQueryResultSelect(event, data) {
         const selectedQueryResults = this.state.selectedQueryResults;
-        if (event.target.checked) {
-            selectedQueryResults.add(event.target.name)
+        if (data.checked) {
+            selectedQueryResults.add(data.name)
         } else {
-            selectedQueryResults.delete(event.target.name)
+            selectedQueryResults.delete(data.name)
         }
         const graph = recordsToGraph(selectedQueryResults)
         this.setState({
@@ -283,6 +283,7 @@ class Explain extends Component {
                     logs={this.state.queryResults['log']}
                     handleSelect={this.handleQueryResultSelect}
                     graph={this.state.graph}
+                    selectedQueryResults={this.state.selectedQueryResults}
                 />
             </Container>
         )

@@ -35,6 +35,7 @@ export default class ExplainQueryResult extends Component {
                             table={this.props.table}
                             handleSort={this.props.handleSort}
                             handlePaginationChange={this.props.handlePaginationChange}
+                            selectedQueryResults={this.props.selectedQueryResults}
                         />
                         <Divider />
                     </div> : null}
