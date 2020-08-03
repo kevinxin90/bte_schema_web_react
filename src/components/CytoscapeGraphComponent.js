@@ -13,6 +13,7 @@ export default class CytoscapeGraph extends PureComponent {
     };
   }
 
+  //modify y-position of node based on slot number (starting from the middle and alternating above and below)
   heightModifier(slot) {
     const pixelsPerSlot = 70;
 
@@ -25,13 +26,13 @@ export default class CytoscapeGraph extends PureComponent {
     }
   }
 
-  getDimensions() {
+  //get dimensions of enclosing div (for node positioning purposes)
+  getDimensions() { 
     let domRect = document.getElementById('cy').getBoundingClientRect();
 
     return [domRect.width, domRect.height];
   }
 
-  //result 
   addConnection(record, inputType, outputType) {
     let [width, height] = this.getDimensions();
     let rec = record.split('||');
@@ -155,6 +156,7 @@ export default class CytoscapeGraph extends PureComponent {
     });
   }
 
+  //initial cytoscape setup
   componentDidMount() {
     const container = document.getElementById('cy');
     const cy = cytoscape({

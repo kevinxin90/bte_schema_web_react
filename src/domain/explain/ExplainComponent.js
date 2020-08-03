@@ -11,7 +11,7 @@ import query from "@biothings-explorer/explain";
 
 let _ = require('lodash');
 
-//forward ref so we can call addConnection and deleteConnection in CytoscapeGraphComponent
+//forward ref so we can call addConnection and deleteConnection in CytoscapeGraphComponent from this component
 const ExplainQueryResultWrapper = React.forwardRef((props, ref) => {
     return (<ExplainQueryResult graphRef={ref} {...props} />);
 });
