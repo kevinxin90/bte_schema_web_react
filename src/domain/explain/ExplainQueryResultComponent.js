@@ -1,9 +1,8 @@
-import D3Graph from '../../components/D3GraphComponent';
 import BTETable from '../../components/DisplayTableResult';
 import ReactLoader from '../../components/DimerComponent';
 import React, { Component } from 'react';
 import { Segment, Divider, Button,  Modal } from 'semantic-ui-react';
-
+import CytoscapeGraph from '../../components/CytoscapeGraphComponent';
 
 export default class ExplainQueryResult extends Component {
 
@@ -40,10 +39,7 @@ export default class ExplainQueryResult extends Component {
                         <Divider />
                     </div> : null}
                     
-                    {this.props.graph.links.length === 0 ? null: 
-                        <D3Graph
-                            graph={this.props.graph}
-                    /> }
+                    <CytoscapeGraph ref={this.props.graphRef} />
                 </Segment>
             </div>
         )

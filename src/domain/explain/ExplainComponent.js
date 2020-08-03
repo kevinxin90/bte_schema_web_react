@@ -6,10 +6,15 @@ import Steps from '../../components/StepsComponent';
 import ExplainInput from './ExplainInputComponent';
 import { MetaPathForm } from '../../components/MetaPathFormComponent';
 import ExplainQueryResult from './ExplainQueryResultComponent';
-import { recordsToD3Graph as recordsToGraph, getIntermediateNodes, findMetaPath, fetchQueryResult } from '../../shared/utils';
+import { getIntermediateNodes, findMetaPath } from '../../shared/utils';
 import query from "@biothings-explorer/explain";
 
 let _ = require('lodash');
+
+//forward ref so we can call addConnection and deleteConnection in CytoscapeGraphComponent
+const ExplainQueryResultWrapper = React.forwardRef((props, ref) => {
+    return (<ExplainQueryResult graphRef={ref} {...props} />);
+});
 
 class Explain extends Component {
 
@@ -34,10 +39,12 @@ class Explain extends Component {
                 totalPages: 1
             },
             selectedQueryResults: new Set(),
-            graph: { nodes: [], links: [] },
             step1ShowError: false,
             step2ShowError: false
         };
+
+        this.graphRef = React.createRef();
+
         this.handleStep1Submit = this.handleStep1Submit.bind(this);
         this.handleStep2Submit = this.handleStep2Submit.bind(this);
         this.handleInputSelect = this.handleInputSelect.bind(this);
@@ -82,15 +89,16 @@ class Explain extends Component {
     handleQueryResultSelect(event, data) {
         const selectedQueryResults = this.state.selectedQueryResults;
         if (data.checked) {
-            selectedQueryResults.add(data.name)
+            selectedQueryResults.add(data.name);
+            this.graphRef.current.addConnection(data.name);
         } else {
-            selectedQueryResults.delete(data.name)
+            selectedQueryResults.delete(data.name);
+            this.graphRef.current.deleteConnection(data.name);
         }
-        const graph = recordsToGraph(selectedQueryResults)
+        
         this.setState({
             selectedQueryResults: selectedQueryResults,
-            graph: graph
-        })
+        });
     }
 
     handleClose = (item) => this.setState({
@@ -273,7 +281,7 @@ class Explain extends Component {
                     handleSubmit={this.handleStep2Submit}
                     handleBackToStep1={this.handleBackToStep1}
                 />
-                <ExplainQueryResult
+                <ExplainQueryResultWrapper
                     shouldDisplay={this.state.currentStep === 3}
                     resultReady={this.state.resultReady}
                     content={this.state.queryResults['data']}
@@ -283,6 +291,7 @@ class Explain extends Component {
                     logs={this.state.queryResults['log']}
                     handleSelect={this.handleQueryResultSelect}
                     graph={this.state.graph}
+                    ref={this.graphRef}
                     selectedQueryResults={this.state.selectedQueryResults}
                 />
             </Container>
