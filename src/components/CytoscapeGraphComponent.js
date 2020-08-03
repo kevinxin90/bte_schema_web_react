@@ -1,5 +1,6 @@
 import cytoscape from 'cytoscape';
 import React, { PureComponent } from 'react';
+import {colorSchema, semanticTypeShorthand} from '../shared/semanticTypes';
 
 export default class CytoscapeGraph extends PureComponent {
   constructor(props){
@@ -31,7 +32,8 @@ export default class CytoscapeGraph extends PureComponent {
   }
 
   //result 
-  addConnection(record) {
+  addConnection(record, inputType, outputType) {
+    console.log("IO RECEIVED", inputType, outputType);
     let [width, height] = this.getDimensions();
     let rec = record.split('||');
 
@@ -45,6 +47,9 @@ export default class CytoscapeGraph extends PureComponent {
         position: {
           x: 100,
           y: height / 2
+        },
+        style: {
+          'background-color': colorSchema[semanticTypeShorthand[inputType]]
         }
       });
     }
@@ -64,6 +69,9 @@ export default class CytoscapeGraph extends PureComponent {
         position: {
           x: width / 2,
           y: ((height / 2) + this.heightModifier(slot))
+        },
+        style: {
+          'background-color': colorSchema[semanticTypeShorthand[rec[5]]]
         }
       });
     }
@@ -78,6 +86,9 @@ export default class CytoscapeGraph extends PureComponent {
         position: {
           x: width - 100,
           y: height / 2
+        },
+        style: {
+          'background-color': colorSchema[semanticTypeShorthand[outputType]]
         }
       });
     }
@@ -155,7 +166,7 @@ export default class CytoscapeGraph extends PureComponent {
           selector: 'node',
           style: {
             'label': 'data(id)',
-            'background-color': '#dd4de2'
+            'background-color': 'black'
           }
         },
 
@@ -163,10 +174,12 @@ export default class CytoscapeGraph extends PureComponent {
           selector: 'edge',
           style: {
             'label': 'data(label)',
+            'text-rotation': 'autorotate',
+            'text-margin-y': '-6',
             'curve-style': 'bezier',
             'target-arrow-shape': 'triangle',
-            'line-color': '#dd4de2',
-            'target-arrow-color': '#dd4de2',
+            'line-color': 'black',
+            'target-arrow-color': 'black',
             'opacity': 0.5
           }
         }

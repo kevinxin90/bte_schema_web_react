@@ -90,7 +90,7 @@ class Explain extends Component {
         const selectedQueryResults = this.state.selectedQueryResults;
         if (data.checked) {
             selectedQueryResults.add(data.name);
-            this.graphRef.current.addConnection(data.name);
+            this.graphRef.current.addConnection(data.name, this.state.selectedInput.type, this.state.selectedOutput.type);
         } else {
             selectedQueryResults.delete(data.name);
             this.graphRef.current.deleteConnection(data.name);
