@@ -33,7 +33,6 @@ export default class CytoscapeGraph extends PureComponent {
 
   //result 
   addConnection(record, inputType, outputType) {
-    console.log("IO RECEIVED", inputType, outputType);
     let [width, height] = this.getDimensions();
     let rec = record.split('||');
 
@@ -49,7 +48,7 @@ export default class CytoscapeGraph extends PureComponent {
           y: height / 2
         },
         style: {
-          'background-color': colorSchema[semanticTypeShorthand[inputType]]
+          'background-color': colorSchema[semanticTypeShorthand[inputType]] || 'black'
         }
       });
     }
@@ -71,7 +70,7 @@ export default class CytoscapeGraph extends PureComponent {
           y: ((height / 2) + this.heightModifier(slot))
         },
         style: {
-          'background-color': colorSchema[semanticTypeShorthand[rec[5]]]
+          'background-color': colorSchema[semanticTypeShorthand[rec[5]]] || 'black'
         }
       });
     }
@@ -88,7 +87,7 @@ export default class CytoscapeGraph extends PureComponent {
           y: height / 2
         },
         style: {
-          'background-color': colorSchema[semanticTypeShorthand[outputType]]
+          'background-color': colorSchema[semanticTypeShorthand[outputType]] || 'black'
         }
       });
     }
