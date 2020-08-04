@@ -1,6 +1,7 @@
 import cytoscape from 'cytoscape';
 import React, { PureComponent } from 'react';
 import {colorSchema, semanticTypeShorthand} from '../shared/semanticTypes';
+import { Grid, Icon, Button } from 'semantic-ui-react';
 
 export default class CytoscapeGraph extends PureComponent {
   constructor(props){
@@ -11,6 +12,8 @@ export default class CytoscapeGraph extends PureComponent {
       elements: {nodes: [], edges: []},
       slots: [0], //array that keeps track of empty slots for middle nodes
     };
+
+    this.zoomFit = this.zoomFit.bind(this);
   }
 
   //modify y-position of node based on slot number (starting from the middle and alternating above and below)
@@ -174,6 +177,7 @@ export default class CytoscapeGraph extends PureComponent {
         {
           selector: 'edge',
           style: {
+            'width': 2,
             'label': 'data(label)',
             'text-rotation': 'autorotate',
             'text-margin-y': '-6',
@@ -187,15 +191,36 @@ export default class CytoscapeGraph extends PureComponent {
       ],
       minZoom: 0.1,
       maxZoom: 25,
+      wheelSensitivity: 0.4,
       layout: {
         name: 'preset'
       }
     });
     
-    this.setState({cy: cy});
+    this.setState({cy: cy}); 
+  }
+
+  zoomFit() {
+    let [width, height] = this.getDimensions();
+    this.state.cy.fit();
+    this.state.cy.zoom({level: this.state.cy.zoom() * 0.99, position: {x: width/2, y: height/2}});
   }
 
   render() {
-    return <div id="cy" style={{height: 400}}></div>
+    return (
+      <div>
+        <Grid columns={2}>
+          <Grid.Row>
+            <Grid.Column>
+              <h2>Graph</h2>
+            </Grid.Column>
+            <Grid.Column style={{textAlign: "right"}}>
+              <Button basic compact style={{marginRight: 0, marginBottom: 5}} onClick={this.zoomFit}><Icon name="search" />Zoom Fit</Button>
+              </Grid.Column>
+          </Grid.Row>
+        </Grid>
+        <div id="cy" style={{ height: 600, border: "1px solid #ddd" }}></div>
+      </div>
+    )
   }
 }
