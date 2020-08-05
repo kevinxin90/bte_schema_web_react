@@ -125,4 +125,4 @@ docker-compose up
 
 ## Usage
 
-`http://<HOST>:8853/docs`
+`http://<HOST>:8853/explorer`
