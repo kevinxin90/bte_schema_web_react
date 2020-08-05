@@ -1,7 +1,30 @@
 import MetaKG from "@biothings-explorer/smartapi-kg";
 
+console.log("Constructing meta kg");
 const meta_kg = new MetaKG();
 meta_kg.constructMetaKGSync();
+
+/** get link to page of results for list of publications
+ * @param {Array.<string>} publications Publications in the format "type:number", also must all be the same format and either "PMID" or "PMC"
+ * @returns {string} Returns either the url to all of the entries or an empty string
+ */
+function getPublicationLink(publications) {
+    let pubType = publications[0].split(":")[0];
+
+    if (pubType === "PMID") {
+        let url = new URL("https://pubmed.ncbi.nlm.nih.gov/");
+        url.searchParams.append("term", publications.map(pub => pub.replace(/\D+/g, '')).join(',')); //comma separated list of publications (number only)
+        return url.toString();
+
+    } else if  (pubType === "PMC") {
+        let url = new URL("https://www.ncbi.nlm.nih.gov/pmc/");
+        url.searchParams.append("term", publications.map(pub => pub.replace(/\D+/g, '')).join(',')); //comma separated list of publications (number only)
+        return url.toString();
+    } else {
+        return "";
+    }
+}
+
 
 const posOrNeg = (num) => {
     if (num === 0) {
@@ -127,4 +150,4 @@ const fetchQueryResult = async (input, output, intermediate) => {
 
 //export { findMetaPath, fetchQueryResult, recordsToTreeGraph, recordsToD3Graph, getIntermediateNodes, recordsToTreeGraph };
 
-export { getIntermediateNodes, fetchQueryResult, findMetaPath, recordsToD3Graph, recordsToTreeGraph }
+export { getIntermediateNodes, fetchQueryResult, findMetaPath, recordsToD3Graph, recordsToTreeGraph, getPublicationLink }

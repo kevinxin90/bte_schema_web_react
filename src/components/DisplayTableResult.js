@@ -1,9 +1,9 @@
 import _ from 'lodash'
 import React from 'react'
-import { Table, Pagination, Accordion, Checkbox } from 'semantic-ui-react'
+import { Table, Pagination, Checkbox, Icon } from 'semantic-ui-react'
+import { getPublicationLink } from '../shared/utils'
 
 export default function BTETable(props) {
-
     const headers = props.table.display.length > 0 ? Object.keys(props.table.display[0]) : [];
         
     return (
@@ -38,21 +38,18 @@ export default function BTETable(props) {
                                 /> 
                             </Table.Cell>
                             {_.map(headers, (col, i) => (
-                                <Table.Cell key={i}>
-                                    {Array.isArray(item[col]) //if the item is an array, make it a space separated string
-                                    ? (item[col].length > 5 //make an accordion if the item's length is greater than 5
-                                        ? <Accordion exclusive={false} fluid panels={[{
-                                            key: `panel-${i}`,
-                                            title: `Show All (${item[col].length})`,
-                                            content: item[col].join(' ')
-                                        }]} />
-                                        : item[col].join(' ')
-                                    ) 
-                                    : item[col]}
-                                </Table.Cell>
+                            <Table.Cell key={i}>
+                                {Array.isArray(item[col]) //if the item is an array, make it a space separated string (only applies to publications)
+                                ? (
+                                    <div>
+                                        <a href={getPublicationLink(item[col])} target="_blank" rel="noopener noreferrer">Open All ({item[col].length})&nbsp;&nbsp;<Icon name='external alternate' /></a>
+                                    </div>
+                                ) 
+                                : item[col]}
+                            </Table.Cell>
                             ))}
                         </Table.Row>
-                    ))}
+                        ))}
                     </Table.Body>
                 </Table>
             </div>
