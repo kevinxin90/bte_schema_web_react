@@ -108,3 +108,21 @@ Builds the app for production to the `build` folder.<br>
   - shared folder (some shared utils functions for BTE)
     - `semanticTypes.js` (list all semantic types for BTE and their shorthands representation)
     - `utils.js` (some utils functions commonly used by other components)
+
+## Deploy
+
+A docker file is included in the base directory and can be used to build the customized container
+
+```bash
+docker build -t bte_web .
+```
+
+Container can be built and started using docker-compose
+
+```bash
+docker-compose up
+```
+
+## Usage
+
+`http://<HOST>:8853/docs`
