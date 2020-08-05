@@ -1,0 +1,9 @@
+version: '3'
+services:
+  bte_web:
+    container_name: bte_web
+    image: bte_web
+    build:
+      context: .
+    ports:
+      - '8853:8853'
