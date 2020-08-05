@@ -123,6 +123,8 @@ Container can be built and started using docker-compose
 docker-compose up
 ```
 
+Public Docker image located at [link](https://hub.docker.com/repository/docker/biothings/bte_web)
+
 ## Usage
 
 `http://<HOST>:8853/explorer`
