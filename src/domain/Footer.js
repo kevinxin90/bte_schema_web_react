@@ -5,7 +5,7 @@ import './Footer.css';
 
 function Footer(props) {
     return(
-        <Grid style={{'background-color': '#9f7de8', 'padding': '0 5vw', 'padding-top': '1rem'}} textAlign='center' centered columns={3} stackable>
+        <Grid style={{backgroundColor: '#9f7de8', padding: '0 5vw', paddingTop: '1rem'}} textAlign='center' centered columns={3} stackable>
             <Grid.Column centered textAlign='left'>
                 <h5>Biothings Explorer</h5>
                 <p>© Copyright 2017-{new Date().getFullYear()} The Su/Wu Lab.</p>

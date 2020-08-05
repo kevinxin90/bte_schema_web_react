@@ -171,6 +171,7 @@ class Explain extends Component {
             let q = new query();
             q.meta_kg.ops = q.meta_kg.ops.filter(item => item.query_operation.tags.includes('biothings'));
             let response = await q.query(this.state.selectedInput, this.state.selectedOutput, intermediate_nodes);
+            console.log("DATA", response.data);
             if (response.data.length === 0) {
                 this.setState({
                     resultReady: true,
