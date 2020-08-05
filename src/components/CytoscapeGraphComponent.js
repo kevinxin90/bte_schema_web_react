@@ -230,7 +230,8 @@ export default class CytoscapeGraph extends PureComponent {
       let tip = new Tippy(dummy, {
         trigger: 'manual',
         lazy: false,
-        // interactive: true,
+        interactive: true,
+        appendTo: document.body,
         onCreate(instance) { 
           instance.popperInstance.reference = node.popperRef(); 
         },
@@ -259,7 +260,8 @@ export default class CytoscapeGraph extends PureComponent {
       let tip = new Tippy(dummy, {
         trigger: 'manual',
         lazy: false,
-        // interactive: true,
+        interactive: true,
+        appendTo: document.body,
         onCreate(instance) { 
           instance.popperInstance.reference = edge.popperRef();
         },
