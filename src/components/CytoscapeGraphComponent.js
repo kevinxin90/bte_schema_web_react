@@ -214,7 +214,7 @@ export default class CytoscapeGraph extends PureComponent {
         }
       ],
       minZoom: 0.1,
-      maxZoom: 25,
+      maxZoom: 15,
       wheelSensitivity: 0.4,
       layout: {
         name: 'preset'

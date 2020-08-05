@@ -37,15 +37,15 @@ const recordsToD3Graph = (records) => {
             let rec = records[i].split('||')
             graph['links'].push({
                 'source': rec[0],
-                'target': rec[4],
+                'target': rec[3],
                 'label': rec[1]
             })
             graph['links'].push({
-                'source': rec[4],
+                'source': rec[3],
                 'target': rec[7],
-                'label': rec[6]
+                'label': rec[5]
             })
-            graph['nodes'].push({ id: rec[4], color: 'red', x: 360, y: 200 + posOrNeg(i) * Math.ceil(i / 2) * 30 })
+            graph['nodes'].push({ id: rec[3], color: 'red', x: 360, y: 200 + posOrNeg(i) * Math.ceil(i / 2) * 30 })
         }
     }
     return graph
