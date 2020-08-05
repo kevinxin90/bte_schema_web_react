@@ -10,7 +10,7 @@ export default function BTETable(props) {
         <div>
             <h3>Your Query Results</h3>
             <div style={{overflowX: "auto", marginBottom: "1em"}}>
-                <Table sortable celled compact>
+                <Table sortable unstackable celled compact>
                     <Table.Header>
                         <Table.Row>
                             <Table.HeaderCell>Display</Table.HeaderCell>
@@ -37,17 +37,23 @@ export default function BTETable(props) {
                                     checked={props.selectedQueryResults.has(Object.values(item).join('||'))}
                                 /> 
                             </Table.Cell>
-                            {_.map(headers, (col, i) => (
-                            <Table.Cell key={i}>
-                                {Array.isArray(item[col]) //if the item is an array, make it a space separated string (only applies to publications)
-                                ? (
-                                    <div>
-                                        <a href={getPublicationLink(item[col])} target="_blank" rel="noopener noreferrer">Open All ({item[col].length})&nbsp;&nbsp;<Icon name='external alternate' /></a>
-                                    </div>
-                                ) 
-                                : item[col]}
-                            </Table.Cell>
-                            ))}
+                            {_.map(headers, (col, i) => {
+                                if (Array.isArray(item[col])) { //if the item is an array, make it a space separated string (only applies to publications)
+                                    return ( // use collapsing to prevent icon from wrapping
+                                        <Table.Cell key={i} collapsing>
+                                            <div>
+                                                <a href={getPublicationLink(item[col])} target="_blank" rel="noopener noreferrer">Publications ({item[col].length})&nbsp;&nbsp;<Icon name='external alternate' /></a>
+                                            </div>
+                                        </Table.Cell>
+                                    );
+                                } else {
+                                    return (
+                                        <Table.Cell key={i}>
+                                            {item[col]}
+                                        </Table.Cell>
+                                    );
+                                }
+                            })}
                         </Table.Row>
                         ))}
                     </Table.Body>
