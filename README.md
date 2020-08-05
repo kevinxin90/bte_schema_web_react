@@ -101,15 +101,6 @@ Builds the app for production to the `build` folder.<br>
         - `PredictHelpComponent.js` (display hint for Predict)
         - `PredictInputComponent.js` (retrieving input for Predict query from user)
         - `PredictQueryResultComponent.js` (display query results for Predict)
-<<<<<<< HEAD
-      - `Footer.js` (footer related display)
-      - `Header.js` (header related display)
-      - `Home.js` (entry point of BTE)
-      - `Main.js` (define routes for BTE)
-    - shared folder (some shared utils functions for BTE)
-      - `semanticTypes.js` (list all semantic types for BTE and their shorthands representation)
-      - `utils.js` (some utils functions commonly used by other components)
-=======
     - `Footer.js` (footer related display)
     - `Header.js` (header related display)
     - `Home.js` (entry point of BTE)
@@ -137,4 +128,3 @@ Public Docker image located at [link](https://hub.docker.com/repository/docker/b
 ## Usage
 
 `http://<HOST>:8853/explorer`
->>>>>>> 7a3f0645362f2e600aa1d8fc89200830af480e3c
