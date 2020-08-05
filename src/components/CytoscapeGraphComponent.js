@@ -90,11 +90,11 @@ export default class CytoscapeGraph extends PureComponent {
       });
     }
 
-    if (this.state.cy.$id(rec[8]).length === 0) {
+    if (this.state.cy.$id(rec[9]).length === 0) {
       this.state.cy.add({
         group: 'nodes',
         data: {
-          id: rec[8],
+          id: rec[9],
           type: outputType,
         },
         position: {
@@ -128,16 +128,16 @@ export default class CytoscapeGraph extends PureComponent {
       edge1.data('publications').push(rec[3].split(',').join(', '));
     }
     
-    let edge2 = this.state.cy.$id(`${rec[4]}-${rec[6]}-${rec[8]}`);
+    let edge2 = this.state.cy.$id(`${rec[4]}-${rec[6]}-${rec[9]}`);
     if (edge2.length === 0) {
       this.state.cy.add({
         group: 'edges',
         data: {
-          id: `${rec[4]}-${rec[6]}-${rec[8]}`,
+          id: `${rec[4]}-${rec[6]}-${rec[9]}`,
           source: rec[4],
-          target: rec[8],
+          target: rec[9],
           label: rec[6],
-          publications: [rec[3].split(',').join(', ')],
+          publications: [rec[8].split(',').join(', ')],
           apis: [rec[7]],
           connections: 1
         },
@@ -145,7 +145,7 @@ export default class CytoscapeGraph extends PureComponent {
     } else {
       edge2.data('connections', edge2.data('connections') + 1); // increment connections if edge already exists
       edge2.data('apis').push(rec[7]);
-      edge2.data('publications').push(rec[3].split(',').join(', '));
+      edge2.data('publications').push(rec[8].split(',').join(', '));
     }
   }
 
@@ -154,11 +154,11 @@ export default class CytoscapeGraph extends PureComponent {
 
     //decrement connections and remove apis/publications then remove edge if connections is 0
     let edge1 = this.state.cy.$id(`${rec[0]}-${rec[1]}-${rec[4]}`);
-    let edge2 = this.state.cy.$id(`${rec[4]}-${rec[6]}-${rec[8]}`);
+    let edge2 = this.state.cy.$id(`${rec[4]}-${rec[6]}-${rec[9]}`);
     edge1.data('connections', edge1.data('connections') - 1);
     edge2.data('connections', edge2.data('connections') - 1);
     let idx1 = edge1.data('publications').indexOf(rec[3].split(',').join(', '));
-    let idx2 = edge2.data('publications').indexOf(rec[3].split(',').join(', '));
+    let idx2 = edge2.data('publications').indexOf(rec[8].split(',').join(', '));
     edge1.data('apis').splice(idx1, 1);
     edge1.data('publications').splice(idx1, 1);
     edge2.data('apis').splice(idx2, 1);
@@ -172,7 +172,7 @@ export default class CytoscapeGraph extends PureComponent {
     }
 
     // delete nodes if they have no edge connections
-    let node_idxs = [0, 4, 8];
+    let node_idxs = [0, 4, 9];
     node_idxs.forEach((node_idx) => {
       let node = this.state.cy.$id(rec[node_idx]);
       if (node.degree() === 0) {
