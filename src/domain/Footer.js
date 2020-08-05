@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Grid, List } from 'semantic-ui-react';
+import { Grid, List, Icon } from 'semantic-ui-react';
 import './Footer.css';
 
 function Footer(props) {
@@ -20,9 +20,7 @@ function Footer(props) {
             </Grid.Column>
             <Grid.Column centered textAlign='left'>
                 <h5>Contact Us</h5>
-                <p><i className="fa fa-envelope fa-lg"></i> : <a href="mailto:biothings@googlegroups.com" className="footer-link">biothings@googlegroups.com</a></p>
-                
-                    
+                <p><Icon name='mail' size='large' />: <a href="mailto:biothings@googlegroups.com" className="footer-link">biothings@googlegroups.com</a></p>
             </Grid.Column>
         </Grid>
     // <div className="footer">
