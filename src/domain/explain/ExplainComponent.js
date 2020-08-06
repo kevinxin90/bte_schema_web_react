@@ -211,32 +211,38 @@ class Explain extends Component {
 
         const { column, direction } = this.state.table;
 
-        if (column !== clickedColumn) {
+        if (column !== clickedColumn) { //sort new column
             this.setState({
+                queryResults: {
+                    ...this.state.queryResults,
+                    data: clickedColumn.includes("publications") //sort publications by length and everything else by alphabetical order
+                        ? _.sortBy(this.state.queryResults['data'], [function(o) { return _.get(o[clickedColumn], 'length', 0)}]) 
+                        : _.sortBy(this.state.queryResults['data'], [clickedColumn])
+                }
+            }, () => this.setState({
                 table: {
                     ...this.state.table,
                     column: clickedColumn,
-                    direction: 'descending',
-                },
+                    direction: 'ascending',
+                    display: this.state.queryResults['data'].slice(this.state.table.activePage * 10 - 10, this.state.table.activePage * 10),
+                }
+            }));
+        } else { //reverse sorted column
+            this.setState({
                 queryResults: {
                     ...this.state.queryResults,
-                    data: _.sortBy(this.state.queryResults['data'], [clickedColumn])
+                    data: this.state.queryResults['data'].reverse()
                 }
+            }, () => {
+                this.setState({
+                    table: {
+                        ...this.state.table,
+                        direction: direction === 'ascending' ? 'descending' : 'ascending',
+                        display: this.state.queryResults['data'].slice(this.state.table.activePage * 10 - 10, this.state.table.activePage * 10),
+                    }
+                })
             });
-            return
         }
-
-        this.setState({
-            table: {
-                ...this.state.table,
-                direction: direction === 'ascending' ? 'descending' : 'ascending',
-                display: this.state.queryResults['data'].slice(this.state.table.activePage * 10 - 10, this.state.table.activePage * 10),
-            },
-            queryResults: {
-                ...this.state.queryResults,
-                data: this.state.queryResults['data'].reverse()
-            }
-        });
     }
 
     handlePaginationChange = (e, { activePage }) => {
