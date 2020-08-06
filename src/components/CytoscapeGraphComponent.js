@@ -272,9 +272,10 @@ export default class CytoscapeGraph extends PureComponent {
           console.log(edge.data('publications'));
           content.innerHTML = `
             <h3>Publications</h3>
-            <p>
-              <a ${edge.data('publications').join("") ? `href=${getPublicationLink(edge.data('publications').join(", ").split(", "))}` : ""} target="_blank" rel="noopener noreferrer">Open All Publications <i class="external alternate icon"></i></a>
-            </p>
+            ${edge.data('publications').join("")
+              ? `<p><a href="${getPublicationLink(edge.data('publications').join(", ").split(", "))}" target="_blank" rel="noopener noreferrer">Open All Publications <i class="external alternate icon"></i></a></p>`
+              : ""}
+            
             ${zip(edge.data('apis'), edge.data('publications')).map((combo) => ( //convert apis and publications arrays into paragraphs with the format api:publications
               combo[1] //don't show a link if there are no publications
               ? `<p><strong>${combo[0]}</strong>:<br> <a href="${getPublicationLink(combo[1].split(", "))}" target="_blank" rel="noopener noreferrer">Publications (${combo[1].split(", ").length}) <i class="external alternate icon"></i></a></p>` 
