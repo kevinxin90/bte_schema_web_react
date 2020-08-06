@@ -5,7 +5,7 @@
   "proxy": "http://localhost:8856/",
   "homepage": "https://biothings.io/explorer/",
   "dependencies": {
-    "@biothings-explorer/explain": "^1.1.0",
+    "@biothings-explorer/explain": "^1.1.1",
     "@biothings-explorer/smartapi-kg": "^1.1.10",
     "axios": "^0.19.2",
     "biomedical-id-autocomplete": "^1.0.3",
