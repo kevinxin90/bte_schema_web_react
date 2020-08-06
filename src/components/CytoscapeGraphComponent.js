@@ -269,10 +269,16 @@ export default class CytoscapeGraph extends PureComponent {
         },
         content() {
           let content = document.createElement('div');
+          console.log(edge.data('publications'));
           content.innerHTML = `
             <h3>Publications</h3>
+            <p>
+              <a ${edge.data('publications').join("") ? `href=${getPublicationLink(edge.data('publications').join(", ").split(", "))}` : ""} target="_blank" rel="noopener noreferrer">Open All Publications <i class="external alternate icon"></i></a>
+            </p>
             ${zip(edge.data('apis'), edge.data('publications')).map((combo) => ( //convert apis and publications arrays into paragraphs with the format api:publications
-              `<p><strong>${combo[0]}</strong>:<br> <a href=${getPublicationLink(combo[1].split(", "))} target="_blank" rel="noopener noreferrer">Publications (${combo[1].split(", ").length}) <i class="external alternate icon"></i></a></p>`
+              combo[1] //don't show a link if there are no publications
+              ? `<p><strong>${combo[0]}</strong>:<br> <a href="${getPublicationLink(combo[1].split(", "))}" target="_blank" rel="noopener noreferrer">Publications (${combo[1].split(", ").length}) <i class="external alternate icon"></i></a></p>` 
+              : `<p><strong>${combo[0]}</strong>: No publications`
             )).join("")}
           `;
           return content;
@@ -303,7 +309,9 @@ export default class CytoscapeGraph extends PureComponent {
               <h2>
                 Graph &nbsp;&nbsp;
                 <Popup 
-                  content="Use the toggles to add results to the graph. Click on nodes and edges for more info"
+                  content="Use the toggles on the table to add results to the graph. 
+                    Click on a node for more info on that node. Click on an edge to see publications for that relationship. 
+                    Click the 'Zoom Fit' button to fit the graph to the viewport."
                   trigger={ <Icon circular name="info" size="tiny" style={{verticalAlign: 4}}/> }
                 /> 
                 </h2>
