@@ -29,7 +29,7 @@ export default function BTETable(props) {
                     </Table.Header>
                     <Table.Body>
                         {_.map(props.table.display, (item) => (
-                        <Table.Row key={Object.values(item).join('||')}>
+                        <Table.Row key={Object.values(item).join('||') + _.uniqueId()}>
                             <Table.Cell key='checkbox' textAlign='center'>
                                 <Checkbox toggle
                                     name={Object.values(item).join('||')}
