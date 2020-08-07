@@ -4,7 +4,6 @@ import { Grid, Icon, Button, Popup } from 'semantic-ui-react';
 import {colorSchema, semanticTypeShorthand} from '../shared/semanticTypes';
 import { getPublicationLink } from '../shared/utils';
 
-import { zip } from 'lodash';
 import cytoscape from 'cytoscape';
 import popper from 'cytoscape-popper';
 import Tippy from 'tippy.js';
@@ -117,15 +116,20 @@ export default class CytoscapeGraph extends PureComponent {
           source: rec[0],
           target: rec[4],
           label: rec[1],
-          publications: [rec[3].split(',').join(', ')],
-          apis: [rec[2]],
+          publications: [{api: rec[2], publication: rec[3], count: 1}],
           connections: 1
         }
       })
     } else {
       edge1.data('connections', edge1.data('connections') + 1); // increment connections if edge already exists
-      edge1.data('apis').push(rec[2]);
-      edge1.data('publications').push(rec[3].split(',').join(', '));
+      
+      //increment count if api/publication combo exists, otherwise make a new one
+      let idx = edge1.data('publications').findIndex((x) => (x.api === rec[2] && x.publication === rec[3]));
+      if (idx === -1) {
+        edge1.data('publications').push({api: rec[2], publication: rec[3], count: 1});
+      } else {
+        edge1.data('publications')[idx].count += 1;
+      }
     }
     
     let edge2 = this.state.cy.$id(`${rec[4]}-${rec[6]}-${rec[9]}`);
@@ -137,33 +141,44 @@ export default class CytoscapeGraph extends PureComponent {
           source: rec[4],
           target: rec[9],
           label: rec[6],
-          publications: [rec[8].split(',').join(', ')],
-          apis: [rec[7]],
+          publications: [{api: rec[7], publication: rec[8], count: 1}],
           connections: 1
         },
       })
     } else {
       edge2.data('connections', edge2.data('connections') + 1); // increment connections if edge already exists
-      edge2.data('apis').push(rec[7]);
-      edge2.data('publications').push(rec[8].split(',').join(', '));
+      
+      //increment count if api/publication combo exists, otherwise make a new one
+      let idx = edge2.data('publications').findIndex((x) => (x.api === rec[7] && x.publication === rec[8]));
+      if (idx === -1) {
+        edge2.data('publications').push({api: rec[7], publication: rec[8], count: 1});
+      } else {
+        edge2.data('publications')[idx].count += 1;
+      }
     }
   }
 
   deleteConnection(record) {
     let rec = record.split('||');
 
-    //decrement connections and remove apis/publications then remove edge if connections is 0
     let edge1 = this.state.cy.$id(`${rec[0]}-${rec[1]}-${rec[4]}`);
     let edge2 = this.state.cy.$id(`${rec[4]}-${rec[6]}-${rec[9]}`);
+
+    //decrement publications then remove if count is 0
+    let idx1 = edge1.data('publications').findIndex((x) => (x.api === rec[2] && x.publication === rec[3]));
+    let idx2 = edge2.data('publications').findIndex((x) => (x.api === rec[7] && x.publication === rec[8]));
+    edge1.data('publications')[idx1].count -= 1;
+    edge2.data('publications')[idx2].count -= 1;
+    if (edge1.data('publications')[idx1].count <= 0) {
+      edge1.data('publications').splice(idx1, 1);
+    }
+    if (edge2.data('publications')[idx2].count <= 0) {
+      edge2.data('publications').splice(idx2, 1);
+    }
+
+    //decrement connections then remove edge if number of connections is 0
     edge1.data('connections', edge1.data('connections') - 1);
     edge2.data('connections', edge2.data('connections') - 1);
-    let idx1 = edge1.data('publications').indexOf(rec[3].split(',').join(', '));
-    let idx2 = edge2.data('publications').indexOf(rec[8].split(',').join(', '));
-    edge1.data('apis').splice(idx1, 1);
-    edge1.data('publications').splice(idx1, 1);
-    edge2.data('apis').splice(idx2, 1);
-    edge2.data('publications').splice(idx2, 1);
-
     if (edge1.data('connections') <= 0) {
       this.state.cy.remove(edge1);
     }
@@ -269,17 +284,16 @@ export default class CytoscapeGraph extends PureComponent {
         },
         content() {
           let content = document.createElement('div');
-          console.log(edge.data('publications'));
           content.innerHTML = `
             <h3>Publications</h3>
-            ${edge.data('publications').join("")
-              ? `<p><a href="${getPublicationLink(edge.data('publications').join(", ").split(", "))}" target="_blank" rel="noopener noreferrer">Open All Publications <i class="external alternate icon"></i></a></p>`
+            ${edge.data('publications').map(x => x.publication).join("")
+              ? `<p><a href="${getPublicationLink(edge.data('publications').map(x => x.publication).join(", ").split(", "))}" target="_blank" rel="noopener noreferrer">Open All Publications <i class="external alternate icon"></i></a></p>`
               : ""}
             
-            ${zip(edge.data('apis'), edge.data('publications')).map((combo) => ( //convert apis and publications arrays into paragraphs with the format api:publications
-              combo[1] //don't show a link if there are no publications
-              ? `<p><strong>${combo[0]}</strong>:<br> <a href="${getPublicationLink(combo[1].split(", "))}" target="_blank" rel="noopener noreferrer">Publications (${combo[1].split(", ").length}) <i class="external alternate icon"></i></a></p>` 
-              : `<p><strong>${combo[0]}</strong>: No publications`
+            ${edge.data('publications').map((combo) => ( //convert publications into paragraphs with the format api:publications
+              combo.publication //don't show a link if there are no publications
+              ? `<p><strong>${combo.api}</strong>:<br> <a href="${getPublicationLink(combo.publication.split(","))}" target="_blank" rel="noopener noreferrer">Publications (${combo.publication.split(",").length}) <i class="external alternate icon"></i></a></p>` 
+              : `<p><strong>${combo.api}</strong>: No publications`
             )).join("")}
           `;
           return content;
