@@ -38,7 +38,6 @@ const Home = () => (
         </Card>
       </Grid.Column>
     </Grid>
-
   </Segment>
   </div>
 )
