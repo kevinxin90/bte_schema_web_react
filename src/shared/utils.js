@@ -8,7 +8,7 @@ meta_kg.constructMetaKGSync();
  * @param {Array.<string>} publications Publications in the format "type:number", also must all be the same format and either "PMID" or "PMC"
  * @returns {string} Returns either the url to all of the entries or an empty string
  */
-function getPublicationLink(publications) {
+const getPublicationLink = (publications) => {
     let pubType = publications[0].split(":")[0];
 
     if (pubType === "PMID") {
@@ -24,6 +24,37 @@ function getPublicationLink(publications) {
         return "";
     }
 }
+
+/** get possible values for a field in the results
+ * @param {Array.<Object>} results Array of result objects
+ * @param {string} field name of the field
+ * @returns {Array.<string>} Array of unique strings
+ */
+const getFieldOptions = (results, field) => {
+    let possiblities = new Set();
+    results.forEach(result => {
+        possiblities.add(result[field]);
+    });
+
+    return Array.from(possiblities).sort();
+}
+
+/** filter results by a filter object
+ * @param {Array.<Object>} results Array of result objects
+ * @param {Object.<Set>} filter filter object of sets representing which fields and for which values to filter for
+ * @returns {Array.<Object>} Filtered results
+ */
+const getFilteredResults = (results, filter) => {
+    return results.filter((result) => {
+        for (const key of Object.keys(filter)) {
+            if (filter[key].size > 0 && !filter[key].has(result[key])) { 
+                return false;
+            }
+        }
+        return true;
+    });
+}
+
 
 const recordsToTreeGraph = (records) => {
     records = Array.from(records);
@@ -99,4 +130,4 @@ const fetchQueryResult = async (input, output, intermediate) => {
     }
 }
 
-export { getIntermediateNodes, fetchQueryResult, findMetaPath, recordsToTreeGraph, getPublicationLink };
+export { getIntermediateNodes, fetchQueryResult, findMetaPath, recordsToTreeGraph, getPublicationLink, getFieldOptions, getFilteredResults };

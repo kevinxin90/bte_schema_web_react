@@ -6,7 +6,7 @@ import Steps from '../../components/StepsComponent';
 import ExplainInput from './ExplainInputComponent';
 import { MetaPathForm } from '../../components/MetaPathFormComponent';
 import ExplainQueryResult from './ExplainQueryResultComponent';
-import { getIntermediateNodes, findMetaPath } from '../../shared/utils';
+import { getIntermediateNodes, findMetaPath, getFieldOptions, getFilteredResults } from '../../shared/utils';
 import query from "@biothings-explorer/explain";
 
 let _ = require('lodash');
@@ -31,6 +31,16 @@ class Explain extends Component {
             paths: [],
             selectedPaths: new Set(),
             queryResults: { 'data': [], 'log': [] },
+            filteredResults: [],
+            filter: {
+                pred1: new Set(),
+                pred1_api: new Set(),
+                node1_name: new Set(),
+                node1_type: new Set(),
+                pred2: new Set(),
+                pred2_api: new Set()
+            },
+            filterOptions: {},
             table: {
                 column: null,
                 display: [],
@@ -58,6 +68,7 @@ class Explain extends Component {
         this.handleStep2Close = this.handleClose.bind(this, 'step2ShowError');
         this.handlePaginationChange = this.handlePaginationChange.bind(this);
         this.handleSort = this.handleSort.bind(this);
+        this.handleFilterSelect = this.handleFilterSelect.bind(this);
     };
 
     //this function will be passed to autocomplete component
@@ -84,6 +95,33 @@ class Explain extends Component {
             selectedPaths.delete(event.target.name)
         }
         this.setState({ selectedPaths: selectedPaths })
+    }
+
+    handleFilterSelect(event, data) {
+        const filter = this.state.filter;
+        if (data.checked) {
+            filter[data.name].add(data.label);
+        } else {
+            filter[data.name].delete(data.label);
+        }
+        
+        this.updateTable(filter);
+        this.setState({filter: filter});
+    }
+
+    //update table when filter is modified
+    updateTable(newFilter) {
+        const newFilteredResults = getFilteredResults(this.state.queryResults.data, newFilter);
+        this.setState({
+            filteredResults: newFilteredResults,
+            table: {
+                column: null,
+                display: newFilteredResults.slice(0, 10),
+                totalPages: Math.ceil(newFilteredResults.length / 10),
+                direction: null,
+                activePage: 1,
+            }
+        });
     }
 
     handleQueryResultSelect(event, data) {
@@ -180,10 +218,28 @@ class Explain extends Component {
             } else {
                 this.setState({
                     queryResults: response,
+                    filteredResults: response.data,
                     table: {
                         ...this.state.table,
-                        display: response['data'].slice(this.state.table.activePage * 10 - 10, this.state.table.activePage * 10),
-                        totalPages: Math.ceil(response['data'].length / 10)
+                        display: response.data.slice(0, 10),
+                        activePage: 1,
+                        totalPages: Math.ceil(response.data.length / 10)
+                    },
+                    filter: { // reset filter on new search
+                        pred1: new Set(),
+                        pred1_api: new Set(),
+                        node1_name: new Set(),
+                        node1_type: new Set(),
+                        pred2: new Set(),
+                        pred2_api: new Set()
+                    },
+                    filterOptions: {
+                        pred1: getFieldOptions(response.data, 'pred1'),
+                        pred1_api: getFieldOptions(response.data, 'pred1_api'),
+                        node1_name: getFieldOptions(response.data, 'node1_name'),
+                        node1_type: getFieldOptions(response.data, 'node1_type'),
+                        pred2: getFieldOptions(response.data, 'pred2'),
+                        pred2_api: getFieldOptions(response.data, 'pred2_api'),
                     },
                     resultReady: true,
                     step3Complete: true
@@ -214,9 +270,9 @@ class Explain extends Component {
         let new_data;
         if (column !== clickedColumn) { //sort new column
             if (clickedColumn.includes("publications")) {//sort publications by length and everything else by alphabetical order
-                new_data = _.sortBy(this.state.queryResults['data'], [function(o) { return _.get(o[clickedColumn], 'length', 0)}]);
+                new_data = _.sortBy(this.state.filteredResults, [function(result) { return _.get(result[clickedColumn], 'length', 0)}]);
             } else {
-                new_data = _.sortBy(this.state.queryResults['data'], [clickedColumn]);
+                new_data = _.sortBy(this.state.filteredResults, [clickedColumn]);
             }
 
             this.setState({
@@ -226,23 +282,17 @@ class Explain extends Component {
                     direction: 'ascending',
                     display: new_data.slice(this.state.table.activePage * 10 - 10, this.state.table.activePage * 10),
                 },
-                queryResults: {
-                    ...this.state.queryResults,
-                    data: new_data
-                }
+                filteredResults: new_data,
             });
         } else { //reverse sorted column
-            new_data = this.state.queryResults['data'].reverse()
+            new_data = this.state.filteredResults.reverse()
             this.setState({
                 table: {
                     ...this.state.table,
                     direction: direction === 'ascending' ? 'descending' : 'ascending',
-                    display: this.state.queryResults['data'].slice(this.state.table.activePage * 10 - 10, this.state.table.activePage * 10),
+                    display: this.state.filteredResults.slice(this.state.table.activePage * 10 - 10, this.state.table.activePage * 10),
                 },
-                queryResults: {
-                    ...this.state.queryResults,
-                    data: new_data,
-                }
+                filteredResults: new_data
             });
         }
     }
@@ -251,7 +301,7 @@ class Explain extends Component {
         this.setState({
             table: {
                 ...this.state.table,
-                display: this.state.queryResults['data'].slice(activePage * 10 - 10, activePage * 10),
+                display: this.state.filteredResults.slice(activePage * 10 - 10, activePage * 10),
                 activePage: activePage
             }
         });
@@ -294,6 +344,9 @@ class Explain extends Component {
                     resultReady={this.state.resultReady}
                     content={this.state.queryResults['data']}
                     table={this.state.table}
+                    filter={this.state.filter}
+                    filterOptions={this.state.filterOptions}
+                    handleFilterSelect={this.handleFilterSelect}
                     handleSort={this.handleSort}
                     handlePaginationChange={this.handlePaginationChange}
                     logs={this.state.queryResults['log']}

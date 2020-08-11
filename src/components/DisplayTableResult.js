@@ -1,15 +1,45 @@
 import _ from 'lodash'
 import React from 'react'
-import { Table, Pagination, Checkbox, Icon } from 'semantic-ui-react'
+import { Table, Pagination, Checkbox, Icon, Popup, Accordion, Form, Button, Menu } from 'semantic-ui-react'
 import { getPublicationLink } from '../shared/utils'
 
 export default function BTETable(props) {
     const headers = props.table.display.length > 0 ? Object.keys(props.table.display[0]) : [];
+
+    const panels = Object.keys(props.filterOptions).map((field) => (
+        {
+            key: field,
+            title: field,
+            content: {
+                content: (
+                    <Form>
+                        <Form.Group grouped>
+                            {
+                                props.filterOptions[field].map((option) => (
+                                    <Form.Checkbox onChange={props.handleFilterSelect} label={option} name={field} value={option} defaultChecked={props.filter[field].has(option)} key={`${field}-${option}`}/>
+                                ))
+                            }
+                            
+                        </Form.Group>
+                    </Form>
+                )
+            }
+        }
+    ));
         
     return (
         <div>
             <h3>Your Query Results</h3>
-            <div style={{overflowX: "auto", marginBottom: "1em"}}>
+            <Popup 
+                trigger={<Button content='Filter Results' icon='filter' labelPosition='left' />}
+                flowing
+                pinned
+                position='bottom left'
+                on='click'
+            >
+                <Accordion as={Menu} secondary vertical panels={panels}/>
+            </Popup>
+            <div style={{overflowX: "auto", marginBottom: "1em", marginTop: "0.5em"}}>
                 <Table sortable unstackable celled compact>
                     <Table.Header>
                         <Table.Row>
