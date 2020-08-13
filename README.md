@@ -86,7 +86,7 @@ Builds the app for production to the `build` folder.<br>
   - src folder (main folder storing code)
     - assets folder (store all static images)
     - components folder (store React components)
-      - `D3GraphComponnet.js` (for D3 visualization of query results)
+      - `CytoscapeGraphComponnet.js` (for cytoscape visualization of query results)
       - `DimerComponent.js` (display when BTE is querying results)
       - `DisplayErrorComponent.js` (display error message)
       - `DrawMetaPath.js` (drawing meta path using D3 library)

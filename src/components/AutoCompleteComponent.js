@@ -5,7 +5,7 @@ export default function AutoComplete(props) {
 
     const handleResultSelect = (e, { result }) => {
         //this.setState({ value: result.title, selected: result });
-        props.handleselect(result);
+        props.handleSelect(result);
     }
 
 

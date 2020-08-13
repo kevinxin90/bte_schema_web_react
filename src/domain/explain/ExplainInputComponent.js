@@ -22,6 +22,8 @@ export default class ExplainInput extends Component {
         };
         this.handleSearchChange1 = this.handleSearchChange1.bind(this);
         this.handleSearchChange2 = this.handleSearchChange2.bind(this);
+        this.handleSelect1 = this.handleSelect1.bind(this);
+        this.handleSelect2 = this.handleSelect2.bind(this);
     }
 
 
@@ -130,6 +132,27 @@ export default class ExplainInput extends Component {
         const CXCR2 = { "NCBIGene": "3579", "name": "C-X-C motif chemokine receptor 2", "SYMBOL": "CXCR2", "UMLS": "C1334126", "UNIPROTKB": "P25025", "HGNC": "6027", "ENSEMBL": "ENSG00000180871", "display": "NCBIGene(3579) ENSEMBL(ENSG00000180871) HGNC(6027) UMLS(C1334126) UNIPROTKB(P25025) SYMBOL(CXCR2)", "type": "Gene", "primary": { "identifier": "NCBIGene", "cls": "Gene", "value": "3579" } };
         this.props.handleOutputSelect(CXCR2);
     }
+
+    handleSelect1 = (result) => {
+        this.setState({
+            autocomplete1: {
+                ...this.setState.autocomplete1,
+                value: result.title
+            }
+        })
+        this.props.handleInputSelect(result);
+    }
+
+    handleSelect2 = (result) => {
+        this.setState({
+            autocomplete2: {
+                ...this.setState.autocomplete2,
+                value: result.title
+            }
+        })
+        this.props.handleOutputSelect(result);
+    }
+
     render() {
         return (
             <div className={this.props.shouldDisplay ? '' : 'hidden'}>
@@ -150,7 +173,7 @@ export default class ExplainInput extends Component {
                         <br />
                         <Form.Group>
                             <AutoComplete
-                                handleselect={this.props.handleInputSelect}
+                                handleSelect={this.handleSelect1}
                                 handleSearchChange={this.handleSearchChange1}
                                 state={this.state.autocomplete1}
                             />
@@ -161,7 +184,7 @@ export default class ExplainInput extends Component {
                         <br />
                         <Form.Group>
                             <AutoComplete
-                                handleselect={this.props.handleOutputSelect}
+                                handleSelect={this.handleSelect2}
                                 handleSearchChange={this.handleSearchChange2}
                                 state={this.state.autocomplete2}
                             />
