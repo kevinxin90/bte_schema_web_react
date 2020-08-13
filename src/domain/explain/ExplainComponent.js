@@ -134,7 +134,6 @@ class Explain extends Component {
             selectedQueryResults.delete(data.name);
             this.graphRef.current.deleteConnection(data.name);
         }
-
         this.setState({
             selectedQueryResults: selectedQueryResults,
         });
