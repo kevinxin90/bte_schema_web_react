@@ -6,10 +6,15 @@ import Steps from '../../components/StepsComponent';
 import ExplainInput from './ExplainInputComponent';
 import { MetaPathForm } from '../../components/MetaPathFormComponent';
 import ExplainQueryResult from './ExplainQueryResultComponent';
-import { recordsToD3Graph as recordsToGraph, getIntermediateNodes, findMetaPath, fetchQueryResult } from '../../shared/utils';
+import { getIntermediateNodes, findMetaPath, getFieldOptions, getFilteredResults } from '../../shared/utils';
 import query from "@biothings-explorer/explain";
 
 let _ = require('lodash');
+
+//forward ref so we can call addConnection and deleteConnection in CytoscapeGraphComponent from this component
+const ExplainQueryResultWrapper = React.forwardRef((props, ref) => {
+    return (<ExplainQueryResult graphRef={ref} {...props} />);
+});
 
 class Explain extends Component {
 
@@ -26,6 +31,17 @@ class Explain extends Component {
             paths: [],
             selectedPaths: new Set(),
             queryResults: { 'data': [], 'log': [] },
+            resolvedIds: {},
+            filteredResults: [],
+            filter: {
+                pred1: new Set(),
+                pred1_api: new Set(),
+                node1_name: new Set(),
+                node1_type: new Set(),
+                pred2: new Set(),
+                pred2_api: new Set()
+            },
+            filterOptions: {},
             table: {
                 column: null,
                 display: [],
@@ -34,10 +50,12 @@ class Explain extends Component {
                 totalPages: 1
             },
             selectedQueryResults: new Set(),
-            graph: { nodes: [], links: [] },
             step1ShowError: false,
             step2ShowError: false
         };
+
+        this.graphRef = React.createRef();
+
         this.handleStep1Submit = this.handleStep1Submit.bind(this);
         this.handleStep2Submit = this.handleStep2Submit.bind(this);
         this.handleInputSelect = this.handleInputSelect.bind(this);
@@ -51,6 +69,7 @@ class Explain extends Component {
         this.handleStep2Close = this.handleClose.bind(this, 'step2ShowError');
         this.handlePaginationChange = this.handlePaginationChange.bind(this);
         this.handleSort = this.handleSort.bind(this);
+        this.handleFilterSelect = this.handleFilterSelect.bind(this);
     };
 
     //this function will be passed to autocomplete component
@@ -79,18 +98,46 @@ class Explain extends Component {
         this.setState({ selectedPaths: selectedPaths })
     }
 
-    handleQueryResultSelect(event) {
-        const selectedQueryResults = this.state.selectedQueryResults;
-        if (event.target.checked) {
-            selectedQueryResults.add(event.target.name)
+    handleFilterSelect(event, data) {
+        const filter = this.state.filter;
+        if (data.checked) {
+            filter[data.name].add(data.label);
         } else {
-            selectedQueryResults.delete(event.target.name)
+            filter[data.name].delete(data.label);
         }
-        const graph = recordsToGraph(selectedQueryResults)
+
+        this.updateTable(filter);
+        this.setState({ filter: filter });
+    }
+
+    //update table when filter is modified
+    updateTable(newFilter) {
+        const newFilteredResults = getFilteredResults(this.state.queryResults.data.result, newFilter);
+        this.setState({
+            filteredResults: newFilteredResults,
+            table: {
+                column: null,
+                display: newFilteredResults.slice(0, 10),
+                totalPages: Math.ceil(newFilteredResults.length / 10),
+                direction: null,
+                activePage: 1,
+            }
+        });
+    }
+
+    handleQueryResultSelect(event, data) {
+        const selectedQueryResults = this.state.selectedQueryResults;
+        if (data.checked) {
+            selectedQueryResults.add(data.name);
+            this.graphRef.current.addConnection(data.name, this.state.selectedInput.type, this.state.selectedOutput.type);
+        } else {
+            selectedQueryResults.delete(data.name);
+            this.graphRef.current.deleteConnection(data.name);
+        }
+
         this.setState({
             selectedQueryResults: selectedQueryResults,
-            graph: graph
-        })
+        });
     }
 
     handleClose = (item) => this.setState({
@@ -163,6 +210,7 @@ class Explain extends Component {
             let q = new query();
             q.meta_kg.ops = q.meta_kg.ops.filter(item => item.query_operation.tags.includes('biothings'));
             let response = await q.query(this.state.selectedInput, this.state.selectedOutput, intermediate_nodes);
+
             if (response.data.length === 0) {
                 this.setState({
                     resultReady: true,
@@ -171,11 +219,30 @@ class Explain extends Component {
                 })
             } else {
                 this.setState({
+                    resolvedIds: response.data.resolved_ids,
                     queryResults: response,
+                    filteredResults: response.data.result,
                     table: {
                         ...this.state.table,
-                        display: response['data'].slice(this.state.table.activePage * 10 - 10, this.state.table.activePage * 10),
-                        totalPages: Math.ceil(response['data'].length / 10)
+                        display: response.data.result.slice(0, 10),
+                        activePage: 1,
+                        totalPages: Math.ceil(response.data.length / 10)
+                    },
+                    filter: { // reset filter on new search
+                        pred1: new Set(),
+                        pred1_api: new Set(),
+                        node1_name: new Set(),
+                        node1_type: new Set(),
+                        pred2: new Set(),
+                        pred2_api: new Set()
+                    },
+                    filterOptions: {
+                        pred1: getFieldOptions(response.data.result, 'pred1'),
+                        pred1_api: getFieldOptions(response.data.result, 'pred1_api'),
+                        node1_name: getFieldOptions(response.data.result, 'node1_name'),
+                        node1_type: getFieldOptions(response.data.result, 'node1_type'),
+                        pred2: getFieldOptions(response.data.result, 'pred2'),
+                        pred2_api: getFieldOptions(response.data.result, 'pred2_api'),
                     },
                     resultReady: true,
                     step3Complete: true
@@ -203,39 +270,41 @@ class Explain extends Component {
 
         const { column, direction } = this.state.table;
 
-        if (column !== clickedColumn) {
+        let new_data;
+        if (column !== clickedColumn) { //sort new column
+            if (clickedColumn.includes("publications")) {//sort publications by length and everything else by alphabetical order
+                new_data = _.sortBy(this.state.filteredResults, [function (result) { return _.get(result[clickedColumn], 'length', 0) }]);
+            } else {
+                new_data = _.sortBy(this.state.filteredResults, [clickedColumn]);
+            }
+
             this.setState({
                 table: {
                     ...this.state.table,
                     column: clickedColumn,
-                    direction: 'descending',
+                    direction: 'ascending',
+                    display: new_data.slice(this.state.table.activePage * 10 - 10, this.state.table.activePage * 10),
                 },
-                queryResults: {
-                    ...this.state.queryResults,
-                    data: _.sortBy(this.state.queryResults['data'], [clickedColumn])
-                }
+                filteredResults: new_data,
             });
-            return
+        } else { //reverse sorted column
+            new_data = this.state.filteredResults.reverse()
+            this.setState({
+                table: {
+                    ...this.state.table,
+                    direction: direction === 'ascending' ? 'descending' : 'ascending',
+                    display: this.state.filteredResults.slice(this.state.table.activePage * 10 - 10, this.state.table.activePage * 10),
+                },
+                filteredResults: new_data
+            });
         }
-
-        this.setState({
-            table: {
-                ...this.state.table,
-                direction: direction === 'ascending' ? 'descending' : 'ascending',
-                display: this.state.queryResults['data'].slice(this.state.table.activePage * 10 - 10, this.state.table.activePage * 10),
-            },
-            queryResults: {
-                ...this.state.queryResults,
-                data: this.state.queryResults['data'].reverse()
-            }
-        });
     }
 
     handlePaginationChange = (e, { activePage }) => {
         this.setState({
             table: {
                 ...this.state.table,
-                display: this.state.queryResults['data'].slice(activePage * 10 - 10, activePage * 10),
+                display: this.state.filteredResults.slice(activePage * 10 - 10, activePage * 10),
                 activePage: activePage
             }
         });
@@ -273,16 +342,21 @@ class Explain extends Component {
                     handleSubmit={this.handleStep2Submit}
                     handleBackToStep1={this.handleBackToStep1}
                 />
-                <ExplainQueryResult
+                <ExplainQueryResultWrapper
                     shouldDisplay={this.state.currentStep === 3}
                     resultReady={this.state.resultReady}
-                    content={this.state.queryResults['data']}
+                    content={this.state.queryResults.data.result}
                     table={this.state.table}
+                    filter={this.state.filter}
+                    filterOptions={this.state.filterOptions}
+                    handleFilterSelect={this.handleFilterSelect}
                     handleSort={this.handleSort}
                     handlePaginationChange={this.handlePaginationChange}
                     logs={this.state.queryResults['log']}
                     handleSelect={this.handleQueryResultSelect}
                     graph={this.state.graph}
+                    ref={this.graphRef}
+                    selectedQueryResults={this.state.selectedQueryResults}
                 />
             </Container>
         )
