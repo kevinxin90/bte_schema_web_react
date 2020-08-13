@@ -112,6 +112,7 @@ const fetchQueryResult = async (input, output, intermediate) => {
         output_obj: JSON.stringify(output),
         intermediate_nodes: JSON.stringify(intermediate)
     };
+    console.log('params', params)
     url.search = new URLSearchParams(params).toString();
     try {
         let response = await fetch(url);
