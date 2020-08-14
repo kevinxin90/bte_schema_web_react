@@ -47,7 +47,7 @@
 .jumbotron {
     padding:70px 30px 70px 30px;
     margin: auto ;
-    background: #9575CD ;
+    background: #9575CD;
     color:floralwhite;
 }
 
@@ -129,3 +129,219 @@ path.link {
     margin-bottom: 10rem;
     margin-top: 10rem;
 }
+
+/* Added CSS elements for updated metapath */
+.divider {
+    position: relative;
+    left: 50px;
+}
+
+.branchDivider {
+    width: 80%;
+    margin-left: 20px;
+    margin-top: 10px;
+}
+
+.path {
+    position: relative;
+    margin-bottom: 20px;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  }
+  
+  .graph {
+    height: 500px;
+    /*margin: 20px;
+    margin-right: 100px;*/
+    margin-bottom: 20px;
+  }
+  
+  .toggleGraph {
+    position: absolute;
+    top: 88%;
+    margin-right: 20%;
+  }
+  
+  .branch {
+    text-align: left;
+    margin: 10px;
+    margin-left: 5px;
+    font-weight: bold;
+    font-size: 150%;
+    text-decoration: underline;
+  }
+
+  .addBranch {
+      position: relative;
+      top: 15px;
+  }
+  
+  .addInter {
+    float: right;
+    right: 55px;
+    margin-top: -40px;
+    width: 25%;
+    font-size: 80%;
+  }
+  
+  .addInterButton {
+    float: right;
+    position: relative;
+    left: 5px;
+    bottom: 40px;
+    height: 38px;
+  }
+  
+  .nodes {
+    text-align: left;
+    padding-left: 5%;
+    font-size: 100%;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  }
+  
+  .cyStyle {
+    border: 3px solid rgba(149, 117, 205, .5);
+    height: 100%;
+    width: 100%;
+    margin-right: 100px;
+  }
+
+  .branchWarning {
+    position: absolute;
+    top: 455px;
+    left: 345px;
+  }
+
+  .removeBranch {
+    float: right;
+    position: relative;
+    bottom: 12px;
+    left: 65px;
+  }
+
+  .Branch1 {
+    border: 3px solid #8A5BC4;
+    margin-top: 25px;
+    padding: 5px;
+    padding-bottom: 20px;
+    border-radius: 5px;
+  }
+
+  .Branch2 {
+    border: 3px solid #B184E9;
+    margin-top: 10px;
+    padding: 5px;
+    padding-bottom: 20px;
+    border-radius: 5px;
+  }
+
+  .Branch3 {
+    border: 3px solid #CBB4E7;
+    margin-top: 10px;
+    padding: 5px;
+    padding-bottom: 20px;
+    border-radius: 5px;
+  }
+  
+  [data-id="layer0-selectbox"],[data-id="layer1-drag"],[data-id="layer2-node"] {
+    right: 10px;
+  }
+  
+  
+  /* Responsive elements taken from : https://gist.github.com/bl4ck5un/ed27db3d653011b32ee0877058abac7d*/
+  
+  /* Mobile */
+  @media only screen and (max-width: 767px) {
+    [class*="mobile hidden"],
+    [class*="tablet only"]:not(.mobile),
+    [class*="computer only"]:not(.mobile),
+    [class*="large screen only"]:not(.mobile),
+    [class*="widescreen only"]:not(.mobile),
+    [class*="or lower hidden"] {
+      display: none !important;
+    }
+  
+    .path {
+      margin: 10px;
+    }
+    .branch {
+        margin-left: 0px;
+    }
+    .addInter {
+      width: 125px;
+      height: 22px !important;
+      font-size: 60%;
+      margin-right: -15px;
+    }
+    .addInterButton {
+      height: 23px;
+      font-size: 50%;
+      left: 20px;
+      padding-top: -100px;
+    }
+    .toggleGraph {
+      right: 100px;
+    }
+  }
+  
+  /* Tablet / iPad Portrait */
+  @media only screen and (min-width: 768px) and (max-width: 991px) {
+    [class*="mobile only"]:not(.tablet),
+    [class*="tablet hidden"],
+    [class*="computer only"]:not(.tablet),
+    [class*="large screen only"]:not(.tablet),
+    [class*="widescreen only"]:not(.tablet),
+    [class*="or lower hidden"]:not(.mobile) {
+      display: none !important;
+    }
+    .path {
+      margin: 20px;
+      margin-right: 5px;
+    }
+    .graph {
+      margin: 20px;
+      margin-left: 5px;
+    }
+    .addInter {
+      width: 160px;
+    }
+  }
+  
+  /* Computer / Desktop / iPad Landscape */
+  @media only screen and (min-width: 992px) and (max-width: 1199px) {
+    [class*="mobile only"]:not(.computer),
+    [class*="tablet only"]:not(.computer),
+    [class*="computer hidden"],
+    [class*="large screen only"]:not(.computer),
+    [class*="widescreen only"]:not(.computer),
+    [class*="or lower hidden"]:not(.tablet):not(.mobile) {
+      display: none !important;
+    }
+  
+    .addInter {
+      width: 160px;
+    }
+  }
+  
+  /* Large Monitor */
+  @media only screen and (min-width: 1200px) and (max-width: 1919px) {
+    [class*="mobile only"]:not([class*="large screen"]),
+    [class*="tablet only"]:not([class*="large screen"]),
+    [class*="computer only"]:not([class*="large screen"]),
+    [class*="large screen hidden"],
+    [class*="widescreen only"]:not([class*="large screen"]),
+    [class*="or lower hidden"]:not(.computer):not(.tablet):not(.mobile) {
+      display: none !important;
+    }
+  }
+  
+  /* Widescreen Monitor */
+  @media only screen and (min-width: 1920px) {
+    [class*="mobile only"]:not([class*="widescreen"]),
+    [class*="tablet only"]:not([class*="widescreen"]),
+    [class*="computer only"]:not([class*="widescreen"]),
+    [class*="large screen only"]:not([class*="widescreen"]),
+    [class*="widescreen hidden"],
+    [class*="widescreen or lower hidden"] {
+      display: none !important;
+    }
+  }

@@ -21,9 +21,12 @@ class Predict extends Component {
             step3Complete: false,
             step1ShowError: false,
             step2ShowError: false,
+            step2ShowBranchError: false,
             selectedInput: {},
             selectedOutput: {},
-            paths: [],
+            availableIntermediates: [], // change to availableIntermediates
+            branches: [], // moving state up
+            numBranches: 1,
             selectedPaths: new Set(),
             queryResults: [],
             queryLog: [],
@@ -41,7 +44,7 @@ class Predict extends Component {
         this.handleStep2Submit = this.handleStep2Submit.bind(this);
         this.handleInputSelect = this.handleInputSelect.bind(this);
         this.handleOutputSelect = this.handleOutputSelect.bind(this);
-        this.handleMetaPathSelect = this.handleMetaPathSelect.bind(this);
+    //    this.handleMetaPathSelect = this.handleMetaPathSelect.bind(this);
         this.handleQueryResultSelect = this.handleQueryResultSelect.bind(this);
         this.handleBackToStep1 = this.handleBackToStep1.bind(this);
         this.handleBackToStep2 = this.handleBackToStep2.bind(this);
@@ -50,6 +53,10 @@ class Predict extends Component {
         this.handleSort = this.handleSort.bind(this);
         this.handleStep1Close = this.handleClose.bind(this, 'step1ShowError');
         this.handleStep2Close = this.handleClose.bind(this, 'step2ShowError');
+        this.handleStep2BranchClose = this.handleClose.bind(this, 'step2ShowBranchError')
+        this.handleAddBranch = this.handleAddBranch.bind(this);
+        this.handleAddInter = this.handleAddInter.bind(this);
+        this.handleRemoveBranch = this.handleRemoveBranch.bind(this);
     };
 
     //this function will be passed to autocomplete component
@@ -68,7 +75,7 @@ class Predict extends Component {
         });
     }
 
-    handleMetaPathSelect(event){
+  /*  handleMetaPathSelect(event){
         const selectedPaths = this.state.selectedPaths;
         if (event.target.checked) {
             selectedPaths.add(event.target.name)
@@ -77,6 +84,8 @@ class Predict extends Component {
         }
         this.setState({ selectedPaths: selectedPaths })
     }
+*/
+
 
     handleQueryResultSelect(event){
         const selectedQueryResults = this.state.selectedQueryResults;
@@ -114,7 +123,9 @@ class Predict extends Component {
             let edges = await findMetaPath(this.state.selectedInput.type,
                 this.state.selectedOutput);
             this.setState({
-                paths: edges
+                availableIntermediates: edges,
+                branches: [{ id: this.state.numBranches, source:this.state.selectedInput, 
+                             output:this.state.selectedOutput, intermediates:[], availableInters:edges}]
             });
         }
     }
@@ -123,39 +134,108 @@ class Predict extends Component {
         event.preventDefault();
         this.setState({
             currentStep: 1
-        }) 
+        })  
     }
+
+    checkBranches() {
+        var sameInters = [];
+        if (this.state.branches.length === 0 || this.state.branches.length === 1) return sameInters;
+        for (var i = 0; i < this.state.branches.length - 1; i++){
+            for (var j = i+1; j < this.state.branches.length; j++){
+                var inters1 = JSON.stringify(this.state.branches[i].intermediates);
+                var inters2 = JSON.stringify(this.state.branches[j].intermediates);
+                if (inters1 === inters2){
+                    sameInters.push({branch1: this.state.branches[i].id, branch2: this.state.branches[j].id})
+                }
+            }
+        }
+        return sameInters;
+    }
+
+    handleAddBranch(event) {
+        event.preventDefault();
+        if (this.state.numBranches >= 3) return;
+        this.setState(prevState => ({
+            branches: [...prevState.branches, { id: this.state.numBranches + 1, source:this.state.selectedInput,
+                                output:this.state.selectedOutput, intermediates:[], availableInters:this.state.availableIntermediates}],
+            numBranches: prevState.numBranches + 1
+        }));
+    }
+
+    async handleAddInter(event, branch) {
+        event.preventDefault();
+        if (branch.intermediates.length === 2) {
+            document.getElementById('intNodes' + branch.id).options['selectedIndex'] = 0;
+            return;
+        }
+        var sel_id = 'intNodes' + branch.id;
+        var selected = document.getElementById(sel_id).options;
+        selected = selected[selected['selectedIndex']];
+        if (selected.value === '') return;
+        let edges = await findMetaPath(selected.text, this.state.selectedOutput);
+        let tempBranches = this.state.branches;
+        tempBranches[branch.id - 1].intermediates.push(selected.text);
+        tempBranches[branch.id - 1].availableInters = edges;
+        this.setState({ branches: tempBranches });
+        document.getElementById(sel_id).options['selectedIndex'] = 0;
+    }
+
+    handleRemoveBranch(event, branch) {
+        event.preventDefault();
+        if (this.state.numBranches === 1) return;
+        var array = [...this.state.branches];
+        array.splice(branch.id - 1, 1);
+        for(let i = 0; i < array.length; i++) {
+            array[i].id = i+1;
+        }
+        this.setState(prevState => ({
+            branches: array,
+            numBranches: prevState.numBranches - 1
+        }));
+    }
+
 
     async handleStep2Submit(event) {
         event.preventDefault();
-        let intermediate_nodes = getIntermediateNodes(this.state.selectedPaths);
-        if (intermediate_nodes.length === 0) {
+
+        if (this.checkBranches().length !== 0){
+            console.log("same branches");
             this.setState({
-                step2ShowError: true
+                step2ShowBranchError: true
             });
-        } else {
-            this.setState({
-                currentStep: 3,
-                step2Complete: true
-            })
-            let response = await fetchQueryResult(this.state.selectedInput,
-                this.state.selectedOutput,
-                intermediate_nodes)
-            if (response.data.length === 0) {
+        }else{
+
+            // what is the format for intermediate nodes here? 2d array?
+            let intermediate_nodes = getIntermediateNodes(this.state.selectedPaths);
+            if (intermediate_nodes.length === 0) {
                 this.setState({
-                    step3Complete: true,
-                    queryResults: []
-                })
+                    step2ShowError: true
+                });
             } else {
                 this.setState({
-                    queryResults: response['data'],
-                    table: {
-                        ...this.state.table,
-                        display: response['data'].slice(this.state.table.activePage*10 - 10, this.state.table.activePage*10),
-                        totalPages: Math.ceil(response['data'].length/10)
-                    },
-                    queryLog: response['log'],                    step3Complete: true
-                });
+                    currentStep: 3,
+                    step2Complete: true
+                })
+                let response = await fetchQueryResult(this.state.selectedInput,
+                    this.state.selectedOutput,
+                    intermediate_nodes)
+                if (response.data.length === 0) {
+                    this.setState({
+                        step3Complete: true,
+                        queryResults: []
+                    })
+                } else {
+                    this.setState({
+                        queryResults: response['data'],
+                        table: {
+                            ...this.state.table,
+                            display: response['data'].slice(this.state.table.activePage*10 - 10, this.state.table.activePage*10),
+                            totalPages: Math.ceil(response['data'].length/10)
+                        },
+                        queryLog: response['log'],
+                        step3Complete: true
+                    });
+                }
             }
         }
     }
@@ -214,6 +294,8 @@ class Predict extends Component {
     }
 
     render() {
+        const branchCheck = this.checkBranches();
+
         return (
             <Container className="feature">
                 <Navigation name="Predict" />
@@ -240,9 +322,19 @@ class Predict extends Component {
                     showModal={this.state.step2ShowError}
                     handleClose={this.handleStep2Close}
                     paths={this.state.paths}
-                    handleSelect={this.handleMetaPathSelect}
+                    //handleSelect={this.handleMetaPathSelect}
                     handleSubmit={this.handleStep2Submit}
                     handleBackToStep1={this.handleBackToStep1}
+                    // added
+                    showBranchModal={this.state.step2ShowBranchError}
+                    handleBranchClose={this.handleStep2BranchClose}
+                    selectedInput={this.state.selectedInput}
+                    selectedOutput={this.state.selectedOutput}
+                    addBranch={this.handleAddBranch}
+                    branches={this.state.branches}
+                    addInter={this.handleAddInter}
+                    branchCheck={branchCheck}
+                    removeBranch={this.handleRemoveBranch}
                 />
                 <PredictQueryResult
                     shouldDisplay={this.state.currentStep === 3}

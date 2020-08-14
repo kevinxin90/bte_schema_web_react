@@ -87,18 +87,18 @@ const findMetaPath = async (input_type, output_type) => {
         if (res1.size === 0) {
             return [];
         }
-
+ 
         let res2 = [];
         res1.forEach(intermediate => {
             let tmp = meta_kg.filter({ input_type: intermediate, output_type: output_type });
             if (tmp.length > 0) {
-                res2.push(input_type + '-' + intermediate + '-' + output_type);
+                res2.push(intermediate);
             }
         });
         if (res2.length === 0) {
             return [];
         }
-        return res2
+        return res2;
     } catch (err) {
         console.log(err)
         return [];
