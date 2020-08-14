@@ -31,6 +31,7 @@ class Explain extends Component {
             paths: [],
             selectedPaths: new Set(),
             queryResults: { 'data': [], 'log': [] },
+            resolvedIds: {},
             filteredResults: [],
             filter: {
                 pred1: new Set(),
@@ -104,14 +105,14 @@ class Explain extends Component {
         } else {
             filter[data.name].delete(data.label);
         }
-        
+
         this.updateTable(filter);
-        this.setState({filter: filter});
+        this.setState({ filter: filter });
     }
 
     //update table when filter is modified
     updateTable(newFilter) {
-        const newFilteredResults = getFilteredResults(this.state.queryResults.data, newFilter);
+        const newFilteredResults = getFilteredResults(this.state.queryResults.data.result, newFilter);
         this.setState({
             filteredResults: newFilteredResults,
             table: {
@@ -133,7 +134,6 @@ class Explain extends Component {
             selectedQueryResults.delete(data.name);
             this.graphRef.current.deleteConnection(data.name);
         }
-        
         this.setState({
             selectedQueryResults: selectedQueryResults,
         });
@@ -209,8 +209,8 @@ class Explain extends Component {
             let q = new query();
             q.meta_kg.ops = q.meta_kg.ops.filter(item => item.query_operation.tags.includes('biothings'));
             let response = await q.query(this.state.selectedInput, this.state.selectedOutput, intermediate_nodes);
-            console.log("Response", response);
-            if (response.data.result.length === 0) {
+
+            if (response.data.length === 0) {
                 this.setState({
                     resultReady: true,
                     step3Complete: true,
@@ -218,6 +218,7 @@ class Explain extends Component {
                 })
             } else {
                 this.setState({
+                    resolvedIds: response.data.resolved_ids,
                     queryResults: response,
                     filteredResults: response.data.result,
                     table: {
@@ -271,7 +272,7 @@ class Explain extends Component {
         let new_data;
         if (column !== clickedColumn) { //sort new column
             if (clickedColumn.includes("publications")) {//sort publications by length and everything else by alphabetical order
-                new_data = _.sortBy(this.state.filteredResults, [function(result) { return _.get(result[clickedColumn], 'length', 0)}]);
+                new_data = _.sortBy(this.state.filteredResults, [function (result) { return _.get(result[clickedColumn], 'length', 0) }]);
             } else {
                 new_data = _.sortBy(this.state.filteredResults, [clickedColumn]);
             }

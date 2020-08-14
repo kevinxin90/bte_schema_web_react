@@ -16,7 +16,7 @@ const getPublicationLink = (publications) => {
         url.searchParams.append("term", publications.map(pub => pub.replace(/\D+/g, '')).join(',')); //comma separated list of publications (number only)
         return url.toString();
 
-    } else if  (pubType === "PMC") {
+    } else if (pubType === "PMC") {
         let url = new URL("https://www.ncbi.nlm.nih.gov/pmc/");
         url.searchParams.append("term", publications.map(pub => pub.replace(/\D+/g, '')).join(',')); //comma separated list of publications (number only)
         return url.toString();
@@ -47,7 +47,7 @@ const getFieldOptions = (results, field) => {
 const getFilteredResults = (results, filter) => {
     return results.filter((result) => {
         for (const key of Object.keys(filter)) {
-            if (filter[key].size > 0 && !filter[key].has(result[key])) { 
+            if (filter[key].size > 0 && !filter[key].has(result[key])) {
                 return false;
             }
         }
