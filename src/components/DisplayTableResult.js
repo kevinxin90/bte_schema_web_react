@@ -70,15 +70,42 @@ export default function BTETable(props) {
                             {_.map(headers, (col, i) => {
                                 if (Array.isArray(item[col])) { //if the item is an array, make it a space separated string (only applies to publications)
                                     return ( // use collapsing to prevent icon from wrapping
-                                        <Table.Cell key={i} collapsing>
+                                        <Table.Cell key={`cell-${_.uniqueId()}`} collapsing>
                                             <div>
                                                 <a href={getPublicationLink(item[col])} target="_blank" rel="noopener noreferrer">Publications ({item[col].length})&nbsp;&nbsp;<Icon name='external alternate' /></a>
                                             </div>
                                         </Table.Cell>
                                     );
+                                } else if (col.includes("_id")) { //show popup 
+                                    return (
+                                        <Popup trigger={
+                                                <Table.Cell key={`cell-${_.uniqueId()}`}>
+                                                    {item[col]}
+                                                </Table.Cell>
+                                            }
+                                            key={`popup-${_.uniqueId()}`}
+                                            hoverable
+                                            popperModifiers={{
+                                                preventOverflow: {
+                                                    boundariesElement: "viewport"
+                                                }
+                                            }}
+                                        >
+                                            <Popup.Header>Equivalent IDs</Popup.Header>
+                                            <Popup.Content>
+                                                {
+                                                    Object.keys(props.equivalentIds[item[col]])
+                                                    .filter(key => !["primary", "display", "type"].includes(key)) //ignore primary, display, and type fields
+                                                    .map((key) => <p style={{marginBottom: 0, marginTop: 5}} key={`p-${_.uniqueId()}`}>{`${key}: ${props.equivalentIds[item[col]][key]}`}</p>)
+                                                }
+                                            </Popup.Content>
+                                        </Popup>
+                                        
+                                        
+                                    );
                                 } else {
                                     return (
-                                        <Table.Cell key={i}>
+                                        <Table.Cell key={`cell-${_.uniqueId()}`}>
                                             {item[col]}
                                         </Table.Cell>
                                     );

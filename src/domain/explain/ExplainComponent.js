@@ -128,7 +128,7 @@ class Explain extends Component {
         const selectedQueryResults = this.state.selectedQueryResults;
         if (data.checked) {
             selectedQueryResults.add(data.name);
-            this.graphRef.current.addConnection(data.name, this.state.selectedInput.type, this.state.selectedOutput.type);
+            this.graphRef.current.addConnection(data.name, this.state.selectedInput.type, this.state.selectedOutput.type, this.state.queryResults.data.resolved_ids);
         } else {
             selectedQueryResults.delete(data.name);
             this.graphRef.current.deleteConnection(data.name);
@@ -209,7 +209,8 @@ class Explain extends Component {
             let q = new query();
             q.meta_kg.ops = q.meta_kg.ops.filter(item => item.query_operation.tags.includes('biothings'));
             let response = await q.query(this.state.selectedInput, this.state.selectedOutput, intermediate_nodes);
-            if (response.data.length === 0) {
+            console.log("Response", response);
+            if (response.data.result.length === 0) {
                 this.setState({
                     resultReady: true,
                     step3Complete: true,
@@ -218,12 +219,12 @@ class Explain extends Component {
             } else {
                 this.setState({
                     queryResults: response,
-                    filteredResults: response.data,
+                    filteredResults: response.data.result,
                     table: {
                         ...this.state.table,
-                        display: response.data.slice(0, 10),
+                        display: response.data.result.slice(0, 10),
                         activePage: 1,
-                        totalPages: Math.ceil(response.data.length / 10)
+                        totalPages: Math.ceil(response.data.result.length / 10)
                     },
                     filter: { // reset filter on new search
                         pred1: new Set(),
@@ -234,12 +235,12 @@ class Explain extends Component {
                         pred2_api: new Set()
                     },
                     filterOptions: {
-                        pred1: getFieldOptions(response.data, 'pred1'),
-                        pred1_api: getFieldOptions(response.data, 'pred1_api'),
-                        node1_name: getFieldOptions(response.data, 'node1_name'),
-                        node1_type: getFieldOptions(response.data, 'node1_type'),
-                        pred2: getFieldOptions(response.data, 'pred2'),
-                        pred2_api: getFieldOptions(response.data, 'pred2_api'),
+                        pred1: getFieldOptions(response.data.result, 'pred1'),
+                        pred1_api: getFieldOptions(response.data.result, 'pred1_api'),
+                        node1_name: getFieldOptions(response.data.result, 'node1_name'),
+                        node1_type: getFieldOptions(response.data.result, 'node1_type'),
+                        pred2: getFieldOptions(response.data.result, 'pred2'),
+                        pred2_api: getFieldOptions(response.data.result, 'pred2_api'),
                     },
                     resultReady: true,
                     step3Complete: true
@@ -342,7 +343,8 @@ class Explain extends Component {
                 <ExplainQueryResultWrapper
                     shouldDisplay={this.state.currentStep === 3}
                     resultReady={this.state.resultReady}
-                    content={this.state.queryResults['data']}
+                    content={this.state.queryResults.data.result}
+                    equivalentIds={this.state.queryResults.data.resolved_ids}
                     table={this.state.table}
                     filter={this.state.filter}
                     filterOptions={this.state.filterOptions}
