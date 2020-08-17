@@ -9,6 +9,10 @@ meta_kg.constructMetaKGSync();
  * @returns {string} Returns either the url to all of the entries or an empty string
  */
 const getPublicationLink = (publications) => {
+    if (!publications || publications.length === 0) {
+        return "";
+    }
+
     let pubType = publications[0].split(":")[0];
 
     if (pubType === "PMID") {

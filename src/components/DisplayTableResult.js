@@ -39,6 +39,7 @@ export default function BTETable(props) {
             >
                 <Accordion as={Menu} secondary vertical panels={panels}/>
             </Popup>
+            <Button content='Export as CSV' icon='file' labelPosition='left' onClick={props.export} />
             <div style={{overflowX: "auto", marginBottom: "1em", marginTop: "0.5em"}}>
                 <Table sortable unstackable celled compact>
                     <Table.Header>
@@ -69,13 +70,18 @@ export default function BTETable(props) {
                             </Table.Cell>
                             {_.map(headers, (col, i) => {
                                 if (col.includes("_publications")) { //get links for publication column
-                                    return ( // use collapsing to prevent icon from wrapping
-                                        <Table.Cell key={`cell-${_.uniqueId()}`} collapsing>
-                                            <div>
-                                                <a href={getPublicationLink(item[col])} target="_blank" rel="noopener noreferrer">Publications ({item[col].length})&nbsp;&nbsp;<Icon name='external alternate' /></a>
-                                            </div>
-                                        </Table.Cell>
-                                    );
+                                    if (item[col]) { //handle undefined
+                                        return ( // use collapsing to prevent icon from wrapping
+                                            <Table.Cell key={`cell-${_.uniqueId()}`} collapsing>
+                                                <div>
+                                                    <a href={getPublicationLink(item[col])} target="_blank" rel="noopener noreferrer">Publications ({item[col].length})&nbsp;&nbsp;<Icon name='external alternate' /></a>
+                                                </div>
+                                            </Table.Cell>
+                                        );
+                                    } else {
+                                        return <Table.Cell key={`cell-${_.uniqueId()}`} collapsing></Table.Cell>;
+                                    }
+                                    
                                 } else if (col.includes("_id") || col.includes("_label")) { //show popup for id and label columns
                                     return (
                                         <Popup trigger={

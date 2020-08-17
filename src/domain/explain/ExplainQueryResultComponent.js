@@ -30,6 +30,7 @@ export default class ExplainQueryResult extends Component {
                         </Modal>
                         <BTETable
                             handleSelect={this.props.handleSelect}
+                            export={this.props.export}
                             table={this.props.table}
                             handleSort={this.props.handleSort}
                             filter={this.props.filter}

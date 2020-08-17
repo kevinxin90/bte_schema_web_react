@@ -6,7 +6,7 @@ import Steps from '../../components/StepsComponent';
 import ExplainInput from './ExplainInputComponent';
 import { MetaPathForm } from '../../components/MetaPathFormComponent';
 import ExplainQueryResult from './ExplainQueryResultComponent';
-import { getIntermediateNodes, findMetaPath, getFieldOptions, getFilteredResults } from '../../shared/utils';
+import { getIntermediateNodes, findMetaPath, getFieldOptions, getFilteredResults, getPublicationLink } from '../../shared/utils';
 import query from "@biothings-explorer/explain";
 
 let _ = require('lodash');
@@ -70,6 +70,7 @@ class Explain extends Component {
         this.handlePaginationChange = this.handlePaginationChange.bind(this);
         this.handleSort = this.handleSort.bind(this);
         this.handleFilterSelect = this.handleFilterSelect.bind(this);
+        this.export = this.export.bind(this);
     };
 
     //this function will be passed to autocomplete component
@@ -309,6 +310,45 @@ class Explain extends Component {
         });
     }
 
+    //export table as a csv file
+    export = () => {
+        if (this.state.filteredResults.length === 0) {
+            console.log("No results to export.");
+            return;
+        }
+
+        //assemble csv content
+        let colNames = Object.keys(this.state.filteredResults[0]);
+        let tableContent = this.state.filteredResults.map((result) => {
+            return Object.keys(result).map((key) => {
+                if (key.includes("publications")) {
+                    return getPublicationLink(result[key]); //map publication to publication link
+                } else {
+                    return result[key];
+                }
+            }).join(',');
+        });
+        let csvContent = [colNames, ...tableContent].join('\n');
+
+        //download content as a csv file
+        let blob = new Blob([csvContent], {
+            type: "text/csv;charset=utf-8;"
+        });
+
+        if (navigator.msSaveBlob) { //for IE 
+            navigator.msSaveBlob(blob, "table.csv");
+        } else { //all other browsers
+            let link = document.createElement("a");
+            link.setAttribute("href", URL.createObjectURL(blob));
+            link.setAttribute("download", "table.csv"); 
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        return null;
+    }
+
     render() {
         return (
             <Container className="feature">
@@ -345,6 +385,7 @@ class Explain extends Component {
                 <ExplainQueryResultWrapper
                     shouldDisplay={this.state.currentStep === 3}
                     resultReady={this.state.resultReady}
+                    export={this.export}
                     content={this.state.queryResults.data.result}
                     equivalentIds={this.state.queryResults.data.resolved_ids}
                     table={this.state.table}
