@@ -68,7 +68,7 @@ export default function BTETable(props) {
                                 /> 
                             </Table.Cell>
                             {_.map(headers, (col, i) => {
-                                if (Array.isArray(item[col])) { //if the item is an array, make it a space separated string (only applies to publications)
+                                if (col.includes("_publications")) { //get links for publication column
                                     return ( // use collapsing to prevent icon from wrapping
                                         <Table.Cell key={`cell-${_.uniqueId()}`} collapsing>
                                             <div>
@@ -76,7 +76,7 @@ export default function BTETable(props) {
                                             </div>
                                         </Table.Cell>
                                     );
-                                } else if (col.includes("_id")) { //show popup 
+                                } else if (col.includes("_id") || col.includes("_label")) { //show popup for id and label columns
                                     return (
                                         <Popup trigger={
                                                 <Table.Cell key={`cell-${_.uniqueId()}`}>
@@ -94,9 +94,9 @@ export default function BTETable(props) {
                                             <Popup.Header>Equivalent IDs</Popup.Header>
                                             <Popup.Content>
                                                 {
-                                                    Object.keys(props.equivalentIds[item[col]])
+                                                    Object.keys(props.equivalentIds[item[col.replace("_label", "_id")]])
                                                     .filter(key => !["primary", "display", "type", "name"].includes(key)) //ignore primary, display, and type fields
-                                                    .map((key) => <p style={{marginBottom: 0, marginTop: 5}} key={`p-${_.uniqueId()}`}>{`${key}: ${props.equivalentIds[item[col]][key]}`}</p>)
+                                                    .map((key) => <p style={{marginBottom: 0, marginTop: 5}} key={`p-${_.uniqueId()}`}>{`${key}: ${props.equivalentIds[item[col.replace("_label", "_id")]][key]}`}</p>)
                                                 }
                                             </Popup.Content>
                                         </Popup>
