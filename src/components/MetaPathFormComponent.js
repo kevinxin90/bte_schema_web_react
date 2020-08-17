@@ -13,7 +13,7 @@ export const MetaPathForm = (props) => {
                         <input type="checkbox"
                             name={path}
                             onChange={props.handleSelect} 
-                            defaultChecked={false} /> 
+                            checked={props.selectedPaths.has(path)} /> 
                     </label>
                 </Table.Cell>
                 <Table.Cell key={path}><MetaPath className={path} /></Table.Cell>

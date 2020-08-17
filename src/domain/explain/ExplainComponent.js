@@ -337,6 +337,7 @@ class Explain extends Component {
                     showModal={this.state.step2ShowError}
                     handleClose={this.handleStep2Close}
                     paths={this.state.paths}
+                    selectedPaths={this.state.selectedPaths}
                     handleSelect={this.handleMetaPathSelect}
                     handleSubmit={this.handleStep2Submit}
                     handleBackToStep1={this.handleBackToStep1}
