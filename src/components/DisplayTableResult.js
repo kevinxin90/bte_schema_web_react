@@ -64,6 +64,7 @@ export default function BTETable(props) {
                             <Table.Cell key='checkbox' textAlign='center'>
                                 <Checkbox toggle
                                     name={Object.values(item).join('||')}
+                                    data={item}
                                     onClick={props.handleSelect}
                                     checked={props.selectedQueryResults.has(Object.values(item).join('||'))}
                                 /> 
