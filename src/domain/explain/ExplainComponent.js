@@ -30,7 +30,7 @@ class Explain extends Component {
             selectedOutput: {},
             paths: [],
             selectedPaths: new Set(),
-            queryResults: { 'data': [], 'log': [] },
+            queryResults: { 'data': {'result': []}, 'log': [] },
             resolvedIds: {},
             filteredResults: [],
             filter: {
@@ -156,7 +156,7 @@ class Explain extends Component {
                 step2Complete: false,
                 step3Complete: false,
                 selectedPaths: new Set(),
-                queryResults: { 'data': [], 'log': [] },
+                queryResults: { 'data': {'result': []}, 'log': [] },
                 selectedQueryResults: new Set(),
                 graph: { nodes: [], links: [] },
                 table: {
@@ -214,7 +214,7 @@ class Explain extends Component {
                 this.setState({
                     resultReady: true,
                     step3Complete: true,
-                    queryResults: { 'data': [], 'log': [] }
+                    queryResults: { 'data': {'result': []}, 'log': [] },
                 })
             } else {
                 this.setState({
