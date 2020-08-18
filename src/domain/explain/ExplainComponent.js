@@ -26,8 +26,8 @@ class Explain extends Component {
             step2Complete: false,
             step3Complete: false,
             resultReady: false,
-            selectedInput: {},
-            selectedOutput: {},
+            selectedInput: [],
+            selectedOutput: [],
             paths: [],
             selectedPaths: new Set(),
             queryResults: { 'data': {'result': []}, 'log': [] },
@@ -77,7 +77,7 @@ class Explain extends Component {
     //in order to retrieve the selected input
     handleInputSelect(value) {
         this.setState({
-            selectedInput: value
+            selectedInput: value.map(v => v.data)
         });
     }
 
@@ -85,7 +85,7 @@ class Explain extends Component {
     //in order to retrieve the selected output
     handleOutputSelect(value) {
         this.setState({
-            selectedOutput: value
+            selectedOutput: value.map(v => v.data)
         });
     }
 
@@ -130,6 +130,7 @@ class Explain extends Component {
         const selectedQueryResults = this.state.selectedQueryResults;
         if (data.checked) {
             selectedQueryResults.add(data.name);
+            console.log(data.data);
             this.graphRef.current.addConnection(data.data, this.state.selectedInput.type, this.state.selectedOutput.type, this.state.queryResults.data.resolved_ids);
         } else {
             selectedQueryResults.delete(data.name);
@@ -145,6 +146,7 @@ class Explain extends Component {
     })
 
     async handleStep1Submit(event) {
+        console.log("SUBMIT", event);
         event.preventDefault();
         if (_.isEmpty(this.state.selectedInput) || _.isEmpty(this.state.selectedOutput)) {
             this.setState({
