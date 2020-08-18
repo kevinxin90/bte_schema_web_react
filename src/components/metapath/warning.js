@@ -1,4 +1,5 @@
 import React from 'react';
+import { Icon } from 'semantic-ui-react';
 
 export default function Warning(props) {
     
@@ -9,7 +10,7 @@ export default function Warning(props) {
     return (
         <div className='ui warning message'>
             <div className='header'>
-                <i className='warning circle icon'></i>
+                <Icon name='warning circle'/>
                 The following branches are the same:
             </div>
             {sameBranches}

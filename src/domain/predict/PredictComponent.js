@@ -4,7 +4,7 @@ import { Navigation } from '../../components/Breadcrumb';
 import AccordionComponent from './PredictHelpComponent';
 import Steps from '../../components/StepsComponent';
 import PredictInput from './PredictInputComponent';
-import {MetaPathForm} from '../../components/MetaPathFormComponent';
+import {PredictMetapath} from '../../components/PredictMetapath';
 import PredictQueryResult from './PredictQueryResultComponent';
 import {recordsToTreeGraph, getIntermediateNodes, findMetaPath, fetchQueryResult} from '../../shared/utils';
 
@@ -22,6 +22,8 @@ class Predict extends Component {
             step1ShowError: false,
             step2ShowError: false,
             step2ShowBranchError: false,
+            filterError: false,
+            filterSuccess: false,
             selectedInput: {},
             selectedOutput: {},
             availableIntermediates: [], // change to availableIntermediates
@@ -57,6 +59,10 @@ class Predict extends Component {
         this.handleAddBranch = this.handleAddBranch.bind(this);
         this.handleAddInter = this.handleAddInter.bind(this);
         this.handleRemoveBranch = this.handleRemoveBranch.bind(this);
+        this.handleMergeBranches = this.handleMergeBranches.bind(this);
+        this.handleContinueBranches = this.handleContinueBranches.bind(this);
+        this.handleAddFilter = this.handleAddFilter.bind(this);
+        this.handleFilterClose = this.handleFilterClose.bind(this);
     };
 
     //this function will be passed to autocomplete component
@@ -125,7 +131,7 @@ class Predict extends Component {
             this.setState({
                 availableIntermediates: edges,
                 branches: [{ id: this.state.numBranches, source:this.state.selectedInput, 
-                             output:this.state.selectedOutput, intermediates:[], availableInters:edges}]
+                             output:this.state.selectedOutput, intermediates:[], availableInters:edges, filters:[{}]}]
             });
         }
     }
@@ -157,27 +163,50 @@ class Predict extends Component {
         if (this.state.numBranches >= 3) return;
         this.setState(prevState => ({
             branches: [...prevState.branches, { id: this.state.numBranches + 1, source:this.state.selectedInput,
-                                output:this.state.selectedOutput, intermediates:[], availableInters:this.state.availableIntermediates}],
+                                output:this.state.selectedOutput, intermediates:[], 
+                                availableInters:this.state.availableIntermediates, filters:[{}]}],
             numBranches: prevState.numBranches + 1
         }));
     }
 
-    async handleAddInter(event, branch) {
+    async handleAddInter(event, branch, node) {
         event.preventDefault();
-        if (branch.intermediates.length === 2) {
-            document.getElementById('intNodes' + branch.id).options['selectedIndex'] = 0;
-            return;
-        }
-        var sel_id = 'intNodes' + branch.id;
-        var selected = document.getElementById(sel_id).options;
-        selected = selected[selected['selectedIndex']];
-        if (selected.value === '') return;
-        let edges = await findMetaPath(selected.text, this.state.selectedOutput);
+        if (branch.intermediates.length === 2) return;
+        let edges = await findMetaPath(node, this.state.selectedOutput);
         let tempBranches = this.state.branches;
-        tempBranches[branch.id - 1].intermediates.push(selected.text);
+        tempBranches[branch.id - 1].intermediates.push(node);
         tempBranches[branch.id - 1].availableInters = edges;
+        if (branch.intermediates.length === 1){
+            tempBranches[branch.id - 1].filters.splice(0,0,{});
+        } else if (branch.intermediates.length === 2) {
+            tempBranches[branch.id - 1].filters.splice(1,0,{});
+        }
         this.setState({ branches: tempBranches });
-        document.getElementById(sel_id).options['selectedIndex'] = 0;
+    }
+
+    // count param in filter may not matter, filters all default to 50 w/o count
+    handleAddFilter(event, branch, filter) {
+        event.preventDefault();
+        if (!('name' in filter) || !('loc' in filter) || !('count' in filter)) {
+            this.setState({
+                filterError: true
+            });
+        } else {
+            let tempBranches = this.state.branches;
+            tempBranches[branch.id - 1].filters[filter['loc']] = filter;
+            delete tempBranches[branch.id - 1].filters[filter['loc']].loc;
+            this.setState({
+                branches: tempBranches,
+                filterError: false,
+                filterSuccess: true
+            });
+        }
+    }
+
+    handleFilterClose(event) {
+        event.preventDefault();
+        this.setState({ filterSuccess: false,
+                        filterError: false });
     }
 
     handleRemoveBranch(event, branch) {
@@ -194,12 +223,30 @@ class Predict extends Component {
         }));
     }
 
+    handleMergeBranches(event) {
+        event.preventDefault();
+        const sames = this.checkBranches();
+        if (sames.length === 1) {
+            this.handleRemoveBranch(event, sames[0]['branch2']);
+        } else { // all 3 branches are the same
+            let branch = this.state.branches[0];
+            this.setState({
+                branches: [branch]
+            })
+        }
+    }
+
+    async handleContinueBranches(event) {
+        event.preventDefault();
+        this.handleMergeBranches(event);
+        await this.handleStep2BranchClose(event);
+        this.handleStep2Submit(event);
+    }
 
     async handleStep2Submit(event) {
         event.preventDefault();
 
         if (this.checkBranches().length !== 0){
-            console.log("same branches");
             this.setState({
                 step2ShowBranchError: true
             });
@@ -317,7 +364,7 @@ class Predict extends Component {
                     handleInputSelect={this.handleInputSelect}
                     handleOutputSelect={this.handleOutputSelect}
                 />
-                <MetaPathForm
+                <PredictMetapath
                     shouldDisplay={this.state.currentStep === 2}
                     showModal={this.state.step2ShowError}
                     handleClose={this.handleStep2Close}
@@ -335,6 +382,11 @@ class Predict extends Component {
                     addInter={this.handleAddInter}
                     branchCheck={branchCheck}
                     removeBranch={this.handleRemoveBranch}
+                    handleContinueBranches={this.handleContinueBranches}
+                    addFilter={this.handleAddFilter}
+                    filterError={this.state.filterError}
+                    filterSuccess={this.state.filterSuccess}
+                    closeFilter={this.handleFilterClose}
                 />
                 <PredictQueryResult
                     shouldDisplay={this.state.currentStep === 3}

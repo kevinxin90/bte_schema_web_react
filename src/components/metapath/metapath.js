@@ -14,7 +14,11 @@ function Metapath(props) {
                             branches={props.branches} 
                             addInter={props.addInter} 
                             branchCheck={props.branchCheck}
-                            removeBranch={props.removeBranch}/>
+                            removeBranch={props.removeBranch}
+                            addFilter={props.addFilter}
+                            filterSuccess={props.filterSuccess}
+                            filterError={props.filterError}
+                            closeFilter={props.closeFilter}/>
                     <div className={["mobile only", "toggleGraph"].join(' ')}> 
                         <ModalSection branches={props.branches} source={props.source.name} output={props.output}/>
                     </div>

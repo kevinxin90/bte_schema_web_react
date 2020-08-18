@@ -10,6 +10,10 @@ export default function BranchList(props) {
                             branch={branch} 
                             addInter={props.addInter}
                             removeBranch={props.removeBranch}
+                            addFilter={props.addFilter}
+                            filterSuccess={props.filterSuccess}
+                            filterError={props.filterError}
+                            closeFilter={props.closeFilter}
                         />
                         <div className="branchDivider">
                             <Divider />

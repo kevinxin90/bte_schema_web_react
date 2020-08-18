@@ -7,13 +7,17 @@ const BranchErrorMessage = (props) => <Modal
         basic
         size='small'
       >
-        <Modal.Header>User Input Error</Modal.Header>
+        <Modal.Header>Branch Warning</Modal.Header>
         <Modal.Content>
-          <h3>Two or more of your branches are the same. Please make sure all branches are unique before continuing.</h3>
+          <h3>Two or more of your branches are the same. These will be treated as the same branch in the query process. Would you like to continue?</h3>
         </Modal.Content>
         <Modal.Actions>
-          <Button color='green' onClick={props.handleClose} inverted>
-            <Icon name='checkmark' /> Got it
+          <Button color='red' onClick={props.handleClose} inverted>
+             Stay on Metapath 
+          </Button>
+          <Button color='green' onClick={props.handleContinue} inverted>
+             Continue
+             <Icon name='angle right' />
           </Button>
         </Modal.Actions>
       </Modal>
