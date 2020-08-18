@@ -29,6 +29,7 @@ class Branch extends Component {
     
     handleFilterClose(e) {
         e.preventDefault();
+        e.stopPropagation();
         this.props.closeFilter(e);
         this.setState({
             filterOpen: false,
@@ -165,8 +166,8 @@ class Branch extends Component {
                 selection
                 upward={false}
                 className='addFilter'
-                open={this.state.filterOpen}
                 onClick={this.handleFilterClick}
+                open={this.state.filterOpen}
                 onBlur={this.handleFilterClose}>
                 <Dropdown.Menu>
                     <Dropdown.Header>Choose Filter:</Dropdown.Header>
@@ -209,7 +210,7 @@ class Branch extends Component {
                                 onClick={this.handleFilterClose}
                                 className={this.props.filterSuccess ? '' : 'hidden1'}
                                 disabled={this.props.filterSuccess ? false : true}>
-                            CLEAR
+                            CLOSE
                         </Button>
                     </Dropdown.Item>
                 </Dropdown.Menu>
