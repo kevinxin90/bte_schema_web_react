@@ -111,31 +111,26 @@ export default class ExplainInput extends Component {
                 <ErrorMessage field='input/output' modalOpen={this.props.showModal} handleClose={this.props.handleClose} />
                 <Segment color="green">
                     <Form onSubmit={this.props.handleStep1Submit}>
-                        <Form.Group>
-                            <h2> Step 1: Specify source and target nodes.</h2>
-                            <hr />
-                        </Form.Group>
-                        <Form.Group>
+                        <h2> Step 1: Specify source and target nodes.</h2>
+                        <hr />
+                        <div style={{marginTop: "1.25em"}}>
                             <Button basic color='red' content='Example 1' onClick={this.setExample1} />
                             <Button basic color='green' content='Example 2' onClick={this.setExample2} />
-                        </Form.Group>
+                        </div>
 
-                        <div>
+                        <div style={{marginBottom: '0.5em', marginTop: '1em'}}>
                             <Popup content="The ending node of the paths" header="Source Node" trigger={<h3>Source Nodes</h3>} />
                         </div>
-                        <br />
                         <InputSelect 
                             options={this.state.options1}
                             value={this.state.value1}
                             selectedOptions={this.state.selectedOptions1}
                             setState={this.setState1}
                         />
-                        <br />
 
-                        <div>
+                        <div style={{marginBottom: '0.5em', marginTop: '1em'}}>
                             <Popup content="The ending node of the paths" header="Target Node" trigger={<h3>Target Nodes</h3>} />
                         </div>
-                        <br />
                         <InputSelect 
                             options={this.state.options2}
                             value={this.state.value2}
