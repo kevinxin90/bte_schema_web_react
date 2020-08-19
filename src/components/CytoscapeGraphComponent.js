@@ -44,7 +44,7 @@ export default class CytoscapeGraph extends PureComponent {
     return [domRect.width, domRect.height];
   }
 
-  addConnection(res, inputType, outputType, equivalentIds) {
+  addConnection(res, equivalentIds) {
     let [width, height] = this.getDimensions();
 
     //check if nodes exist and if not add them to list of nodes
@@ -53,7 +53,7 @@ export default class CytoscapeGraph extends PureComponent {
         group: 'nodes',
         data: {
           id: res['input_label'],
-          type: inputType,
+          type: res['input_type'],
           equivalentIds: equivalentIds[res['input_id']]
         },
         position: {
@@ -61,7 +61,7 @@ export default class CytoscapeGraph extends PureComponent {
           y: height / 2
         },
         style: {
-          'background-color': colorSchema[semanticTypeShorthand[inputType]] || 'black'
+          'background-color': colorSchema[semanticTypeShorthand[res['input_type']]] || 'black'
         }
       });
     }
@@ -96,14 +96,14 @@ export default class CytoscapeGraph extends PureComponent {
         data: {
           id: res['output_label'],
           equivalentIds: equivalentIds[res['output_id']],
-          type: outputType,
+          type: res['output_type'],
         },
         position: {
           x: width - 100,
           y: height / 2
         },
         style: {
-          'background-color': colorSchema[semanticTypeShorthand[outputType]] || 'black'
+          'background-color': colorSchema[semanticTypeShorthand[res['output_type']]] || 'black'
         }
       });
     }

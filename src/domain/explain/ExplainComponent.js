@@ -36,7 +36,7 @@ class Explain extends Component {
             filter: {
                 pred1: new Set(),
                 pred1_api: new Set(),
-                node1_name: new Set(),
+                node1_label: new Set(),
                 node1_type: new Set(),
                 pred2: new Set(),
                 pred2_api: new Set()
@@ -233,7 +233,7 @@ class Explain extends Component {
                     filter: { // reset filter on new search
                         pred1: new Set(),
                         pred1_api: new Set(),
-                        node1_name: new Set(),
+                        node1_label: new Set(),
                         node1_type: new Set(),
                         pred2: new Set(),
                         pred2_api: new Set()
@@ -241,7 +241,7 @@ class Explain extends Component {
                     filterOptions: {
                         pred1: getFieldOptions(response.data.result, 'pred1'),
                         pred1_api: getFieldOptions(response.data.result, 'pred1_api'),
-                        node1_name: getFieldOptions(response.data.result, 'node1_name'),
+                        node1_label: getFieldOptions(response.data.result, 'node1_label'),
                         node1_type: getFieldOptions(response.data.result, 'node1_type'),
                         pred2: getFieldOptions(response.data.result, 'pred2'),
                         pred2_api: getFieldOptions(response.data.result, 'pred2_api'),
