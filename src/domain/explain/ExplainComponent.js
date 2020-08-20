@@ -25,6 +25,8 @@ class Explain extends Component {
             step1Complete: false,
             step2Complete: false,
             step3Complete: false,
+            step2Loading: false,
+            step3Loading: false,
             resultReady: false,
             selectedInput: [],
             selectedOutput: [],
@@ -72,6 +74,72 @@ class Explain extends Component {
         this.handleFilterSelect = this.handleFilterSelect.bind(this);
         this.export = this.export.bind(this);
     };
+
+    // handle calculating of metapaths and querying of results
+
+    // use setTimeout and window.requestAnimationFrame to ensure 
+    // that there has been a visual update before performing expensive computation tasks
+    // (otherwise it freezes for a moment)
+    componentDidUpdate() {
+        setTimeout(() => {
+            window.requestAnimationFrame(() => {
+                if (this.state.step2Loading) {
+                    findMetaPath(this.state.selectedInput.type, this.state.selectedOutput.type).then((edges) => {
+                        console.log(edges);
+                        this.setState({
+                            paths: edges,
+                            step2Loading: false,
+                        });
+                    });
+                } else if (this.state.step3Loading) {
+                    let intermediate_nodes = getIntermediateNodes(this.state.selectedPaths);
+                    let q = new query();
+                    q.meta_kg.ops = q.meta_kg.ops.filter(item => item.query_operation.tags.includes('biothings'));
+                    q.query(this.state.selectedInput, this.state.selectedOutput, intermediate_nodes).then((response) => {
+                        if (response.data.length === 0) {
+                            this.setState({
+                                resultReady: true,
+                                step3Loading: false,
+                                step3Complete: true,
+                                queryResults: { 'data': {'result': []}, 'log': [] },
+                            })
+                        } else {
+                            this.setState({
+                                resolvedIds: response.data.resolved_ids,
+                                queryResults: response,
+                                filteredResults: response.data.result,
+                                table: {
+                                    ...this.state.table,
+                                    display: response.data.result.slice(0, 10),
+                                    activePage: 1,
+                                    totalPages: Math.ceil(response.data.result.length / 10)
+                                },
+                                filter: { // reset filter on new search
+                                    pred1: new Set(),
+                                    pred1_api: new Set(),
+                                    node1_label: new Set(),
+                                    node1_type: new Set(),
+                                    pred2: new Set(),
+                                    pred2_api: new Set()
+                                },
+                                filterOptions: {
+                                    pred1: getFieldOptions(response.data.result, 'pred1'),
+                                    pred1_api: getFieldOptions(response.data.result, 'pred1_api'),
+                                    node1_label: getFieldOptions(response.data.result, 'node1_label'),
+                                    node1_type: getFieldOptions(response.data.result, 'node1_type'),
+                                    pred2: getFieldOptions(response.data.result, 'pred2'),
+                                    pred2_api: getFieldOptions(response.data.result, 'pred2_api'),
+                                },
+                                resultReady: true,
+                                step3Loading: false,
+                                step3Complete: true
+                            });
+                        }
+                    });
+                }
+            });
+        });
+    }
 
     //this function will be passed to autocomplete component
     //in order to retrieve the selected input
@@ -145,8 +213,7 @@ class Explain extends Component {
         [item]: false
     })
 
-    async handleStep1Submit(event) {
-        console.log("SUBMIT", event);
+    handleStep1Submit(event) {
         event.preventDefault();
         if (_.isEmpty(this.state.selectedInput) || _.isEmpty(this.state.selectedOutput)) {
             this.setState({
@@ -158,23 +225,10 @@ class Explain extends Component {
                 step1Complete: true,
                 step2Complete: false,
                 step3Complete: false,
+                step2Loading: true,
                 selectedPaths: new Set(),
                 queryResults: { 'data': {'result': []}, 'log': [] },
                 selectedQueryResults: new Set(),
-                graph: { nodes: [], links: [] },
-                table: {
-                    column: null,
-                    display: [],
-                    direction: null,
-                    activePage: 1,
-                    totalPages: 1
-                },
-            });
-            let edges = await findMetaPath(this.state.selectedInput.type,
-                this.state.selectedOutput.type);
-            console.log('edges', edges);
-            this.setState({
-                paths: edges
             });
         }
     }
@@ -186,7 +240,7 @@ class Explain extends Component {
         })
     }
 
-    async handleStep2Submit(event) {
+    handleStep2Submit(event) {
         event.preventDefault();
         let intermediate_nodes = getIntermediateNodes(this.state.selectedPaths);
         if (intermediate_nodes.length === 0) {
@@ -197,6 +251,7 @@ class Explain extends Component {
             this.setState({
                 currentStep: 3,
                 step2Complete: true,
+                step3Loading: true,
                 resultReady: false,
                 table: {
                     column: null,
@@ -206,50 +261,6 @@ class Explain extends Component {
                     totalPages: 1
                 },
             });
-            // let response = await fetchQueryResult(this.state.selectedInput,
-            //     this.state.selectedOutput,
-            //     intermediate_nodes)
-            let q = new query();
-            q.meta_kg.ops = q.meta_kg.ops.filter(item => item.query_operation.tags.includes('biothings'));
-            let response = await q.query(this.state.selectedInput, this.state.selectedOutput, intermediate_nodes);
-
-            if (response.data.length === 0) {
-                this.setState({
-                    resultReady: true,
-                    step3Complete: true,
-                    queryResults: { 'data': {'result': []}, 'log': [] },
-                })
-            } else {
-                this.setState({
-                    resolvedIds: response.data.resolved_ids,
-                    queryResults: response,
-                    filteredResults: response.data.result,
-                    table: {
-                        ...this.state.table,
-                        display: response.data.result.slice(0, 10),
-                        activePage: 1,
-                        totalPages: Math.ceil(response.data.result.length / 10)
-                    },
-                    filter: { // reset filter on new search
-                        pred1: new Set(),
-                        pred1_api: new Set(),
-                        node1_label: new Set(),
-                        node1_type: new Set(),
-                        pred2: new Set(),
-                        pred2_api: new Set()
-                    },
-                    filterOptions: {
-                        pred1: getFieldOptions(response.data.result, 'pred1'),
-                        pred1_api: getFieldOptions(response.data.result, 'pred1_api'),
-                        node1_label: getFieldOptions(response.data.result, 'node1_label'),
-                        node1_type: getFieldOptions(response.data.result, 'node1_type'),
-                        pred2: getFieldOptions(response.data.result, 'pred2'),
-                        pred2_api: getFieldOptions(response.data.result, 'pred2_api'),
-                    },
-                    resultReady: true,
-                    step3Complete: true
-                });
-            }
         }
     }
 
@@ -377,6 +388,7 @@ class Explain extends Component {
                 <MetaPathForm
                     shouldDisplay={this.state.currentStep === 2}
                     showModal={this.state.step2ShowError}
+                    isLoading={this.state.step2Loading}
                     handleClose={this.handleStep2Close}
                     paths={this.state.paths}
                     selectedPaths={this.state.selectedPaths}
