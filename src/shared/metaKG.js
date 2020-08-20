@@ -8,6 +8,7 @@ let constructed = false;
 export default function getMetaKG() {
   if (!constructed) {
     meta_kg.constructMetaKGSync();
+    constructed = true;
   }
 
   return meta_kg;
