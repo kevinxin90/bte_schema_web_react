@@ -17,7 +17,7 @@ export const MetaPathForm = (props) => {
                             checked={props.selectedPaths.has(path)} /> 
                     </label>
                 </Table.Cell>
-                <Table.Cell key={path}><MetaPath className={path} /></Table.Cell>
+                <Table.Cell key={path}><MetaPath className={`metapath-${i}`} path={path}/></Table.Cell>
             </Table.Row>
         )
     })

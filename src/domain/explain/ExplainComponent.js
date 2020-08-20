@@ -84,7 +84,7 @@ class Explain extends Component {
         setTimeout(() => {
             window.requestAnimationFrame(() => {
                 if (this.state.step2Loading) {
-                    findMetaPath(this.state.selectedInput.type, this.state.selectedOutput.type).then((edges) => {
+                    findMetaPath(this.state.selectedInput, this.state.selectedOutput).then((edges) => {
                         console.log(edges);
                         this.setState({
                             paths: edges,
@@ -199,7 +199,7 @@ class Explain extends Component {
         if (data.checked) {
             selectedQueryResults.add(data.name);
             console.log(data.data);
-            this.graphRef.current.addConnection(data.data, this.state.selectedInput.type, this.state.selectedOutput.type, this.state.queryResults.data.resolved_ids);
+            this.graphRef.current.addConnection(data.data, this.state.queryResults.data.resolved_ids);
         } else {
             selectedQueryResults.delete(data.name);
             this.graphRef.current.deleteConnection(data.data);
