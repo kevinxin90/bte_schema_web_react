@@ -135,34 +135,26 @@ path.link {
 }
 
 /* Added CSS elements for updated metapath */
-.divider {
+.metapathDivider {
     position: relative;
-    left: 50px;
+    left:0px;
 }
 
 .branchDivider {
     width: 80%;
-    margin-left: 20px;
+    margin-left: 10%;
     margin-top: 10px;
 }
 
 .path {
     position: relative;
-    margin-bottom: 20px;
+    margin-bottom: 20px !important;
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   }
   
   .graph {
     height: 500px;
-    /*margin: 20px;
-    margin-right: 100px;*/
     margin-bottom: 20px;
-  }
-  
-  .toggleGraph {
-    position: absolute;
-    top: 88%;
-    margin-right: 20%;
   }
   
   .branch {
@@ -182,8 +174,12 @@ path.link {
   .addFilter {
     float: right;
     margin-top: -40px;
-    width: 100px;
+    width: 25%;
     font-size: 80%;
+  }
+
+  .countInput {
+    width: 80%;
   }
 
   .error {
@@ -198,22 +194,25 @@ path.link {
   
   .addInter {
     float: right;
-    right: 156px;
+    right: 164px;
     margin-top: -40px;
     width: 25%;
     font-size: 80%;
   }
 
   .dropdownOptions {
-    font-size: .75rem !important;
+    font-size: .8rem !important;
   }
-  
-  .addInterButton {
-    float: right;
+
+  .predBox {
+    height: 30px !important;
+  }
+
+  .predOptions {
+    font-size: .7rem !important;
+    padding-left: 5px !important;
     position: relative;
-    left: 5px;
-    bottom: 40px;
-    height: 38px;
+    bottom: 5px;
   }
   
   .nodes {
@@ -231,9 +230,9 @@ path.link {
   }
 
   .branchWarning {
-    position: absolute;
-    top: 455px;
-    left: 345px;
+    position: relative;
+    left: 344px;
+    width: 49%;
   }
 
   .removeBranch {
@@ -277,6 +276,10 @@ path.link {
     position: relative;
     left: 0px;
   }
+
+  .filterHeader {
+    font-size: .7rem !important;
+  }
   
   [data-id="layer0-selectbox"],[data-id="layer1-drag"],[data-id="layer2-node"] {
     right: 10px;
@@ -295,27 +298,39 @@ path.link {
     [class*="or lower hidden"] {
       display: none !important;
     }
-  
     .path {
       margin: 10px;
     }
     .branch {
         margin-left: 0px;
     }
+    .metapathDivider {
+      display: none;
+    }
     .addInter {
       width: 125px;
       height: 22px !important;
       font-size: 60%;
-      margin-right: -15px;
+      right: 25%;
     }
-    .addInterButton {
-      height: 23px;
-      font-size: 50%;
-      left: 20px;
-      padding-top: -100px;
+    .addFilter {
+      height: 22px !important;
+      font-size: 60%;
     }
     .toggleGraph {
-      right: 100px;
+      margin-left: 240px;
+    }
+    .branchWarning {
+      left: 295px;
+      top: 54px;
+      width: 55%;
+      margin-top: -40px;
+    }
+    .dropdownOptions {
+      font-size: .7rem !important;
+    }
+    .predOptions {
+      font-size: .65rem !important;
     }
   }
   
@@ -329,9 +344,18 @@ path.link {
     [class*="or lower hidden"]:not(.mobile) {
       display: none !important;
     }
+    .metapathDivider {
+      display: none;
+    }
+    .toggleGraph {
+      margin-left: 260px;
+    }
     .path {
       margin: 20px;
+      margin-top: 0px;
       margin-right: 5px;
+      margin-bottom: 0px;
+      width: 155%;
     }
     .graph {
       margin: 20px;
@@ -339,6 +363,13 @@ path.link {
     }
     .addInter {
       width: 160px;
+      right: 159px;
+    }
+    .branchWarning {
+      left: 295px;
+      top: 54px;
+      width: 55%;
+      margin-top: -40px;
     }
   }
   
@@ -352,9 +383,15 @@ path.link {
     [class*="or lower hidden"]:not(.tablet):not(.mobile) {
       display: none !important;
     }
-  
     .addInter {
       width: 160px;
+      position: relative;
+      right: 156px;
+    }
+    .branchWarning {
+      position: relative;
+      left: 223px;
+      width: 60%;
     }
   }
   

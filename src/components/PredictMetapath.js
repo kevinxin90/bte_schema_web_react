@@ -19,15 +19,17 @@ export const PredictMetapath = (props) => {
                 <h2> Step 2: Select the MetaPath you want to execute.</h2>
                 <Metapath 
                     source={props.selectedInput} 
-                    output={props.selectedOutput} 
+                    //output={props.selectedOutput} 
                     addBranch={props.addBranch} 
                     branches={props.branches}
-                    addInter={props.addInter}
+                    addNode={props.addNode}
                     branchCheck={props.branchCheck}
                     removeBranch={props.removeBranch}
                     addFilter={props.addFilter}
                     filterSuccess={props.filterSuccess}
                     filterError={props.filterError}
+                    filterPredError={props.filterPredError}
+                    filterCountError={props.filterCountError}
                     closeFilter={props.closeFilter}/>
                 <div className="col text-center">
                     <Button type='submit' onClick={props.handleBackToStep1}>Back</Button>

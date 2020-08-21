@@ -105,6 +105,33 @@ const findMetaPath = async (input_type, output_type) => {
     }
 }
 
+const findNext = async (input_type) => {
+    try {
+        let res1 = new Set(meta_kg.filter({ input_type: input_type }).map(rec => rec.association.output_type));
+        if (res1.size === 0) {
+            return [];
+        }
+        return res1;
+    } catch (err) {
+        console.log(err);
+        return [];
+    }
+}
+
+const findPredicates = async (input_type, output_type) => {
+    try {
+        let res1 = new Set(meta_kg.filter({ input_type: input_type, output_type: output_type }).map(rec => rec.association.predicate));
+        if (res1.size === 0) {
+            return [];
+        }
+        return res1;
+    } catch (err) {
+        console.log(err);
+        return [];
+    }
+}
+
+
 const fetchQueryResult = async (input, output, intermediate) => {
     let url = new URL('https://geneanalysis.ncats.io/explorer_api/v1/connect');
     let params = {
@@ -127,4 +154,4 @@ const fetchQueryResult = async (input, output, intermediate) => {
 
 //export { findMetaPath, fetchQueryResult, recordsToTreeGraph, recordsToD3Graph, getIntermediateNodes, recordsToTreeGraph };
 
-export { getIntermediateNodes, fetchQueryResult, findMetaPath, recordsToD3Graph, recordsToTreeGraph }
+export { getIntermediateNodes, fetchQueryResult, findMetaPath, recordsToD3Graph, recordsToTreeGraph, findPredicates, findNext }

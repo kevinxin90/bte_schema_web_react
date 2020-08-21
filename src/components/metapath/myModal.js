@@ -5,11 +5,13 @@ import Graph from './graph';
 class MyModal extends Component {
     
     render() {
+
         return (
             <Modal
                 closeIcon
                 open={this.props.modalOpen}
                 onClose={this.props.handleClose}
+                size='small'
             >
                 <Modal.Header>Graph</Modal.Header>
                 <Modal.Content>

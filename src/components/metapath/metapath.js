@@ -1,7 +1,6 @@
 import React from 'react';
 import Graph from './graph';
 import Path from './path';
-import ModalSection from './modalSection';
 import { Divider } from 'semantic-ui-react';
 
 function Metapath(props) {
@@ -12,22 +11,24 @@ function Metapath(props) {
                 <div className="ten wide column">
                     <Path   addBranch={props.addBranch} 
                             branches={props.branches} 
-                            addInter={props.addInter} 
+                            addNode={props.addNode} 
                             branchCheck={props.branchCheck}
                             removeBranch={props.removeBranch}
                             addFilter={props.addFilter}
                             filterSuccess={props.filterSuccess}
                             filterError={props.filterError}
-                            closeFilter={props.closeFilter}/>
-                    <div className={["mobile only", "toggleGraph"].join(' ')}> 
-                        <ModalSection branches={props.branches} source={props.source.name} output={props.output}/>
-                    </div>
+                            closeFilter={props.closeFilter}
+                            filterPredError={props.filterPredError}
+                            filterCountError={props.filterCountError}
+                            source={props.source}
+                            //output={props.output}
+                            />
                 </div>
-                <div className="divider">
+                <div className="metapathDivider">
                     <Divider vertical/>
                 </div>
-                <div className="six wide column mobile hidden">
-                    <Graph branches={props.branches} source={props.source} output={props.output}/>
+                <div className="six wide column mobile hidden tablet hidden">
+                    <Graph branches={props.branches} source={props.source} /*output={props.output}*/ />
                 </div>
 
             </div>
