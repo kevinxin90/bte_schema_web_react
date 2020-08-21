@@ -89,8 +89,8 @@ const findMetaPath = async (inputs, outputs) => {
         console.log(inputs, outputs);
 
         //get unique inputs and outputs
-        let input_type = [... new Set(inputs.map(input => input.type))];
-        let output_type = [... new Set(outputs.map(output => output.type))];
+        let input_type = [...new Set(inputs.map(input => input.type))];
+        let output_type = [...new Set(outputs.map(output => output.type))];
 
         let res1 = new Set(meta_kg.filter({ input_type: input_type }).map(rec => rec.association.output_type));
         if (res1.size === 0) {
