@@ -16,7 +16,7 @@ export default class InputSelect extends Component {
       .then(response => {
         let new_options = [];
         
-        for (let record of Object.keys(response).map((key) => response[key]).flat()) {
+        for (let record of Object.keys(response).map((key) => response[key]).flat().sort((a, b) => (b._score - a._score))) {
           new_options.push({
             key: record.display + _.uniqueId(),
             text: record.name,
