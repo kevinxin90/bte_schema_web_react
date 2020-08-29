@@ -9,6 +9,7 @@ import PredictQueryResult from './PredictQueryResultComponent';
 import {recordsToTreeGraph, getIntermediateNodes, findMetaPath, findPredicates, findNext, fetchQueryResult} from '../../shared/utils';
 import { interpolateReds } from 'd3';
 
+
 let _ = require('lodash');
 
 class Predict extends Component {
@@ -71,7 +72,7 @@ class Predict extends Component {
 
     //this function will be passed to autocomplete component
     //in order to retrieve the selected input
-    handleInputSelect(value) {    
+    handleInputSelect(value) {
         this.setState({
             selectedInput: value
         });
@@ -79,13 +80,14 @@ class Predict extends Component {
 
     //this function will be passed to autocomplete component
     //in order to retrieve the selected output
-  /*  handleOutputSelect(value) {    
+    handleOutputSelect(value) {    
         this.setState({
             selectedOutput: value
         });
     }*/
+  
+    handleMetaPathSelect(event){
 
-  /*  handleMetaPathSelect(event){
         const selectedPaths = this.state.selectedPaths;
         if (event.target.checked) {
             selectedPaths.add(event.target.name)
@@ -97,7 +99,7 @@ class Predict extends Component {
 */
 
 
-    handleQueryResultSelect(event){
+    handleQueryResultSelect(event) {
         const selectedQueryResults = this.state.selectedQueryResults;
         if (event.target.checked) {
             selectedQueryResults.add(event.target.name)
@@ -105,8 +107,10 @@ class Predict extends Component {
             selectedQueryResults.delete(event.target.name)
         }
         const graph = recordsToTreeGraph(selectedQueryResults)
-        this.setState({ selectedQueryResults: selectedQueryResults,
-                        graph: graph })
+        this.setState({
+            selectedQueryResults: selectedQueryResults,
+            graph: graph
+        })
     }
 
     handleClose = (item) => this.setState({
@@ -315,27 +319,27 @@ class Predict extends Component {
         }
     }
 
-    
+
 
     handleBackToStep2(event) {
         event.preventDefault();
         this.setState({
             currentStep: 2
-        }) 
+        })
     }
 
     handleBackToStep3(event) {
         event.preventDefault();
         this.setState({
             currentStep: 3
-        }) 
+        })
     }
 
     handleSort(event) {
         let clickedColumn = event.target.className.split(' ').slice(-1)[0];
-        
+
         const { column, direction } = this.state.table;
-    
+
         if (column !== clickedColumn) {
             this.setState({
                 table: {
@@ -344,27 +348,27 @@ class Predict extends Component {
                     direction: 'descending',
                 },
                 queryResults: _.sortBy(this.state.queryResults, [clickedColumn])
-          });
-          return
+            });
+            return
         }
-    
+
         this.setState({
             table: {
                 ...this.state.table,
                 direction: direction === 'ascending' ? 'descending' : 'ascending',
-                display: this.state.queryResults.slice(this.state.table.activePage*10 - 10, this.state.table.activePage*10),
+                display: this.state.queryResults.slice(this.state.table.activePage * 10 - 10, this.state.table.activePage * 10),
             },
             queryResults: this.state.queryResults.reverse(),
         });
     }
-    
+
     handlePaginationChange = (e, { activePage }) => {
         this.setState({
-            table:{
+            table: {
                 ...this.state.table,
-                display: this.state.queryResults.slice(activePage*10 - 10, activePage*10),
+                display: this.state.queryResults.slice(activePage * 10 - 10, activePage * 10),
                 activePage: activePage
-            }      
+            }
         });
     }
 
@@ -429,7 +433,7 @@ class Predict extends Component {
                     handleSelect={this.handleQueryResultSelect}
                     graph={this.state.graph}
                 />
-            </Container>        
+            </Container>
         )
     }
 }

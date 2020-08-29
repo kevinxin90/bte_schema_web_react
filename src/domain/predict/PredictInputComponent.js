@@ -16,6 +16,7 @@ export default class PredictInput extends Component {
             },
         };
         this.handleSearchChange1 = this.handleSearchChange1.bind(this);
+        this.handleInputSelect = this.handleInputSelect.bind(this);
     }
 
     handleSearchChange1 = (e, { value }) => {
@@ -53,6 +54,16 @@ export default class PredictInput extends Component {
         })
     }
 
+    handleInputSelect = (result) => {
+        this.setState({
+            autocomplete1: {
+                ...this.state.autocomplete1,
+                value: result.title
+            }
+        })
+        this.props.handleInputSelect(result);
+    }
+
     render() {
         return (
             <div className={this.props.shouldDisplay ? '' : 'hidden'}>
@@ -69,7 +80,7 @@ export default class PredictInput extends Component {
                         <br />
                         <Form.Group>
                             <AutoComplete 
-                                handleselect={this.props.handleInputSelect}
+                                handleSelect={this.handleInputSelect}
                                 handleSearchChange={this.handleSearchChange1}
                                 state={this.state.autocomplete1}
                             />

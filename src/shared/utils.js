@@ -1,55 +1,60 @@
 import MetaKG from "@biothings-explorer/smartapi-kg";
 
+console.log("Constructing meta kg");
 const meta_kg = new MetaKG();
 meta_kg.constructMetaKGSync();
 
-const posOrNeg = (num) => {
-    if (num === 0) {
-        return 0
-    } else if (num % 2 === 0) {
-        return 1
+/** get link to page of results for list of publications
+ * @param {Array.<string>} publications Publications in the format "type:number", also must all be the same format and either "PMID" or "PMC"
+ * @returns {string} Returns either the url to all of the entries or an empty string
+ */
+const getPublicationLink = (publications) => {
+    let pubType = publications[0].split(":")[0];
+
+    if (pubType === "PMID") {
+        let url = new URL("https://pubmed.ncbi.nlm.nih.gov/");
+        url.searchParams.append("term", publications.map(pub => pub.replace(/\D+/g, '')).join(',')); //comma separated list of publications (number only)
+        return url.toString();
+
+    } else if (pubType === "PMC") {
+        let url = new URL("https://www.ncbi.nlm.nih.gov/pmc/");
+        url.searchParams.append("term", publications.map(pub => pub.replace(/\D+/g, '')).join(',')); //comma separated list of publications (number only)
+        return url.toString();
     } else {
-        return -1
+        return "";
     }
 }
 
-const recordsToD3Graph = (records) => {
-    records = Array.from(records);
-    let graph = { nodes: [{ id: 'kevin' }], links: [] };
-    if (Array.isArray(records) && records.length) {
-        graph['nodes'] = [
-            {
-                id: records[0].split('||')[0],
-                color: 'green',
-                x: 20,
-                y: 200
-            },
-            {
-                id: records[0].split('||')[7],
-                color: 'blue',
-                x: 700,
-                y: 200
-            }
-        ]
-    };
-    for (let i = 0; i < records.length; i++) {
-        if (i < 10) {
-            let rec = records[i].split('||')
-            graph['links'].push({
-                'source': rec[0],
-                'target': rec[3],
-                'label': rec[1]
-            })
-            graph['links'].push({
-                'source': rec[3],
-                'target': rec[7],
-                'label': rec[5]
-            })
-            graph['nodes'].push({ id: rec[3], color: 'red', x: 360, y: 200 + posOrNeg(i) * Math.ceil(i / 2) * 30 })
-        }
-    }
-    return graph
+/** get possible values for a field in the results
+ * @param {Array.<Object>} results Array of result objects
+ * @param {string} field name of the field
+ * @returns {Array.<string>} Array of unique strings
+ */
+const getFieldOptions = (results, field) => {
+    let possiblities = new Set();
+    results.forEach(result => {
+        possiblities.add(result[field]);
+    });
+
+    return Array.from(possiblities).sort();
 }
+
+/** filter results by a filter object
+ * @param {Array.<Object>} results Array of result objects
+ * @param {Object.<Set>} filter filter object of sets representing which fields and for which values to filter for
+ * @returns {Array.<Object>} Filtered results
+ */
+const getFilteredResults = (results, filter) => {
+    return results.filter((result) => {
+        for (const key of Object.keys(filter)) {
+            if (filter[key].size > 0 && !filter[key].has(result[key])) {
+                return false;
+            }
+        }
+        return true;
+    });
+}
+
 
 const recordsToTreeGraph = (records) => {
     records = Array.from(records);
@@ -152,6 +157,5 @@ const fetchQueryResult = async (input, output, intermediate) => {
     }
 }
 
-//export { findMetaPath, fetchQueryResult, recordsToTreeGraph, recordsToD3Graph, getIntermediateNodes, recordsToTreeGraph };
-
 export { getIntermediateNodes, fetchQueryResult, findMetaPath, recordsToD3Graph, recordsToTreeGraph, findPredicates, findNext }
+

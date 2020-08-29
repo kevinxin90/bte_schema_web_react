@@ -77,3 +77,54 @@ See the section about [running tests](https://facebook.github.io/create-react-ap
 ### `npm run build`
 
 Builds the app for production to the `build` folder.<br>
+
+## Folder structure
+
+- Root:
+  - `package.json`
+  - `README.md`
+  - src folder (main folder storing code)
+    - assets folder (store all static images)
+    - components folder (store React components)
+      - `CytoscapeGraphComponnet.js` (for cytoscape visualization of query results)
+      - `DimerComponent.js` (display when BTE is querying results)
+      - `DisplayErrorComponent.js` (display error message)
+      - `DrawMetaPath.js` (drawing meta path using D3 library)
+      - `StepsComponent.js` (construct bte steps)
+    - domain folder (store major modules of BTE)
+      - explain folder (store feature for Explain)
+        - `ExplainComponent.js` (main file for explain, store all states related to explain)
+        - `ExplainInputComponent.js` (retrieving input for Explain query from user)
+        - `ExplainQueryResultComponent.js` (display query results for Explain)
+      - predict folder (store features for Predict)
+        - `PredictComponent.js` (main file for predict, store all states related to predict)
+        - `PredictHelpComponent.js` (display hint for Predict)
+        - `PredictInputComponent.js` (retrieving input for Predict query from user)
+        - `PredictQueryResultComponent.js` (display query results for Predict)
+    - `Footer.js` (footer related display)
+    - `Header.js` (header related display)
+    - `Home.js` (entry point of BTE)
+    - `Main.js` (define routes for BTE)
+  - shared folder (some shared utils functions for BTE)
+    - `semanticTypes.js` (list all semantic types for BTE and their shorthands representation)
+    - `utils.js` (some utils functions commonly used by other components)
+
+## Deploy
+
+A docker file is included in the base directory and can be used to build the customized container
+
+```bash
+docker build -t bte_web .
+```
+
+Container can be built and started using docker-compose
+
+```bash
+docker-compose up
+```
+
+Public Docker image located at [link](https://hub.docker.com/repository/docker/biothings/bte_web)
+
+## Usage
+
+`http://<HOST>:8853/explorer`
