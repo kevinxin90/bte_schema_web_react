@@ -3,7 +3,7 @@ import {colorSchema, semanticTypeShorthand} from '../shared/semanticTypes'
 import * as d3 from 'd3';
 
 const DrawMetaPaths = (props) => {
-    useEffect(() => {
+    useEffect((props) => {
         draw(props)
     }, [])
     return <div className={props.className} />

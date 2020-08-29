@@ -48,5 +48,3 @@ export const MetaPathForm = (props) => {
         </div>
     )
 }
-
-
