@@ -2,7 +2,7 @@ import MetaKG from "@biothings-explorer/smartapi-kg";
 
 console.log("Constructing meta kg");
 const meta_kg = new MetaKG();
-meta_kg.constructMetaKGSync();
+meta_kg.constructMetaKGSync("biothings");
 
 /** get link to page of results for list of publications
  * @param {Array.<string>} publications Publications in the format "type:number", also must all be the same format and either "PMID" or "PMC"
@@ -92,7 +92,34 @@ const findMetaPath = async (input_type, output_type) => {
         if (res1.size === 0) {
             return [];
         }
- 
+
+        let res2 = [];
+        res1.forEach(intermediate => {
+            let tmp = meta_kg.filter({ input_type: intermediate, output_type: output_type });
+            if (tmp.length > 0) {
+                res2.push(input_type + '-' + intermediate + '-' + output_type);
+            }
+        });
+        if (res2.length === 0) {
+            return [];
+        }
+        return res2
+    } catch (err) {
+        console.log(err)
+        return [];
+    }
+}
+
+const findPredictMetaPath = async (input_type, output_type) => {
+    try {
+        // let response = await fetch('http://localhost:8856/explorer_api/v1/find_metapath?input_cls=' + input_type + '&output_cls=' + output_type);
+        // response = await response.json();
+        // return response['edges'];
+        let res1 = new Set(meta_kg.filter({ input_type: input_type }).map(rec => rec.association.output_type));
+        if (res1.size === 0) {
+            return [];
+        }
+
         let res2 = [];
         res1.forEach(intermediate => {
             let tmp = meta_kg.filter({ input_type: intermediate, output_type: output_type });
@@ -136,26 +163,12 @@ const findPredicates = async (input_type, output_type) => {
     }
 }
 
-
-const fetchQueryResult = async (input, output, intermediate) => {
-    let url = new URL('https://geneanalysis.ncats.io/explorer_api/v1/connect');
-    let params = {
-        input_obj: JSON.stringify(input),
-        output_obj: JSON.stringify(output),
-        intermediate_nodes: JSON.stringify(intermediate)
-    };
-    url.search = new URLSearchParams(params).toString();
-    try {
-        let response = await fetch(url);
-        if (!response.ok) {
-            return { 'data': [], 'log': [] }
-        };
-        response = await response.json();
-        return response
-    } catch (err) {
-        return { 'data': [], 'log': [] }
-    }
+const findSmartAPIEdgesByInputAndOutput = (input_type, output_type) => {
+    return meta_kg.filter({
+        input_type,
+        output_type
+    })
 }
 
-export { getIntermediateNodes, fetchQueryResult, findMetaPath, recordsToD3Graph, recordsToTreeGraph, findPredicates, findNext }
+export { getIntermediateNodes, findSmartAPIEdgesByInputAndOutput, findMetaPath, findPredictMetaPath, recordsToTreeGraph, findPredicates, findNext, getFieldOptions, getFilteredResults, getPublicationLink }
 
