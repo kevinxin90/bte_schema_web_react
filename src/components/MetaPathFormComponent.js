@@ -12,8 +12,8 @@ export const MetaPathForm = (props) => {
                     <label>
                         <input type="checkbox"
                             name={path}
-                            onChange={props.handleSelect} 
-                            defaultChecked={false} /> 
+                            onChange={props.handleSelect}
+                            defaultChecked={false} />
                     </label>
                 </Table.Cell>
                 <Table.Cell key={path}><MetaPath className={path} /></Table.Cell>
@@ -23,7 +23,7 @@ export const MetaPathForm = (props) => {
 
     return (
         <div className={props.shouldDisplay ? '' : 'hidden'}>
-            <ErrorMessage field="metapath" modalOpen={props.showModal} handleClose={props.handleClose}/>
+            <ErrorMessage field="metapath" modalOpen={props.showModal} handleClose={props.handleClose} />
             <Segment color='red'>
                 <h2> Step 2: Select the MetaPath you want to execute.</h2>
                 <hr />
