@@ -1,8 +1,7 @@
-import BTETable from '../../components/DisplayTableResult';
 import ReactLoader from '../../components/DimerComponent';
 import React, { Component } from 'react';
-import { Segment, Divider, Modal, Button } from 'semantic-ui-react';
-import TreeGraph from '../../components/TreeGraphComponent';
+import { Segment, Tab } from 'semantic-ui-react';
+import BTETable from '../../components/DisplayTableResult';
 
 export default class PredictQueryResult extends Component {
     render() {
@@ -12,35 +11,35 @@ export default class PredictQueryResult extends Component {
             )
         })
 
-        return (
-            <div className={this.props.shouldDisplay ? '' : 'hidden'}>
-                <Segment color='blue'>
-                    {this.props.resultReady ? null: <ReactLoader />}
-                    {this.props.resultReady && this.props.content.length === 0 ? <h2 className="emptyQueryResult">Sorry, no results could be found for your query. Please refine your search!</h2> : ''}
-                    
-                    {this.props.resultReady && this.props.content.length > 0? 
-                    <div>
-                        <h2> Step 3: Select the Query Result you want to display.</h2>
-                        <hr />
-                        <Modal trigger={<Button basic color="red" className="logButton">Query Execution Logs</Button>} closeIcon>
-                            <Modal.Header>Query Execution Logs</Modal.Header>
-                            <Modal.Description>
-                                {paragraphs}
-                            </Modal.Description>
-                        </Modal>
+        // let panes = [
+        //     { menuItem: 'Tab 1', render: () => <Tab.Pane>Tab 1 Content</Tab.Pane> },
+        //     { menuItem: 'Tab 2', render: () => <Tab.Pane>Tab 2 Content</Tab.Pane> },
+        //     { menuItem: 'Tab 3', render: () => <Tab.Pane>Tab 3 Content</Tab.Pane> },
+        // ]
+        let panes = this.props.branches.map((item, i) => {
+            return {
+                menuItem: 'Path ' + (i + 1),
+                render: () =>
+                    <Tab.Pane>
+                        <p>{'Path ' + (i + 1)}</p>
                         <BTETable
-                            resultReady={this.props.resultReady}
-                            content={this.props.content}
                             handleSelect={this.props.handleSelect}
                             table={this.props.table}
                             handleSort={this.props.handleSort}
+                            filter={this.props.filter}
+                            filterOptions={this.props.filterOptions}
+                            handleFilterSelect={this.props.handleFilterSelect}
                             handlePaginationChange={this.props.handlePaginationChange}
+                            selectedQueryResults={this.props.selectedQueryResults}
                         />
-                        <Divider />
-                    </div> : null}
-                    {Object.keys(this.props.graph).length === 0 ? null: 
-                        <TreeGraph graph={this.props.graph} />
-                    }           
+                    </Tab.Pane>
+            }
+        })
+
+        return (
+            <div className={this.props.shouldDisplay ? '' : 'hidden'}>
+                <Segment color='blue'>
+                    <Tab panes={panes} />
                 </Segment>
             </div>
         )

@@ -4,11 +4,10 @@ import { Navigation } from '../../components/Breadcrumb';
 import AccordionComponent from './PredictHelpComponent';
 import Steps from '../../components/StepsComponent';
 import PredictInput from './PredictInputComponent';
-import {PredictMetapath} from '../../components/PredictMetapath';
+import { PredictMetapath } from '../../components/PredictMetapath';
 import PredictQueryResult from './PredictQueryResultComponent';
-import {recordsToTreeGraph, getIntermediateNodes, findMetaPath, findPredicates, findNext, fetchQueryResult} from '../../shared/utils';
-import { interpolateReds } from 'd3';
-
+import { recordsToTreeGraph, findSmartAPIEdgesByInputAndOutput, findPredicates, findNext, fetchQueryResult } from '../../shared/utils';
+import { queryAPIs } from '../../shared/query';
 
 let _ = require('lodash');
 
@@ -29,12 +28,13 @@ class Predict extends Component {
             filterCountError: false,
             filterSuccess: false,
             selectedInput: {},
-           // selectedOutput: {},
+            // selectedOutput: {},
             availablePaths: [], //initial available paths
             initialPredicates: [],
-            branches: [], 
+            branches: [],
+            smartapiEdges: [],
             numBranches: 1,
-           // selectedPaths: new Set(),
+            // selectedPaths: new Set(),
             queryResults: [],
             queryLog: [],
             table: {
@@ -44,14 +44,25 @@ class Predict extends Component {
                 activePage: 1,
                 totalPages: 1
             },
+            filteredResults: [],
+            filter: {
+                pred1: new Set(),
+                pred1_api: new Set(),
+                node1_name: new Set(),
+                node1_type: new Set(),
+                pred2: new Set(),
+                pred2_api: new Set()
+            },
+            filterOptions: {},
             selectedQueryResults: new Set(),
             graph: {},
+            result: []
         };
         this.handleStep1Submit = this.handleStep1Submit.bind(this);
         this.handleStep2Submit = this.handleStep2Submit.bind(this);
         this.handleInputSelect = this.handleInputSelect.bind(this);
-    //    this.handleOutputSelect = this.handleOutputSelect.bind(this);
-    //    this.handleMetaPathSelect = this.handleMetaPathSelect.bind(this);
+        //    this.handleOutputSelect = this.handleOutputSelect.bind(this);
+        //    this.handleMetaPathSelect = this.handleMetaPathSelect.bind(this);
         this.handleQueryResultSelect = this.handleQueryResultSelect.bind(this);
         this.handleBackToStep1 = this.handleBackToStep1.bind(this);
         this.handleBackToStep2 = this.handleBackToStep2.bind(this);
@@ -80,13 +91,13 @@ class Predict extends Component {
 
     //this function will be passed to autocomplete component
     //in order to retrieve the selected output
-    handleOutputSelect(value) {    
+    handleOutputSelect(value) {
         this.setState({
             selectedOutput: value
         });
-    }*/
-  
-    handleMetaPathSelect(event){
+    }
+
+    handleMetaPathSelect(event) {
 
         const selectedPaths = this.state.selectedPaths;
         if (event.target.checked) {
@@ -96,7 +107,6 @@ class Predict extends Component {
         }
         this.setState({ selectedPaths: selectedPaths })
     }
-*/
 
 
     handleQueryResultSelect(event) {
@@ -139,11 +149,13 @@ class Predict extends Component {
             let availableNext = Array.from(await findNext(this.state.selectedInput.type));
             console.log(availableNext);
             this.setState({
-            //    availableIntermediates: edges,
-            //    initialPredicates: preds,
+                //    availableIntermediates: edges,
+                //    initialPredicates: preds,
                 availablePaths: availableNext,
-                branches: [{ id: this.state.numBranches, source:this.state.selectedInput, 
-                             path:[], availablePaths:availableNext, filters:[], predicates:[]}]
+                branches: [{
+                    id: this.state.numBranches, source: this.state.selectedInput,
+                    path: [], availablePaths: availableNext, filters: [], predicates: []
+                }]
             });
         }
     }
@@ -152,20 +164,20 @@ class Predict extends Component {
         event.preventDefault();
         this.setState({
             currentStep: 1
-        })  
+        })
     }
 
     checkBranches() {
         var sames = [];
         if (this.state.branches.length === 0 || this.state.branches.length === 1) return sames;
-        for (var i = 0; i < this.state.branches.length - 1; i++){
-            for (var j = i+1; j < this.state.branches.length; j++){
+        for (var i = 0; i < this.state.branches.length - 1; i++) {
+            for (var j = i + 1; j < this.state.branches.length; j++) {
                 var path1 = JSON.stringify(this.state.branches[i].path);
                 var path2 = JSON.stringify(this.state.branches[j].path);
                 var filters1 = JSON.stringify(this.state.branches[i].filters);
                 var filters2 = JSON.stringify(this.state.branches[j].filters);
-                if (path1 === path2 && filters1 === filters2){
-                    sames.push({branch1: this.state.branches[i].id, branch2: this.state.branches[j].id})
+                if (path1 === path2 && filters1 === filters2) {
+                    sames.push({ branch1: this.state.branches[i].id, branch2: this.state.branches[j].id })
                 }
             }
         }
@@ -176,8 +188,10 @@ class Predict extends Component {
         event.preventDefault();
         if (this.state.numBranches >= 3) return;
         this.setState(prevState => ({
-            branches: [...prevState.branches, { id: this.state.numBranches + 1, source:this.state.selectedInput,
-                                path:[], availablePaths:this.state.availablePaths,filters:[], predicates:[]}],
+            branches: [...prevState.branches, {
+                id: this.state.numBranches + 1, source: this.state.selectedInput,
+                path: [], availablePaths: this.state.availablePaths, filters: [], predicates: []
+            }],
             numBranches: prevState.numBranches + 1
         }));
     }
@@ -191,7 +205,7 @@ class Predict extends Component {
         if (branch.path.length === 0) {
             preds = Array.from(await findPredicates(this.state.selectedInput.type, node));
         } else {
-            preds = Array.from(await findPredicates(branch.path[branch.path.length - 1],node));
+            preds = Array.from(await findPredicates(branch.path[branch.path.length - 1], node));
         }
         let tempBranches = this.state.branches;
         tempBranches[branch.id - 1].path.push(node);
@@ -212,11 +226,11 @@ class Predict extends Component {
             this.setState({
                 filterPredError: true
             });
-        } else if (filter['count'] <= 0 ) {
+        } else if (filter['count'] <= 0) {
             this.setState({
                 filterCountError: true
             });
-        }else {
+        } else {
             let tempBranches = this.state.branches;
             tempBranches[branch.id - 1].filters[filter['loc']] = filter;
             if (filter['name'] === 'EdgeLabel (predicate)') {
@@ -235,10 +249,12 @@ class Predict extends Component {
 
     handleFilterClose(event) {
         event.preventDefault();
-        this.setState({ filterSuccess: false,
-                        filterError: false,
-                        filterPredError: false,
-                        filterCountError: false });
+        this.setState({
+            filterSuccess: false,
+            filterError: false,
+            filterPredError: false,
+            filterCountError: false
+        });
     }
 
     handleRemoveBranch(event, branch) {
@@ -246,8 +262,8 @@ class Predict extends Component {
         if (this.state.numBranches === 1) return;
         var array = [...this.state.branches];
         array.splice(branch.id - 1, 1);
-        for(let i = 0; i < array.length; i++) {
-            array[i].id = i+1;
+        for (let i = 0; i < array.length; i++) {
+            array[i].id = i + 1;
         }
         this.setState(prevState => ({
             branches: array,
@@ -278,48 +294,47 @@ class Predict extends Component {
     async handleStep2Submit(event) {
         event.preventDefault();
 
-        if (this.checkBranches().length !== 0){
+        if (this.checkBranches().length !== 0) {
             this.setState({
                 step2ShowBranchError: true
             });
-        }else{
+        } else {
 
             // what is the format for intermediate nodes here? 2d array?
-            let intermediate_nodes = getIntermediateNodes(this.state.selectedPaths);
-            if (intermediate_nodes.length === 0) {
-                this.setState({
-                    step2ShowError: true
-                });
-            } else {
-                this.setState({
-                    currentStep: 3,
-                    step2Complete: true
-                })
-                let response = await fetchQueryResult(this.state.selectedInput,
-                    this.state.selectedOutput,
-                    intermediate_nodes)
-                if (response.data.length === 0) {
-                    this.setState({
-                        step3Complete: true,
-                        queryResults: []
-                    })
-                } else {
-                    this.setState({
-                        queryResults: response['data'],
-                        table: {
-                            ...this.state.table,
-                            display: response['data'].slice(this.state.table.activePage*10 - 10, this.state.table.activePage*10),
-                            totalPages: Math.ceil(response['data'].length/10)
-                        },
-                        queryLog: response['log'],
-                        step3Complete: true
-                    });
-                }
-            }
+            //let intermediate_nodes = getIntermediateNodes(this.state.selectedPaths);
+            this.setState({
+                currentStep: 3,
+                step2Complete: true,
+                smartapiEdges: findSmartAPIEdgesByInputAndOutput('Gene', 'Disease'),
+                queryResults: 'll',
+                table: {
+                    ...this.state.table,
+                    display: 'll',
+                    totalPages: Math.ceil(11)
+                },
+                queryLog: [],
+                step3Complete: true
+            });
+            let edges = findSmartAPIEdgesByInputAndOutput('Gene', 'Disease');
+            let queryResults = await queryAPIs(edges, [this.state.selectedInput])
+            this.setState({
+                queryResults: queryResults,
+                filteredResults: queryResults,
+                table: {
+                    ...this.state.table,
+                    display: queryResults.slice(0, 10),
+                    activePage: 1,
+                    totalPages: Math.ceil(queryResults.length / 10)
+                },
+                filter: { // reset filter on new search
+                    pred1: new Set(),
+                    pred1_api: new Set(),
+                },
+                resultReady: true,
+                step3Complete: true
+            })
         }
     }
-
-
 
     handleBackToStep2(event) {
         event.preventDefault();
@@ -423,15 +438,18 @@ class Predict extends Component {
                     closeFilter={this.handleFilterClose}
                 />
                 <PredictQueryResult
-                    shouldDisplay={this.state.currentStep === 3}
-                    resultReady={this.state.step3Complete}
-                    content={this.state.queryResults}
                     table={this.state.table}
+                    filter={this.state.filter}
+                    filterOptions={this.state.filterOptions}
+                    selectedQueryResults={this.state.selectedQueryResults}
+                    queryResults={this.state.queryResults}
+                    branches={this.state.branches}
+                    smartapiEdges={this.state.smartapiEdges}
+                    shouldDisplay={this.state.currentStep === 3}
                     handleSort={this.handleSort}
                     handlePaginationChange={this.handlePaginationChange}
                     logs={this.state.queryLog}
                     handleSelect={this.handleQueryResultSelect}
-                    graph={this.state.graph}
                 />
             </Container>
         )
