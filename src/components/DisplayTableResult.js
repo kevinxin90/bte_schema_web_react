@@ -102,7 +102,7 @@ export default function BTETable(props) {
                                             <Popup.Content>
                                                 {
                                                     Object.keys(props.equivalentIds[item[col.replace("_label", "_id")]])
-                                                    .filter(key => !["primary", "display", "type", "name"].includes(key)) //ignore primary, display, and type fields
+                                                    .filter(key => !["primary", "display", "type", "name", "_score"].includes(key)) //idon't display these fields
                                                     .map((key) => <p style={{marginBottom: 0, marginTop: 5}} key={`p-${_.uniqueId()}`}>{`${key}: ${props.equivalentIds[item[col.replace("_label", "_id")]][key]}`}</p>)
                                                 }
                                             </Popup.Content>

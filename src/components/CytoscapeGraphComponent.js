@@ -259,7 +259,7 @@ export default class CytoscapeGraph extends PureComponent {
             <p>Type: ${node.data('type')}</p>
             ${
               Object.keys(node.data('equivalentIds'))
-              .filter(key => !["primary", "display", "type", "name"].includes(key)) //ignore primary, display, type, and name fields
+              .filter(key => !["primary", "display", "type", "name", "_score"].includes(key)) //don't display these fields
               .map((key) => `<p>${key}: ${node.data('equivalentIds')[key]}</p>`)
               .join("")
             }
