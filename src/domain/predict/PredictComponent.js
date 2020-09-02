@@ -6,7 +6,7 @@ import Steps from '../../components/StepsComponent';
 import PredictInput from './PredictInputComponent';
 import { PredictMetapath } from '../../components/PredictMetapath';
 import PredictQueryResult from './PredictQueryResultComponent';
-import { recordsToTreeGraph, findSmartAPIEdgesByInputAndOutput, findPredicates, findNext, fetchQueryResult } from '../../shared/utils';
+import { recordsToTreeGraph, findSmartAPIEdgesByInputAndOutput, findPredicates, findNext } from '../../shared/utils';
 import { queryAPIs } from '../../shared/query';
 
 let _ = require('lodash');
@@ -259,16 +259,24 @@ class Predict extends Component {
 
     handleRemoveBranch(event, branch) {
         event.preventDefault();
-        if (this.state.numBranches === 1) return;
-        var array = [...this.state.branches];
-        array.splice(branch.id - 1, 1);
-        for (let i = 0; i < array.length; i++) {
-            array[i].id = i + 1;
+        if (this.state.numBranches === 1) {
+            this.setState({
+                branches: [{
+                    id: this.state.numBranches, source: this.state.selectedInput,
+                    path: [], availablePaths: this.state.availablePaths, filters: [], predicates: []
+                }]
+            });
+        } else{
+            var array = [...this.state.branches];
+            array.splice(branch.id - 1, 1);
+            for (let i = 0; i < array.length; i++) {
+                array[i].id = i + 1;
+            }
+            this.setState(prevState => ({
+                branches: array,
+                numBranches: prevState.numBranches - 1
+            }));
         }
-        this.setState(prevState => ({
-            branches: array,
-            numBranches: prevState.numBranches - 1
-        }));
     }
 
     handleMergeBranches(event) {
