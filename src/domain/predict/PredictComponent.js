@@ -56,7 +56,8 @@ class Predict extends Component {
             filterOptions: {},
             selectedQueryResults: new Set(),
             graph: {},
-            result: []
+            result: [],
+            
         };
         this.handleStep1Submit = this.handleStep1Submit.bind(this);
         this.handleStep2Submit = this.handleStep2Submit.bind(this);
@@ -147,7 +148,6 @@ class Predict extends Component {
             //let edges = await findMetaPath(this.state.selectedInput.type, this.state.selectedOutput);
             //let preds = Array.from(await findPredicates(this.state.selectedInput.type, this.state.selectedOutput));
             let availableNext = Array.from(await findNext(this.state.selectedInput.type));
-            console.log(availableNext);
             this.setState({
                 //    availableIntermediates: edges,
                 //    initialPredicates: preds,
@@ -308,8 +308,6 @@ class Predict extends Component {
             });
         } else {
 
-            // what is the format for intermediate nodes here? 2d array?
-            //let intermediate_nodes = getIntermediateNodes(this.state.selectedPaths);
             this.setState({
                 currentStep: 3,
                 step2Complete: true,
@@ -321,8 +319,45 @@ class Predict extends Component {
                     totalPages: Math.ceil(11)
                 },
                 queryLog: [],
-                step3Complete: true
+                step3Complete: true,
+                
             });
+
+            const levels = Math.max(...this.state.branches.map(branch => branch.path.length));
+            let input = this.state.selectedInput;
+            let queryResults = [];
+            let tempReady = new Array(this.state.branches.length).fill(false);
+            for (let i = 0; i < levels; i++) { // for each level...
+                let edges = []
+                let x = [];
+                console.log(i);
+                
+                for (let branch = 0; branch < this.state.branches.length; branch++) {
+                    if (this.state.branches[branch].path.length >= i + 1) { // if the level exists in the branch
+                        if (i === 0) { // level 1 use input
+                            edges = findSmartAPIEdgesByInputAndOutput(input.type, this.state.branches[branch].path[i]);
+                            x = await queryAPIs(edges, [input]);
+                            queryResults.push([x]);
+                            console.log('first');
+                        
+                        } else { // other level use prev level's outputs
+                            edges = findSmartAPIEdgesByInputAndOutput(this.state.branches[branch].path[i-1], this.state.branches[branch].path[i]);
+                            
+                            x = await queryAPIs(edges, queryResults[branch][i-1]);
+                            queryResults[branch].push(x);
+                        }
+                        if (this.state.branches[branch].path.length === i + 1) { // if it is the last level for the branch
+                            tempReady[branch] = true;
+                            console.log('last level')
+                        }
+                    }
+                }
+
+                console.log(queryResults);
+                
+            }
+
+            /*
             let edges = findSmartAPIEdgesByInputAndOutput('Gene', 'Disease');
             let queryResults = await queryAPIs(edges, [this.state.selectedInput])
             this.setState({
@@ -341,6 +376,7 @@ class Predict extends Component {
                 resultReady: true,
                 step3Complete: true
             })
+            */
         }
     }
 

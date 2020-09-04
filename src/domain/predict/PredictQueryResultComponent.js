@@ -9,7 +9,9 @@ export default class PredictQueryResult extends Component {
             return (
                 <p>{log}</p>
             )
-        })
+        }) 
+
+        
 
         // let panes = [
         //     { menuItem: 'Tab 1', render: () => <Tab.Pane>Tab 1 Content</Tab.Pane> },
