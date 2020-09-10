@@ -284,6 +284,18 @@ path.link {
   [data-id="layer0-selectbox"],[data-id="layer1-drag"],[data-id="layer2-node"] {
     right: 10px;
   }
+
+  /* For Results */
+  .result {
+    margin-top: 1rem;
+  }
+
+  .resultGraph {
+    border: 3px solid black;
+    width: 75rem;
+    height: 6rem;
+    margin-bottom: 2rem;
+  }
   
   
   /* Responsive elements taken from : https://gist.github.com/bl4ck5un/ed27db3d653011b32ee0877058abac7d*/

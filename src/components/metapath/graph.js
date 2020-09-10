@@ -23,12 +23,6 @@ class Graph extends Component {
                     'background-color': colorSchema[semanticTypeShorthand[this.props.source.type]]
                 }
             },
-           /* {
-                selector: '#target',
-                style: {
-                    'background-color': colorSchema[semanticTypeShorthand[this.props.output]]
-                }
-            },*/
             {
                 selector: 'node',
                 style: {

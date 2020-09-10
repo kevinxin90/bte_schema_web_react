@@ -169,19 +169,25 @@ class Predict extends Component {
 
     checkBranches() {
         var sames = [];
-        if (this.state.branches.length === 0 || this.state.branches.length === 1) return sames;
-        for (var i = 0; i < this.state.branches.length - 1; i++) {
-            for (var j = i + 1; j < this.state.branches.length; j++) {
-                var path1 = JSON.stringify(this.state.branches[i].path);
-                var path2 = JSON.stringify(this.state.branches[j].path);
-                var filters1 = JSON.stringify(this.state.branches[i].filters);
-                var filters2 = JSON.stringify(this.state.branches[j].filters);
+        var noPath = [];
+        if (this.state.branches.length === 0 || this.state.branches.length === 1) return [sames, noPath];
+        for (let i = 0; i < this.state.branches.length - 1; i++) {
+            for (let j = i + 1; j < this.state.branches.length; j++) {
+                let path1 = JSON.stringify(this.state.branches[i].path);
+                let path2 = JSON.stringify(this.state.branches[j].path);
+                let filters1 = JSON.stringify(this.state.branches[i].filters);
+                let filters2 = JSON.stringify(this.state.branches[j].filters);
                 if (path1 === path2 && filters1 === filters2) {
                     sames.push({ branch1: this.state.branches[i].id, branch2: this.state.branches[j].id })
                 }
             }
         }
-        return sames;
+        for (let i = 0; i < this.state.branches.length; i++) {
+            if (this.state.branches[i].path.length === 0) {
+                noPath.push(this.state.branches[i]);
+            }
+        }
+        return [sames, noPath];
     }
 
     handleAddBranch(event) {
@@ -281,14 +287,18 @@ class Predict extends Component {
 
     handleMergeBranches(event) {
         event.preventDefault();
-        const sames = this.checkBranches();
+        const sames = this.checkBranches()[0];
+        const noPath = this.checkBranches()[1];
         if (sames.length === 1) {
             this.handleRemoveBranch(event, sames[0]['branch2']);
         } else { // all 3 branches are the same
             let branch = this.state.branches[0];
             this.setState({
                 branches: [branch]
-            })
+            });
+        }
+        for (let i = 0; i < noPath.length; i++) {
+            this.handleRemoveBranch(event, noPath[i]);
         }
     }
 
@@ -296,13 +306,18 @@ class Predict extends Component {
         event.preventDefault();
         this.handleMergeBranches(event);
         await this.handleStep2BranchClose(event);
+        console.log(this.state.branches);
         this.handleStep2Submit(event);
     }
 
     async handleStep2Submit(event) {
         event.preventDefault();
 
-        if (this.checkBranches().length !== 0) {
+        if (this.state.branches.length === 1 && this.state.branches[0].path.length === 0) {
+            this.setState({
+                step2ShowError: true
+            });
+        } else if (this.checkBranches()[0].length !== 0 || this.checkBranches()[1].length !== 0) {
             this.setState({
                 step2ShowBranchError: true
             });
@@ -311,40 +326,43 @@ class Predict extends Component {
             this.setState({
                 currentStep: 3,
                 step2Complete: true,
-                smartapiEdges: findSmartAPIEdgesByInputAndOutput('Gene', 'Disease'),
-                queryResults: 'll',
+                queryResults: [],
+                filteredResults: [],
                 table: {
                     ...this.state.table,
-                    display: 'll',
-                    totalPages: Math.ceil(11)
+                    display: [],
+                    totalPages: [],
+                    activePage: []
                 },
                 queryLog: [],
                 step3Complete: true,
-                
             });
 
             const levels = Math.max(...this.state.branches.map(branch => branch.path.length));
             let input = this.state.selectedInput;
             let queryResults = [];
+            let next_input = [];
             let tempReady = new Array(this.state.branches.length).fill(false);
             for (let i = 0; i < levels; i++) { // for each level...
                 let edges = []
-                let x = [];
+                let result = [];
+                
                 console.log(i);
                 
                 for (let branch = 0; branch < this.state.branches.length; branch++) {
                     if (this.state.branches[branch].path.length >= i + 1) { // if the level exists in the branch
                         if (i === 0) { // level 1 use input
                             edges = findSmartAPIEdgesByInputAndOutput(input.type, this.state.branches[branch].path[i]);
-                            x = await queryAPIs(edges, [input]);
-                            queryResults.push([x]);
+                            result = await queryAPIs(edges, [input]);
+                            queryResults.push([result[0]]);
+                            next_input.push(result[1]);
                             console.log('first');
                         
                         } else { // other level use prev level's outputs
                             edges = findSmartAPIEdgesByInputAndOutput(this.state.branches[branch].path[i-1], this.state.branches[branch].path[i]);
-                            
-                            x = await queryAPIs(edges, queryResults[branch][i-1]);
-                            queryResults[branch].push(x);
+                            result = await queryAPIs(edges, next_input[branch]);
+                            next_input[branch] = result[1];
+                            queryResults[branch].push(result[0]);
                         }
                         if (this.state.branches[branch].path.length === i + 1) { // if it is the last level for the branch
                             tempReady[branch] = true;
@@ -354,6 +372,37 @@ class Predict extends Component {
                 }
 
                 console.log(queryResults);
+                let display = []
+                let totalPages = []
+                let activePage = []
+                for (let branch = 0; branch < queryResults.length; branch++) {
+                    let d = [], t = [], a = [];
+                    for (let level = 0; level < queryResults[branch].length; level++) {
+                        d.push(queryResults[branch][level].slice(0,5));
+                        a.push(1);
+                        t.push(Math.ceil(queryResults[branch][level].length / 5))
+                    }
+                    display.push(d);
+                    totalPages.push(t);
+                    activePage.push(a);
+                }
+
+                this.setState({
+                    queryResults: queryResults,
+                    filteredResults: queryResults,
+                    table: {
+                        ...this.state.table,
+                        display: display,
+                        activePage: activePage,
+                        totalPages: totalPages
+                    },
+                    filter: { // reset filter on new search
+                        pred1: new Set(),
+                        pred1_api: new Set(),
+                    },
+                    resultReady: true, // these 2 might not be needed/used?
+                    step3Complete: true
+                });
                 
             }
 
@@ -421,18 +470,26 @@ class Predict extends Component {
         });
     }
 
-    handlePaginationChange = (e, { activePage }) => {
+    handlePaginationChange = (e, { activePage }, branch, level) => {
+
+        let display = this.state.table.display;
+        let active = this.state.table.activePage;
+
+        display[branch][level] = this.state.queryResults[branch][level].slice(activePage * 5 - 5, activePage * 5);
+        active[branch][level] = activePage;
+
         this.setState({
             table: {
                 ...this.state.table,
-                display: this.state.queryResults.slice(activePage * 10 - 10, activePage * 10),
-                activePage: activePage
+                display: display,
+                activePage: active
             }
         });
     }
 
     render() {
         const branchCheck = this.checkBranches();
+        console.log(branchCheck);
 
         return (
             <Container className="feature">
@@ -482,14 +539,18 @@ class Predict extends Component {
                     closeFilter={this.handleFilterClose}
                 />
                 <PredictQueryResult
+                    shouldDisplay={this.state.currentStep === 3}
+
+
                     table={this.state.table}
                     filter={this.state.filter}
                     filterOptions={this.state.filterOptions}
                     selectedQueryResults={this.state.selectedQueryResults}
                     queryResults={this.state.queryResults}
                     branches={this.state.branches}
-                    smartapiEdges={this.state.smartapiEdges}
-                    shouldDisplay={this.state.currentStep === 3}
+                    // smartapiEdges={this.state.smartapiEdges}
+                    
+                    source={this.state.selectedInput}
                     handleSort={this.handleSort}
                     handlePaginationChange={this.handlePaginationChange}
                     logs={this.state.queryLog}

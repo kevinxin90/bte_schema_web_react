@@ -39,7 +39,7 @@ function Path(props) {
             <div className={["mobile only", "toggleGraph", "tablet only"].join(' ')}> 
                 <ModalSection branches={props.branches} source={props.source} /*output={props.output} */ />
             </div>
-            <div className={props.branchCheck.length === 0? 'hidden' : 'branchWarning'}>
+            <div className={props.branchCheck[0].length === 0? 'hidden' : 'branchWarning'}>
                 <Warning branchCheck={props.branchCheck}/>
             </div>
         </div>
