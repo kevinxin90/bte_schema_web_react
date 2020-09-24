@@ -14,10 +14,11 @@ export const PredictMetapath = (props) => {
             <BranchErrorMessage  
                             modalOpen={props.showBranchModal} 
                             handleClose={props.handleBranchClose}
-                            handleContinue={props.handleContinueBranches}/>
+                            handleContinue={props.handleContinueBranches}
+                            branchCheck={props.branchCheck}/>
             <Segment color='red'>
                 <h2> Step 2: Select the MetaPath you want to execute.</h2>
-                <Metapath 
+                <Metapath  // main metapath component -- everything from here is contained in the 'metapath' folder
                     source={props.selectedInput} 
                     //output={props.selectedOutput} 
                     addBranch={props.addBranch} 

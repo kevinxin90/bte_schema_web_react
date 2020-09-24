@@ -9,7 +9,7 @@ function Path(props) {
     return (
         <div className="path">
             <div>
-                <Popup
+                <Popup // hover over 'add branch' button
                     content='Each path (max 3) represents a different metapath which will be queried.'
                     on='hover'
                     trigger={<Button className="addBranch" onClick={props.addBranch}>+ ADD PATH</Button>}
@@ -17,7 +17,7 @@ function Path(props) {
                     position='right center'
                     size='mini'
                 />
-                <Popup
+                <Popup // hover over help icon
                     content='Get started by adding a node to your first path (max 3 additional nodes per path). Once added, you may apply filters, 
                             which can be applied between any two nodes. When adding filters, please select one item from each category.'
                     on='hover'
@@ -36,11 +36,13 @@ function Path(props) {
                         filterPredError={props.filterPredError}
                         filterCountError={props.filterCountError}
                         closeFilter={props.closeFilter}/>
-            <div className={["mobile only", "toggleGraph", "tablet only"].join(' ')}> 
-                <ModalSection branches={props.branches} source={props.source} /*output={props.output} */ />
+            <div className={["mobile only", "toggleGraph", "tablet only"].join(' ')}
+                // mobile only graph component
+            > 
+                <ModalSection branches={props.branches} source={props.source} />
             </div>
-            <div className={props.branchCheck.length === 0? 'hidden' : 'branchWarning'}>
-                <Warning branchCheck={props.branchCheck}/>
+            <div className={props.branchCheck[0].length === 0? 'hidden' : 'branchWarning'}>
+                <Warning branchCheck={props.branchCheck} />
             </div>
         </div>
     );

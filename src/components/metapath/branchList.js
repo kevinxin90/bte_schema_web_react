@@ -3,7 +3,11 @@ import Branch from './branch'
 import { Divider } from 'semantic-ui-react';
 
 export default function BranchList(props) {
+
+    const disableRemove = props.branches.length === 1 && props.branches[0].path.length === 0;
+
     return (
+        // mapping each branch to its own branch component
         props.branches.map(branch => {
             return <div>
                         <Branch  
@@ -17,6 +21,7 @@ export default function BranchList(props) {
                             closeFilter={props.closeFilter}
                             filterPredError={props.filterPredError}
                             filterCountError={props.filterCountError}
+                            disableRemove={disableRemove}
                         />
                         <div className="branchDivider">
                             <Divider />
