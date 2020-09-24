@@ -21,14 +21,13 @@ function Metapath(props) {
                             filterPredError={props.filterPredError}
                             filterCountError={props.filterCountError}
                             source={props.source}
-                            //output={props.output}
                             />
                 </div>
                 <div className="metapathDivider">
                     <Divider vertical/>
                 </div>
                 <div className="six wide column mobile hidden tablet hidden">
-                    <Graph branches={props.branches} source={props.source} /*output={props.output}*/ />
+                    <Graph branches={props.branches} source={props.source} />
                 </div>
 
             </div>

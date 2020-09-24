@@ -28,13 +28,11 @@ class Predict extends Component {
             filterCountError: false,
             filterSuccess: false,
             selectedInput: {},
-            // selectedOutput: {},
             availablePaths: [], //initial available paths
-            initialPredicates: [],
-            branches: [],
+            initialPredicates: [], // initial available predicates from source
+            branches: [], // holds all metapath selection data
             smartapiEdges: [],
             numBranches: 1,
-            // selectedPaths: new Set(),
             queryResults: [],
             queryLog: [],
             table: {
@@ -62,8 +60,6 @@ class Predict extends Component {
         this.handleStep1Submit = this.handleStep1Submit.bind(this);
         this.handleStep2Submit = this.handleStep2Submit.bind(this);
         this.handleInputSelect = this.handleInputSelect.bind(this);
-        //    this.handleOutputSelect = this.handleOutputSelect.bind(this);
-        //    this.handleMetaPathSelect = this.handleMetaPathSelect.bind(this);
         this.handleQueryResultSelect = this.handleQueryResultSelect.bind(this);
         this.handleBackToStep1 = this.handleBackToStep1.bind(this);
         this.handleBackToStep2 = this.handleBackToStep2.bind(this);
@@ -98,18 +94,6 @@ class Predict extends Component {
         });
     }
 
-    handleMetaPathSelect(event) {
-
-        const selectedPaths = this.state.selectedPaths;
-        if (event.target.checked) {
-            selectedPaths.add(event.target.name)
-        } else {
-            selectedPaths.delete(event.target.name)
-        }
-        this.setState({ selectedPaths: selectedPaths })
-    }
-
-
     handleQueryResultSelect(event) {
         const selectedQueryResults = this.state.selectedQueryResults;
         if (event.target.checked) {
@@ -128,6 +112,7 @@ class Predict extends Component {
         [item]: false
     })
 
+    // altered to get rid of target nodes
     async handleStep1Submit(event) {
         event.preventDefault();
         if (_.isEmpty(this.state.selectedInput)) /* || _.isEmpty(this.state.selectedOutput)) */ {
@@ -167,10 +152,13 @@ class Predict extends Component {
         })
     }
 
+    // function to check whether branches are the same and whether a metapath has been selected or not
     checkBranches() {
-        var sames = [];
-        var noPath = [];
+        var sames = []; // to hold branches that are identical
+        var noPath = []; // to hold branch IDs where no metapath was specified
         if (this.state.branches.length === 0 || this.state.branches.length === 1) return [sames, noPath];
+
+        // check for same branches -- 2 are the same if nodes AND filters are the same
         for (let i = 0; i < this.state.branches.length - 1; i++) {
             for (let j = i + 1; j < this.state.branches.length; j++) {
                 let path1 = JSON.stringify(this.state.branches[i].path);
@@ -182,6 +170,7 @@ class Predict extends Component {
                 }
             }
         }
+        // check for branches with no metapath
         for (let i = 0; i < this.state.branches.length; i++) {
             if (this.state.branches[i].path.length === 0) {
                 noPath.push(this.state.branches[i]);
@@ -190,9 +179,16 @@ class Predict extends Component {
         return [sames, noPath];
     }
 
+    // function to add branch to metapath
     handleAddBranch(event) {
         event.preventDefault();
-        if (this.state.numBranches >= 3) return;
+        if (this.state.numBranches >= 3) return; // limit 3
+        // add default branch settings:
+        //  metadata:
+        //      path: additional nodes after the source
+        //      filters: filters to be applied
+        //      predicates: available predicates after the last added node in the branch
+        //      availablePaths: availble nodes after the last added node
         this.setState(prevState => ({
             branches: [...prevState.branches, {
                 id: this.state.numBranches + 1, source: this.state.selectedInput,
@@ -202,18 +198,23 @@ class Predict extends Component {
         }));
     }
 
-    // originally handleAddInter
+    // function to add node to a branch
+    // @params :
+    //      branch: the branch to add a node to
+    //      node: semantic name of node (eg. Disease)
     async handleAddNode(event, branch, node) {
         event.preventDefault();
-        if (branch.path.length === 3) return;
-        let edges = Array.from(await findNext(node));
-        var preds;
-        if (branch.path.length === 0) {
+        if (branch.path.length === 3) return; // limit 3 additional nodes per path
+        let edges = Array.from(await findNext(node)); // get new availablePaths from the node to be added
+        var preds; // get new predicates available between last node and node to be added
+        if (branch.path.length === 0) { // if no nodes after source
             preds = Array.from(await findPredicates(this.state.selectedInput.type, node));
         } else {
             preds = Array.from(await findPredicates(branch.path[branch.path.length - 1], node));
         }
         let tempBranches = this.state.branches;
+
+        // add new data to the branch
         tempBranches[branch.id - 1].path.push(node);
         tempBranches[branch.id - 1].availablePaths = edges;
         tempBranches[branch.id - 1].filters.push({});
@@ -221,9 +222,11 @@ class Predict extends Component {
         this.setState({ branches: tempBranches });
     }
 
-    // count param in filter may not matter, filters all default to 50 w/o count
+    // function to add a filter to a branch
     handleAddFilter(event, branch, filter, label) {
         event.preventDefault();
+
+        // first check for filter errors (show up in filter dropdown)
         if (!('name' in filter) || !('loc' in filter) || !('count' in filter)) {
             this.setState({
                 filterError: true
@@ -236,12 +239,13 @@ class Predict extends Component {
             this.setState({
                 filterCountError: true
             });
-        } else {
+        } else { // no errors, add filters
             let tempBranches = this.state.branches;
             tempBranches[branch.id - 1].filters[filter['loc']] = filter;
             if (filter['name'] === 'EdgeLabel (predicate)') {
                 tempBranches[branch.id - 1].filters[filter['loc']]['label'] = label;
             }
+            // remove the 'loc' key from the filter
             delete tempBranches[branch.id - 1].filters[filter['loc']].loc;
             this.setState({
                 branches: tempBranches,
@@ -253,6 +257,7 @@ class Predict extends Component {
         }
     }
 
+    // reset filter errors/success messages when filter dropdown closes
     handleFilterClose(event) {
         event.preventDefault();
         this.setState({
@@ -263,8 +268,11 @@ class Predict extends Component {
         });
     }
 
+    // function to remove a branch from metapath
     handleRemoveBranch(event, branch) {
         event.preventDefault();
+
+        // if one branch left, set it back to default settings
         if (this.state.numBranches === 1) {
             this.setState({
                 branches: [{
@@ -272,9 +280,11 @@ class Predict extends Component {
                     path: [], availablePaths: this.state.availablePaths, filters: [], predicates: []
                 }]
             });
-        } else{
+        } else{ // remove entire branch
             var array = [...this.state.branches];
             array.splice(branch.id - 1, 1);
+
+            // reset branch ids so they remain continuous 
             for (let i = 0; i < array.length; i++) {
                 array[i].id = i + 1;
             }
@@ -285,10 +295,12 @@ class Predict extends Component {
         }
     }
 
+    // function to merge same branches and remove branches after metapath
+    // this function is called from handleContinueBranches after warning modal
     handleMergeBranches(event) {
         event.preventDefault();
-        const sames = this.checkBranches()[0];
-        const noPath = this.checkBranches()[1];
+        const sames = this.checkBranches()[0]; // get same branches
+        const noPath = this.checkBranches()[1]; // get branches with no metapath
         if (sames.length === 1) {
             this.handleRemoveBranch(event, sames[0]['branch2']);
         } else { // all 3 branches are the same
@@ -297,31 +309,37 @@ class Predict extends Component {
                 branches: [branch]
             });
         }
+
+        // remove branches with no metapath
         for (let i = 0; i < noPath.length; i++) {
             this.handleRemoveBranch(event, noPath[i]);
         }
     }
 
+    // function to handle continue after warning modal
+    // merges/deletes branches and then submits metapath again
     async handleContinueBranches(event) {
         event.preventDefault();
         this.handleMergeBranches(event);
         await this.handleStep2BranchClose(event);
-        console.log(this.state.branches);
         this.handleStep2Submit(event);
     }
 
+    // called when submitting metapaths after step 2
     async handleStep2Submit(event) {
         event.preventDefault();
 
+        // error if only one branch and it has no metapath
         if (this.state.branches.length === 1 && this.state.branches[0].path.length === 0) {
             this.setState({
                 step2ShowError: true
             });
+        // warrning modal if checkBranches fails
         } else if (this.checkBranches()[0].length !== 0 || this.checkBranches()[1].length !== 0) {
             this.setState({
                 step2ShowBranchError: true
             });
-        } else {
+        } else { // go to results
 
             this.setState({
                 currentStep: 3,
@@ -338,26 +356,23 @@ class Predict extends Component {
                 step3Complete: true,
             });
 
+            // number of levels to query
             const levels = Math.max(...this.state.branches.map(branch => branch.path.length));
             let input = this.state.selectedInput;
-            let queryResults = [];
+            let queryResults = []; // query results... 3d array where dim1 is each branch, dim2 is levels within that branch, dim3 is results within those levels
             let next_input = [];
             let tempReady = new Array(this.state.branches.length).fill(false);
             for (let i = 0; i < levels; i++) { // for each level...
-                let edges = []
+                let edges = [];
                 let result = [];
                 
-                console.log(i);
-                
-                for (let branch = 0; branch < this.state.branches.length; branch++) {
-                    if (this.state.branches[branch].path.length >= i + 1) { // if the level exists in the branch
+                for (let branch = 0; branch < this.state.branches.length; branch++) { // for each branch
+                    if (this.state.branches[branch].path.length >= i + 1) { // check if the level exists in the branch
                         if (i === 0) { // level 1 use input
                             edges = findSmartAPIEdgesByInputAndOutput(input.type, this.state.branches[branch].path[i]);
-                            result = await queryAPIs(edges, [input]);
+                            result = await queryAPIs(edges, [input]); // query edges with input
                             queryResults.push([result[0]]);
                             next_input.push(result[1]);
-                            console.log('first');
-                        
                         } else { // other level use prev level's outputs
                             edges = findSmartAPIEdgesByInputAndOutput(this.state.branches[branch].path[i-1], this.state.branches[branch].path[i]);
                             result = await queryAPIs(edges, next_input[branch]);
@@ -366,21 +381,20 @@ class Predict extends Component {
                         }
                         if (this.state.branches[branch].path.length === i + 1) { // if it is the last level for the branch
                             tempReady[branch] = true;
-                            console.log('last level')
                         }
                     }
                 }
 
-                console.log(queryResults);
-                let display = []
+                // how to display table results, same dimensions as queryResults 
+                let display = [] 
                 let totalPages = []
                 let activePage = []
                 for (let branch = 0; branch < queryResults.length; branch++) {
-                    let d = [], t = [], a = [];
+                    let d = [], t = [], a = []; // temps for display, totalPages, and activePage
                     for (let level = 0; level < queryResults[branch].length; level++) {
-                        d.push(queryResults[branch][level].slice(0,5));
+                        d.push(queryResults[branch][level].slice(0,5)); // display 5 results at a time per table
                         a.push(1);
-                        t.push(Math.ceil(queryResults[branch][level].length / 5))
+                        t.push(Math.ceil(queryResults[branch][level].length / 5)) 
                     }
                     display.push(d);
                     totalPages.push(t);
@@ -405,27 +419,6 @@ class Predict extends Component {
                 });
                 
             }
-
-            /*
-            let edges = findSmartAPIEdgesByInputAndOutput('Gene', 'Disease');
-            let queryResults = await queryAPIs(edges, [this.state.selectedInput])
-            this.setState({
-                queryResults: queryResults,
-                filteredResults: queryResults,
-                table: {
-                    ...this.state.table,
-                    display: queryResults.slice(0, 10),
-                    activePage: 1,
-                    totalPages: Math.ceil(queryResults.length / 10)
-                },
-                filter: { // reset filter on new search
-                    pred1: new Set(),
-                    pred1_api: new Set(),
-                },
-                resultReady: true,
-                step3Complete: true
-            })
-            */
         }
     }
 
@@ -489,7 +482,6 @@ class Predict extends Component {
 
     render() {
         const branchCheck = this.checkBranches();
-        console.log(branchCheck);
 
         return (
             <Container className="feature">

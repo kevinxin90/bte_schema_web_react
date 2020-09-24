@@ -3,66 +3,9 @@ import _ from 'lodash'
 
 const ID_WITH_PREFIXES = ["MONDO", "DOID", "UBERON", "EFO", "HP", "CHEBI", "CL", "MGI"];
 
+
+/* Used to fetch query results after metapath selection*/
 const queryAPIs = async (edges, inputs) => {
-    /*let annotated_edges = [], new_edge;
-
-    edges.map(edge => {
-
-       // console.log(edge);
-        
-        new_edge = _.cloneDeep(edge);
-
-      //  console.log(new_edge);
-        
-        inputs.map(input => {
-
-         //   console.log(input)
-            
-            if (new_edge.association.input_id in input) {
-                
-                if (!(new_edge.query_operation.supportBatch === true)) {
-                    new_edge.input = input[new_edge.association.input_id];
-                    if (!(ID_WITH_PREFIXES.includes(new_edge.association.input_id))) {
-                        new_edge.original_input = {
-                            [new_edge.association.input_id + ':' + new_edge.input]: input
-                        }
-                    } else {
-                        new_edge.original_input = {
-                            [new_edge.input]: input
-                        }
-                    }
-                    annotated_edges.push(new_edge);
-                } else {
-                    if (!("input" in new_edge)) {
-                        new_edge.input = [];
-                        new_edge.original_input = {};
-                    }
-                    new_edge.input.push(input[new_edge.association.input_id]);
-                    if (!(ID_WITH_PREFIXES.includes(new_edge.association.input_id))) {
-                        new_edge.original_input = {
-                            ...new_edge.original_input, ...{
-                                [new_edge.association.input_id + ':' + new_edge.input]: input
-                            }
-                        }
-                    } else {
-                        new_edge.original_input = {
-                            ...new_edge.original_input, ...{
-                                [new_edge.input]: input
-                            }
-                        }
-                    }
-                }
-            }
-            
-        });
-        if (new_edge.query_operation.supportBatch === true && "input" in new_edge) {
-            annotated_edges.push(new_edge);
-        }
-    });
-*/
-
-
-
 
     let annotated_edges = [], new_edge;
 

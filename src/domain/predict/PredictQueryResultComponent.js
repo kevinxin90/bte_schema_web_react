@@ -78,7 +78,7 @@ export default class PredictQueryResult extends Component {
                 menuItem: 'Path ' + (i + 1),
                 render: () =>
                     <Tab.Pane>
-
+                        <h2>Your Query Path:</h2>
                         <CytoscapeComponent 
                             id="resultG"
                             elements={elements} 

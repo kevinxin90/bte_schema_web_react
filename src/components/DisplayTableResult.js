@@ -107,10 +107,21 @@ class BTETable extends Component {
                     );
                 }
             } else {
+                var b = this.props.branch.path[i];
+                if (i === 0){
+                    var a = this.props.branch.source.type;
+                    var edges = findSmartAPIEdgesByInputAndOutput(a, b);
+                } else {
+                    var a = this.props.branch.path[i-1];
+                    var edges = findSmartAPIEdgesByInputAndOutput(a, b);
+                }
+
+                let apis = new Set(edges.map(edge =>  edge.association.api_name ));
+
                 return (
                     <div className="result">
                         {header}
-                        <div>Still Querying this path...</div>
+                        <div>We are currently querying the following APIs to connect you from {a} to {b}: <br/> {Array.from(apis).join(', ')}</div>
                     </div>
                 );
             }
@@ -122,7 +133,7 @@ class BTETable extends Component {
     
         return (
             <div>
-                <h3>Your Query Results</h3>
+                <h2>Your Query Results:</h2>
                 {tables}
             </div>
         );

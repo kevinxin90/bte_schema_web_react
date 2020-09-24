@@ -74,17 +74,12 @@ class Graph extends Component {
 
         const elements = [
             { data: {id:'source', label:this.props.source.name}, position: {x:w/2, y:50}, classes:'static'},
-           // { data: {id:'target', label:this.props.output}, position: {x:w/2, y:h-50}, classes:'static'}
         ]
 
         var numBranches = this.props.branches.length;
         for (const [index, branch] of this.props.branches.entries()) {
             const name = 'edge' + index;
-            /*if (branch.path.length === 0){
-                elements.push(
-                    { data : {source: 'source', target: 'target'}, classes:name}
-                );
-            }*/
+            
             if (branch.path.length !== 0) {
                 var numNodes = branch.path.length;
                 var prevNode = 'source';
@@ -95,7 +90,6 @@ class Graph extends Component {
                     elements.push({data: {source:prevNode, target:id}, classes:name});
                     prevNode = id;
                 }
-                //elements.push({data: {source:prevNode, target:'target'}, classes:name});
             }
         }
 

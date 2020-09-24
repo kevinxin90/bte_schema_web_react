@@ -8,22 +8,22 @@ class Branch extends Component {
         super(props);
         this.state = {
             filterOpen: false,
-            filterBuffer: {},
+            filterBuffer: {}, // to store selected changing filter values before clicking 'add' button
             selectedFilter: '',
-            selectedLoc: '',
+            selectedLoc: '', // index of location of filter
             selectedCount: '', // index of selected count
             label: []
         }
-        this.myRef = React.createRef();
+        this.myRef = React.createRef(); // to handle custom count input
         this.handleFilterClick = this.handleFilterClick.bind(this);
         this.handleFilterSelect = this.handleFilterSelect.bind(this);
         this.handleCountSelect = this.handleCountSelect.bind(this);
         this.handleLocSelect = this.handleLocSelect.bind(this);
         this.handleFilterClose = this.handleFilterClose.bind(this);
         this.handleTogglePred = this.handleTogglePred.bind(this);
-        //this.handleInputChange = this.handleInputChange.bind(this);
     }
 
+    // function to keep filter dropdown open when clicking options -- semantic-ui just closes the filter
     handleFilterClick(e) {
         e.preventDefault();
         this.setState({
@@ -31,6 +31,7 @@ class Branch extends Component {
         })
     }
     
+    // function to reset states when the filter is closed
     handleFilterClose(e) {
         e.preventDefault();
         e.stopPropagation();
@@ -45,6 +46,7 @@ class Branch extends Component {
         })
     }
 
+    // function to handle which filter is selected, adds to filter buffer
     handleFilterSelect(e, value) {
         e.preventDefault();
         var tempBuffer = this.state.filterBuffer;
@@ -56,6 +58,7 @@ class Branch extends Component {
         });
     }
 
+    // function to add/remove predicate checkboxes -- predicates only shown for EdgeLabel filter selection
     handleTogglePred(e, pred) {
         e.preventDefault();
         var tempLabel = this.state.label;
@@ -69,6 +72,7 @@ class Branch extends Component {
         }
     }
 
+    // function to handle which count is selected
     handleCountSelect(e, value) {
         e.preventDefault();
         const counts = [25,50,100,0];
@@ -80,6 +84,7 @@ class Branch extends Component {
         });
     }
 
+    // functiion to handle the custom count input changes
     handleInputChange(e,input) {
         e.preventDefault();
         var value = parseInt(input.value)
@@ -90,6 +95,7 @@ class Branch extends Component {
         });
     }
 
+    // function to handle selection of the location of the filter 
     handleLocSelect(e, value) {
         e.preventDefault();
         var tempBuffer = this.state.filterBuffer;
@@ -101,6 +107,7 @@ class Branch extends Component {
         });
     }
 
+    // drawing the metapath of the branch
     drawPath() {
         const inters = this.props.branch.path.map((node,index) => {
             let content='Filter: '+ this.props.branch.filters[index].name + ' Count: '+this.props.branch.filters[index].count;
@@ -109,7 +116,8 @@ class Branch extends Component {
             }
             return (
                 <span>
-                    <Popup  content={content}
+                    <Popup  // to show selected filter for that stage in the path
+                            content={content}
                             on='hover'
                             trigger={<Icon name="arrow alternate circle right outline"></Icon>}
                             position='bottom center'
@@ -120,27 +128,16 @@ class Branch extends Component {
                 </span>    
             );
         });
-        /*let content='Filter: '+ this.props.branch.filters[inters.length].name + ' Count: '+this.props.branch.filters[inters.length].count;
-        if ('label' in this.props.branch.filters[inters.length]) {
-            content += ' Label(s): ' + this.props.branch.filters[inters.length].label;
-        }*/
+        
         return (<div>   {this.props.branch.source.name} {" "}
                         { inters }
-                        
-                        {/*<Popup  content={content}
-                                on='hover'
-                                trigger={<Icon name="arrow alternate circle right outline"></Icon>}
-                                position='bottom center'
-                                size='mini'
-                                disabled={!('name' in this.props.branch.filters[inters.length])}
-                        />  
-                        {this.props.branch.output}*/}
                 </div>
         );
     }
 
     render() {
 
+        // filter options for filter dropdown
         const filters = ['NodeDegree', 'CoOccurrence', 'UniqueAPIs', 'EdgeLabel (predicate)']
         const filterOptions = filters.map(filter => 
             <Dropdown.Item>
@@ -152,6 +149,7 @@ class Branch extends Component {
             </Dropdown.Item>    
         );
 
+        // get predicate options for edgelabel filter, display them only when selected
         var predOptions = [];
         if (this.props.branch.predicates.length > 0){
             for (let idx = 0; idx < this.props.branch.predicates.length; idx++){
@@ -181,6 +179,7 @@ class Branch extends Component {
             );
         });
 
+        // counts to be displayed for filter dropdown
         const countOptions = [25,50,100].map((count,index) => 
             <Dropdown.Item>
                 <Checkbox   radio 
@@ -191,6 +190,7 @@ class Branch extends Component {
             </Dropdown.Item>    
         );
 
+        // options for add node dropdown, get from availablePaths
         const interOptions = this.props.branch.availablePaths.map(node => 
             <Dropdown.Item  onClick={(e) => this.props.addNode(e,this.props.branch,node)}
                             text={node}
@@ -198,13 +198,14 @@ class Branch extends Component {
             />
         );
 
+        // message for add node dropdown
         const addAnother = this.props.branch.path.length === 0 ? '+ NODE' : '+ ANOTHER NODE';
 
         return (
             <div className={"Branch" + this.props.branch.id}>
                 <div className="branch"> Path #{this.props.branch.id}: </div>
 
-                <Dropdown
+                <Dropdown // dropdown for adding a node
                     placeholder={addAnother}
                     selection
                     options={interOptions}
@@ -213,9 +214,7 @@ class Branch extends Component {
                     disabled={this.props.branch.path.length === 3}
                 />
 
-                {/* TO DO : separate component for filter error messages */}
-
-                <Dropdown 
+                <Dropdown  // filter dropdown
                     placeholder='+ FILTER'
                     selection
                     upward={false}
@@ -227,8 +226,10 @@ class Branch extends Component {
                                 color='purple'
                                 inverted
                                 fluid
-                                onClick={this.handleFilterClose} >
-                            Close Dropdown
+                                onClick={this.handleFilterClose} 
+                        // buttton to close dropdown... onBlur didn't work for semantic-ui
+                        >
+                            Close Dropdown 
                         </Button>
                         <Dropdown.Header className='filterHeader'>Where?</Dropdown.Header>
                             {locOptions}
@@ -254,7 +255,7 @@ class Branch extends Component {
                                 checked={this.state.selectedCount === 3}
                                 onChange={(e) => this.handleCountSelect(e,3)}
                                 />
-                            <Input 
+                            <Input // custom countt input
                                 placeholder='Custom' 
                                 size='mini' 
                                 type='number'
@@ -266,6 +267,7 @@ class Branch extends Component {
                                 />
                         </Dropdown.Item>
                         <Dropdown.Divider className='filterDiv'/>
+                        {/* Error messages */}
                         <Dropdown.Item className={this.props.filterError ? 'dropdownOptions' : 'hidden1'}>
                             <div className='error'><Icon name='x' size='large' color='red'/> ERROR: </div>
                             Please select one option from each category.
@@ -278,6 +280,7 @@ class Branch extends Component {
                             <div className='error'><Icon name='x' size='large' color='red'/> ERROR: </div>
                             Please enter a valid integer for the count.
                         </Dropdown.Item>
+                        {/* success message after filter is applied */}
                         <Dropdown.Item className={this.props.filterSuccess ? 'dropdownOptions' : 'hidden1'}>
                             <div className='success'><Icon name='checkmark' size='large' color='green'/> SUCCESS: </div>
                             You may view your added filter by hovering over the arrow.
@@ -305,7 +308,10 @@ class Branch extends Component {
                     </Dropdown.Menu>
                 </Dropdown>
 
+                {/* Path for that branch */}
                 <p className="nodes">{ this.drawPath() }</p>
+
+                {/* remove branch button */}
                 <Button className="removeBranch"
                         size='mini'
                         color='red'

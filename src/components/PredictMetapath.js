@@ -18,7 +18,7 @@ export const PredictMetapath = (props) => {
                             branchCheck={props.branchCheck}/>
             <Segment color='red'>
                 <h2> Step 2: Select the MetaPath you want to execute.</h2>
-                <Metapath 
+                <Metapath  // main metapath component -- everything from here is contained in the 'metapath' folder
                     source={props.selectedInput} 
                     //output={props.selectedOutput} 
                     addBranch={props.addBranch} 
