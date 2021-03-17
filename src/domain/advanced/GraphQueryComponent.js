@@ -4,19 +4,33 @@ import { Grid, Icon, Button, Popup } from 'semantic-ui-react';
 import GraphModeSwitcher, { MODE } from './GraphModeSwitcher';
 
 import cytoscape from 'cytoscape';
+import edgehandles from 'cytoscape-edgehandles';
+import popper from 'cytoscape-popper';
+import Tippy from 'tippy.js';
+import 'tippy.js/dist/tippy.css';
+
+// cytoscape.use(popper);
+cytoscape.use(edgehandles);
 
 export default class GraphQuery extends Component {
   constructor(props) {
     super(props);
     this.state = {
       cy: {},
+      eh: {},
       mode: 1
     };
   }
 
   //set mode (for mode switcher component)
   setMode(mode) {
-    console.log(this.state.mode);
+    if (mode === MODE.addEdge) {
+      this.state.eh.enable();
+      this.state.eh.enableDrawMode();
+    } else {
+      this.state.eh.disableDrawMode();
+      this.state.eh.disable();
+    }
     this.setState({mode: mode});
   }
 
@@ -37,11 +51,72 @@ export default class GraphQuery extends Component {
   createNode(e) {
     this.state.cy.add([{
       group: "nodes",
+      data: {
+        label: "Any"
+      },
       renderedPosition: {
         x: e.renderedPosition.x,
         y: e.renderedPosition.y,
       },
     }]);
+  }
+
+  removeElement(e) {
+    this.state.cy.remove(e);
+  }
+
+  showEdgeOptions(edge) {
+    let dummy = document.createElement('div');
+
+    let tip = new Tippy(dummy, {
+      trigger: 'manual',
+      lazy: false,
+      interactive: true,
+      appendTo: document.body,
+      onCreate(instance) { 
+        instance.popperInstance.reference = edge.popperRef(); 
+      },
+      content() {
+        let content = document.createElement('div');
+        content.innerHTML = `
+          <h3>${edge.id()}</h3>
+        `;
+        return content;
+      },
+      onUntrigger(instance) {
+        instance.destroy();
+      }
+
+    });
+
+    tip.show();
+  }
+
+  showNodeOptions(node) {
+    let dummy = document.createElement('div');
+
+    let tip = new Tippy(dummy, {
+      trigger: 'manual',
+      lazy: false,
+      interactive: true,
+      appendTo: document.body,
+      onCreate(instance) { 
+        instance.popperInstance.reference = node.popperRef(); 
+      },
+      content() {
+        let content = document.createElement('div');
+        content.innerHTML = `
+          <h3>${node.id()}</h3>
+        `;
+        return content;
+      },
+      onUntrigger(instance) {
+        instance.destroy();
+      }
+
+    });
+
+    tip.show();
   }
 
   componentDidMount() {
@@ -52,7 +127,7 @@ export default class GraphQuery extends Component {
         {
           selector: 'node',
           style: {
-            'label': 'data(id)',
+            'label': 'data(label)',
             'background-color': 'black'
           }
         },
@@ -82,10 +157,25 @@ export default class GraphQuery extends Component {
       console.log(this.state.mode);
       if (this.state.mode === MODE.addNode) {
         this.createNode(event);
+      } else if (this.state.mode === MODE.edit) {
+        if (event.target !== cy && event.target.isNode()) {
+          this.showNodeOptions(event.target);
+        } else if (event.target !== cy && event.target.isEdge()) {
+          this.showEdgeOptions(event.target);
+        }
       }
-    })
+    });
 
-    this.setState({cy: cy}); 
+    //delete elements on right click
+    cy.on('cxttap', (event) => {
+      if (event.target !== cy) {
+        this.removeElement(event.target);
+      }
+    });
+
+    let eh = cy.edgehandles({hoverDelay: 50});
+
+    this.setState({cy: cy, eh: eh}); 
   } 
 
   render() {
