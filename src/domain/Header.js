@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Message } from 'semantic-ui-react';
 import bte from '../assets/biothings-explorer-text.png';
 import network from '../assets/network.png';
 import { Menu, Grid, Image } from 'semantic-ui-react';
@@ -35,6 +34,14 @@ class Header extends Component {
                         exact to='/explain'
                         >
                         EXPLAIN
+                    </Menu.Item>
+
+                    <Menu.Item
+                        name='ADVANCED'
+                        as={NavLink}
+                        exact to='/advanced'
+                        >
+                        ADVANCED
                     </Menu.Item>
                 </Menu>
 
