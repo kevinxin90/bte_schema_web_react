@@ -13,3 +13,19 @@ export default function getMetaKG() {
 
   return meta_kg;
 }
+
+let categories;
+//get array of all possible categories (input/output types)
+export function getCategories() {
+  if (categories == null) {
+    categories = new Set();
+    getMetaKG().ops.forEach((op) => {
+      categories.add(op.association.input_type);
+      categories.add(op.association.output_type);
+    });
+  }
+
+  categories = Array.from(categories);
+
+  return categories;
+}

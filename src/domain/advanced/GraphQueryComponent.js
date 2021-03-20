@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
-import { Grid, Icon, Button, Popup } from 'semantic-ui-react';
+import ReactDOM from 'react-dom';
+import { Dropdown, Grid, Icon, Button, Popup } from 'semantic-ui-react';
 
+import { colorSchema, semanticTypeShorthand } from '../../shared/semanticTypes';
 import GraphModeSwitcher, { MODE } from './GraphModeSwitcher';
 
 import cytoscape from 'cytoscape';
@@ -9,17 +11,31 @@ import popper from 'cytoscape-popper';
 import Tippy from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
 
+import _ from 'lodash';
+
+import { getCategories } from '../../shared/metaKG';
+
 // cytoscape.use(popper);
 cytoscape.use(edgehandles);
 
 export default class GraphQuery extends Component {
   constructor(props) {
     super(props);
+    
+    //precompute categories
+    getCategories();
+
     this.state = {
       cy: {},
       eh: {},
+      tippyElement: {}, // element that current tippy is bound to
+      tip: {}, //store current tippy object
+      nodeIDs: [],
+      nodeCategories: [],
+      edge: {},
       mode: 1
     };
+
   }
 
   //set mode (for mode switcher component)
@@ -52,7 +68,9 @@ export default class GraphQuery extends Component {
     this.state.cy.add([{
       group: "nodes",
       data: {
-        label: "Any"
+        label: "Any",
+        ids: [],
+        categories: [],
       },
       renderedPosition: {
         x: e.renderedPosition.x,
@@ -65,7 +83,8 @@ export default class GraphQuery extends Component {
     this.state.cy.remove(e);
   }
 
-  showEdgeOptions(edge) {
+  //creates popup on element with tippyContent as the content
+  createTippy(element, tippyContent) {
     let dummy = document.createElement('div');
 
     let tip = new Tippy(dummy, {
@@ -74,49 +93,98 @@ export default class GraphQuery extends Component {
       interactive: true,
       appendTo: document.body,
       onCreate(instance) { 
-        instance.popperInstance.reference = edge.popperRef(); 
+        instance.popperInstance.reference = element.popperRef(); 
       },
       content() {
         let content = document.createElement('div');
-        content.innerHTML = `
-          <h3>${edge.id()}</h3>
-        `;
+
+        ReactDOM.render(tippyContent, content);
         return content;
       },
       onUntrigger(instance) {
+        this.setState({tippyElement: {}, tip: {}, nodeIDs: [], nodeCategories: []});
         instance.destroy();
       }
-
     });
 
     tip.show();
+
+    return tip;
   }
 
-  showNodeOptions(node) {
-    let dummy = document.createElement('div');
+  getNodePopupContent() {
+    let popupContent = <div>
+      <h3>NODE</h3>
+      {/* IDs:
+      <Dropdown 
+        placeholder='IDs'
+        multiple
+        search
+        selection
+        options={[1, 2, 3]}
+      /> */}
+      Categories:
+      <Dropdown 
+        placeholder='Categories'
+        name='nodeCategories'
+        label='categories'
+        multiple
+        search
+        selection
+        onChange={this.handleCategoryChange}
+        options={_.map(getCategories(), (category, idx) => ({key: idx, text: category, value: category}))}
+        value={this.state.nodeCategories}
+      />
+    </div>;
+    return popupContent;
+  }
 
-    let tip = new Tippy(dummy, {
-      trigger: 'manual',
-      lazy: false,
-      interactive: true,
-      appendTo: document.body,
-      onCreate(instance) { 
-        instance.popperInstance.reference = node.popperRef(); 
-      },
-      content() {
-        let content = document.createElement('div');
-        content.innerHTML = `
-          <h3>${node.id()}</h3>
-        `;
-        return content;
-      },
-      onUntrigger(instance) {
-        instance.destroy();
-      }
+  getEdgePopupContent() {
+    let popupContent = <div>
+      <h3>Edge</h3>
+      Predicates:
+      <Dropdown 
+        placeholder='Predicates'
+        multiple
+        search
+        selection
+        options={[1, 2, 3]}
+      />
+    </div>;
+    return popupContent;
+  }
 
+  handleCategoryChange = (e, data) => {
+    console.log(e, data);
+    this.state.tippyElement.data('categories', data.value);
+    this.setState({
+      nodeCategories: data.value,
+    }, () => {
+      let popupContent = this.getNodePopupContent();
+      let content = document.createElement('div');
+      ReactDOM.render(popupContent, content);
+      this.state.tip.setContent(content);
     });
+  };
 
-    tip.show();
+  showNodeOptions(node) {
+    let nodeCategories = node.data('categories');
+    this.setState({nodeCategories: nodeCategories}, () => {
+      let popupContent = this.getNodePopupContent();
+    
+      let tip = this.createTippy(node, popupContent);
+
+      this.setState({tip: tip, tippyElement: node});
+    })
+    
+  }
+
+  showEdgeOptions(edge) {
+    let popupContent = this.getEdgePopupContent();
+
+    let tip = this.createTippy(edge, popupContent);
+
+    this.setState({tip: tip, tippyElement: edge});
   }
 
   componentDidMount() {
@@ -151,14 +219,13 @@ export default class GraphQuery extends Component {
       maxZoom: 15,
       wheelSensitivity: 0.4,
     });
-    
 
     cy.on('tap', (event) => {
-      console.log(this.state.mode);
       if (this.state.mode === MODE.addNode) {
         this.createNode(event);
       } else if (this.state.mode === MODE.edit) {
         if (event.target !== cy && event.target.isNode()) {
+          console.log(event.target.id());
           this.showNodeOptions(event.target);
         } else if (event.target !== cy && event.target.isEdge()) {
           this.showEdgeOptions(event.target);
@@ -196,7 +263,7 @@ export default class GraphQuery extends Component {
               <GraphModeSwitcher mode={this.state.mode} setMode={this.setMode.bind(this)} />
             </Grid.Column>
             <Grid.Column style={{textAlign: "right"}} width="4">
-              <Button basic compact style={{marginRight: 0, marginBottom: 5}} onClick={this.zoomFit}><Icon name="search" />Zoom Fit</Button>
+              <Button basic compact style={{marginRight: 0, marginBottom: 5}} onClick={this.zoomFit.bind(this)}><Icon name="search" />Zoom Fit</Button>
               </Grid.Column>
           </Grid.Row>
         </Grid>
