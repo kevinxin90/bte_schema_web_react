@@ -10,7 +10,7 @@ export default function getMetaKG() {
     meta_kg.constructMetaKGSync();
     constructed = true;
   }
-
+  console.log(meta_kg);
   return meta_kg;
 }
 
@@ -26,6 +26,23 @@ export function getCategories() {
   }
 
   categories = Array.from(categories);
+  categories.sort();
 
   return categories;
+}
+
+let predicates;
+//get array of all possible predicates
+export function getPredicates() {
+  if (predicates == null) {
+    predicates = new Set();
+    getMetaKG().ops.forEach((op) => {
+      predicates.add(op.association.predicate);
+    });
+  }
+
+  predicates = Array.from(predicates);
+  predicates.sort();
+
+  return predicates;
 }

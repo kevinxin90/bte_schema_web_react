@@ -13,7 +13,7 @@ import 'tippy.js/dist/tippy.css';
 
 import _ from 'lodash';
 
-import { getCategories } from '../../shared/metaKG';
+import getMetaKG, { getCategories, getPredicates } from '../../shared/metaKG';
 
 // cytoscape.use(popper);
 cytoscape.use(edgehandles);
@@ -22,8 +22,8 @@ export default class GraphQuery extends Component {
   constructor(props) {
     super(props);
     
-    //precompute categories
-    getCategories();
+    //load metakg graph
+    getMetaKG();
 
     this.state = {
       cy: {},
@@ -32,6 +32,7 @@ export default class GraphQuery extends Component {
       tip: {}, //store current tippy object
       nodeIDs: [],
       nodeCategories: [],
+      edgePredicates: [],
       edge: {},
       mode: 1
     };
@@ -69,6 +70,7 @@ export default class GraphQuery extends Component {
       group: "nodes",
       data: {
         label: "Any",
+        color: "black",
         ids: [],
         categories: [],
       },
@@ -148,15 +150,42 @@ export default class GraphQuery extends Component {
         multiple
         search
         selection
-        options={[1, 2, 3]}
+        onChange={this.handlePredicateChange}
+        options={_.map(getPredicates(), (predicate, idx) => ({key: idx, text: predicate, value: predicate}))}
+        value={this.state.edgePredicates}
       />
     </div>;
     return popupContent;
   }
 
+  handlePredicateChange = (e, data) => {
+    this.state.tippyElement.data('predicates', data.value);
+
+    this.state.tippyElement.data('label', data.value.join(', '));
+
+    this.setState({
+      edgePredicates: data.value,
+    }, () => {
+      let popupContent = this.getEdgePopupContent();
+      let content = document.createElement('div');
+      ReactDOM.render(popupContent, content);
+      this.state.tip.setContent(content);
+    });
+  };
+
   handleCategoryChange = (e, data) => {
-    console.log(e, data);
     this.state.tippyElement.data('categories', data.value);
+    if (data.value.length === 0) {
+      this.state.tippyElement.data('label', 'Any');
+      this.state.tippyElement.data('color', 'black');
+    } else if (data.value.length === 1) {
+      this.state.tippyElement.data('label', data.value[0]);
+      this.state.tippyElement.data('color', colorSchema[semanticTypeShorthand[data.value[0]]])
+    } else {
+      this.state.tippyElement.data('label', 'Multi');
+      this.state.tippyElement.data('color', 'black');
+    }
+
     this.setState({
       nodeCategories: data.value,
     }, () => {
@@ -180,11 +209,15 @@ export default class GraphQuery extends Component {
   }
 
   showEdgeOptions(edge) {
-    let popupContent = this.getEdgePopupContent();
+    let edgePredicates = edge.data('predicates') || [];
+    this.setState({edgePredicates: edgePredicates}, () => {
+      let popupContent = this.getEdgePopupContent();
 
-    let tip = this.createTippy(edge, popupContent);
+      let tip = this.createTippy(edge, popupContent);
 
-    this.setState({tip: tip, tippyElement: edge});
+      this.setState({tip: tip, tippyElement: edge});
+    })
+    
   }
 
   componentDidMount() {
@@ -196,7 +229,7 @@ export default class GraphQuery extends Component {
           selector: 'node',
           style: {
             'label': 'data(label)',
-            'background-color': 'black'
+            'background-color': 'data(color)'
           }
         },
 
@@ -206,7 +239,7 @@ export default class GraphQuery extends Component {
             'width': 2,
             'label': 'data(label)',
             'text-rotation': 'autorotate',
-            'text-margin-y': '-6',
+            'text-margin-y': '-8',
             'curve-style': 'bezier',
             'target-arrow-shape': 'triangle',
             'line-color': 'black',
@@ -225,7 +258,6 @@ export default class GraphQuery extends Component {
         this.createNode(event);
       } else if (this.state.mode === MODE.edit) {
         if (event.target !== cy && event.target.isNode()) {
-          console.log(event.target.id());
           this.showNodeOptions(event.target);
         } else if (event.target !== cy && event.target.isEdge()) {
           this.showEdgeOptions(event.target);
