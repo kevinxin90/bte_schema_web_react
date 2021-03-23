@@ -10,7 +10,6 @@ export default function getMetaKG() {
     meta_kg.constructMetaKGSync();
     constructed = true;
   }
-  console.log(meta_kg);
   return meta_kg;
 }
 

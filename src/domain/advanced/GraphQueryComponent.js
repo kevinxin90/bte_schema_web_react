@@ -114,64 +114,17 @@ export default class GraphQuery extends Component {
     return tip;
   }
 
-  getNodePopupContent() {
-    let popupContent = <div>
-      <h3>NODE</h3>
-      {/* IDs:
-      <Dropdown 
-        placeholder='IDs'
-        multiple
-        search
-        selection
-        options={[1, 2, 3]}
-      /> */}
-      Categories:
-      <Dropdown 
-        placeholder='Categories'
-        name='nodeCategories'
-        label='categories'
-        multiple
-        search
-        selection
-        onChange={this.handleCategoryChange}
-        options={_.map(getCategories(), (category, idx) => ({key: idx, text: category, value: category}))}
-        value={this.state.nodeCategories}
-      />
-    </div>;
-    return popupContent;
-  }
-
-  getEdgePopupContent() {
-    let popupContent = <div>
-      <h3>Edge</h3>
-      Predicates:
-      <Dropdown 
-        placeholder='Predicates'
-        multiple
-        search
-        selection
-        onChange={this.handlePredicateChange}
-        options={_.map(getPredicates(), (predicate, idx) => ({key: idx, text: predicate, value: predicate}))}
-        value={this.state.edgePredicates}
-      />
-    </div>;
-    return popupContent;
-  }
-
-  handlePredicateChange = (e, data) => {
-    this.state.tippyElement.data('predicates', data.value);
-
-    this.state.tippyElement.data('label', data.value.join(', '));
-
+  handleIDChange = (e, data) => {
+    this.state.tippyElement.data('ids', data.value);
     this.setState({
-      edgePredicates: data.value,
+      nodeIDs: data.value,
     }, () => {
-      let popupContent = this.getEdgePopupContent();
+      let popupContent = this.getNodePopupContent();
       let content = document.createElement('div');
       ReactDOM.render(popupContent, content);
       this.state.tip.setContent(content);
     });
-  };
+  }
 
   handleCategoryChange = (e, data) => {
     this.state.tippyElement.data('categories', data.value);
@@ -196,9 +149,43 @@ export default class GraphQuery extends Component {
     });
   };
 
+  getNodePopupContent() {
+    let popupContent = <div>
+      <h3>Node</h3>
+      IDs:
+      <Dropdown 
+        placeholder='IDs  eg.MONDO:0016575'
+        multiple
+        search
+        selection
+        allowAdditions
+        onChange={this.handleIDChange}
+        options={_.map(this.state.nodeIDs, (nodeID) => ({text: nodeID, value: nodeID}))}
+        value={this.state.nodeIDs}
+      />
+      Categories:
+      <Dropdown 
+        placeholder='Categories'
+        name='nodeCategories'
+        label='categories'
+        multiple
+        search
+        selection
+        onChange={this.handleCategoryChange}
+        options={_.map(getCategories(), (category) => ({text: category, value: category}))}
+        value={this.state.nodeCategories}
+      />
+    </div>;
+    return popupContent;
+  }
+
   showNodeOptions(node) {
     let nodeCategories = node.data('categories');
-    this.setState({nodeCategories: nodeCategories}, () => {
+    let nodeIDs = node.data('ids')
+    this.setState({
+      nodeCategories: nodeCategories, 
+      nodeIDs: nodeIDs, 
+    }, () => {
       let popupContent = this.getNodePopupContent();
     
       let tip = this.createTippy(node, popupContent);
@@ -206,6 +193,38 @@ export default class GraphQuery extends Component {
       this.setState({tip: tip, tippyElement: node});
     })
     
+  }
+
+  handlePredicateChange = (e, data) => {
+    this.state.tippyElement.data('predicates', data.value);
+
+    this.state.tippyElement.data('label', data.value.join(', '));
+
+    this.setState({
+      edgePredicates: data.value,
+    }, () => {
+      let popupContent = this.getEdgePopupContent();
+      let content = document.createElement('div');
+      ReactDOM.render(popupContent, content);
+      this.state.tip.setContent(content);
+    });
+  };
+
+  getEdgePopupContent() {
+    let popupContent = <div>
+      <h3>Edge</h3>
+      Predicates:
+      <Dropdown 
+        placeholder='Predicates'
+        multiple
+        search
+        selection
+        onChange={this.handlePredicateChange}
+        options={_.map(getPredicates(), (predicate, idx) => ({key: idx, text: predicate, value: predicate}))}
+        value={this.state.edgePredicates}
+      />
+    </div>;
+    return popupContent;
   }
 
   showEdgeOptions(edge) {
