@@ -239,6 +239,11 @@ export default class GraphQuery extends Component {
     
   }
 
+  export() {
+    console.log(this.state.cy.json());
+    return this.state.cy.json();
+  }
+
   componentDidMount() {
     const container = document.getElementById('cy');
     const cy = cytoscape({
@@ -298,16 +303,24 @@ export default class GraphQuery extends Component {
 
   render() {
     return (
-      <div style={{ paddingTop: "1rem" }}>
+      <div style={{ paddingTop: "1rem", paddingBottom: "1rem" }}>
         <Grid columns={3}>
           <Grid.Row>
             <Grid.Column width="4">
               <h2>
                 Graph &nbsp;&nbsp;
                 <Popup 
-                  content="Stuff"
                   trigger={ <Icon circular name="info" size="tiny" style={{verticalAlign: 4}}/> }
-                /> 
+                >
+                  <Popup.Content>
+                    <div>
+                      <p>Use Edit mode to add attributes to nodes/edges and reposition nodes.</p>
+                      <p>Left click while in Add Node mode to place nodes.</p>
+                      <p>Click and drag while in Add Edge mode to create new edges.</p>
+                      <p>Right click to remove nodes/edges.</p>
+                    </div>
+                  </Popup.Content>
+                </Popup> 
                 </h2>
             </Grid.Column>
             <Grid.Column style={{textAlign: "center"}}  width="8">
