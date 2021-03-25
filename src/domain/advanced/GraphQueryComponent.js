@@ -308,11 +308,11 @@ export default class GraphQuery extends Component {
   render() {
     return (
       <div style={{ paddingTop: "1rem", paddingBottom: "1rem" }}>
-        <Grid columns={3}>
+        <Grid stackable columns={3}>
           <Grid.Row>
             <Grid.Column width="4">
               <h2>
-                Graph &nbsp;&nbsp;
+                Query Graph &nbsp;&nbsp;
                 <Popup 
                   trigger={ <Icon circular name="info" size="tiny" style={{verticalAlign: 4}}/> }
                 >
