@@ -9,7 +9,8 @@ class AdvancedQuery extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      graph: {}
+      response: {},
+      loading: false
     };
     this.childRef = React.createRef();
   }
@@ -24,7 +25,6 @@ class AdvancedQuery extends Component {
     if (jsonGraph.elements.nodes && jsonGraph.elements.nodes.length >= 2) {
 
       for (let node of jsonGraph.elements.nodes) {
-        console.log(node.data.ids.length);
         if (node.data.ids.length > 0) {
           return true;
         }
@@ -67,23 +67,37 @@ class AdvancedQuery extends Component {
 
   getGraph() {
     let jsonGraph = this.childRef.current.export();
-    console.log("valid query?", this.isValidQuery(jsonGraph));
     if (this.isValidQuery(jsonGraph)) {
-      let query = this.convertJSONtoTRAPI(jsonGraph);
-      axios.post('https://api.bte.ncats.io/v1/query', query).then((response) => {
-        console.log("Response", response, response.data);
-      });
+      if (!this.state.loading) {
+        this.setState({loading: true});
+        let query = this.convertJSONtoTRAPI(jsonGraph);
+        axios.post('https://api.bte.ncats.io/v1/query', query).then((response) => {
+          this.setState({loading: false, response: response.data});
+          console.log("Response", response, response.data);
+        });
+      } else {
+        console.log('Already loading');
+      }
+      
     } else {
       alert("Invalid query. Must have at least 2 nodes, 1 edge, and 1 node with an id.");
     }
   }
 
   render() {
+    let edges = _.get(this.state.response, 'message.knowledge_graph.edges',{});
+    let display = Object.values(edges).map(edge => {
+      return <div>{`${edge.object}-${edge.predicate}-${edge.subject}`}</div>;
+    });
     return (
       <Container className="feature">
         <Navigation name="Advanced" />
         <GraphQuery ref={this.childRef} />
-        <Button onClick={this.getGraph.bind(this)}>Query</Button>
+        <Button onClick={this.getGraph.bind(this)} loading={this.state.loading}>Query</Button>
+        <h3>Query Results</h3>
+        <div>
+          {display}
+        </div>
       </Container>
     )
   }

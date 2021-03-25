@@ -114,8 +114,26 @@ export default class GraphQuery extends Component {
     return tip;
   }
 
+  //calculate and set node label
+  setNodeLabel(node, ids, categories) {
+    if (categories.length === 0 && ids.length == 0) {
+      node.data('label', 'Any');
+      node.data('color', 'black');
+    } else if (categories.length === 1) {
+      node.data('label', categories[0]);
+      node.data('color', colorSchema[semanticTypeShorthand[categories[0]]])
+    } else if (ids.length > 0) {
+      node.data('label', ids.join(', '));
+      node.data('color', 'black');
+    } else {
+      node.data('label', 'Multi');
+      node.data('color', 'black');
+    }
+  }
+
   handleIDChange = (e, data) => {
     this.state.tippyElement.data('ids', data.value);
+    this.setNodeLabel(this.state.tippyElement, data.value, this.state.nodeCategories);
     this.setState({
       nodeIDs: data.value,
     }, () => {
@@ -128,16 +146,7 @@ export default class GraphQuery extends Component {
 
   handleCategoryChange = (e, data) => {
     this.state.tippyElement.data('categories', data.value);
-    if (data.value.length === 0) {
-      this.state.tippyElement.data('label', 'Any');
-      this.state.tippyElement.data('color', 'black');
-    } else if (data.value.length === 1) {
-      this.state.tippyElement.data('label', data.value[0]);
-      this.state.tippyElement.data('color', colorSchema[semanticTypeShorthand[data.value[0]]])
-    } else {
-      this.state.tippyElement.data('label', 'Multi');
-      this.state.tippyElement.data('color', 'black');
-    }
+    this.setNodeLabel(this.state.tippyElement, this.state.nodeIDs, data.value);
 
     this.setState({
       nodeCategories: data.value,
@@ -196,10 +205,14 @@ export default class GraphQuery extends Component {
     
   }
 
+  //calculate and set edge label
+  setEdgeLabel(edge, predicates) {
+    edge.data('label', predicates.join(', '));
+  }
+
   handlePredicateChange = (e, data) => {
     this.state.tippyElement.data('predicates', data.value);
-
-    this.state.tippyElement.data('label', data.value.join(', '));
+    this.setEdgeLabel(this.state.tippyElement, data.value);
 
     this.setState({
       edgePredicates: data.value,
@@ -244,7 +257,6 @@ export default class GraphQuery extends Component {
   }
 
   export() {
-    console.log(this.state.cy.json());
     return this.state.cy.json();
   }
 
