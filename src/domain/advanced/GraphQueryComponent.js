@@ -184,13 +184,14 @@ export default class GraphQuery extends Component {
     let nodeIDs = node.data('ids')
     this.setState({
       nodeCategories: nodeCategories, 
-      nodeIDs: nodeIDs, 
+      nodeIDs: nodeIDs,
+      tippyElement: node 
     }, () => {
       let popupContent = this.getNodePopupContent();
     
       let tip = this.createTippy(node, popupContent);
 
-      this.setState({tip: tip, tippyElement: node});
+      this.setState({tip: tip});
     })
     
   }
@@ -211,6 +212,7 @@ export default class GraphQuery extends Component {
   };
 
   getEdgePopupContent() {
+    let connectedNodes = this.state.tippyElement.connectedNodes();
     let popupContent = <div>
       <h3>Edge</h3>
       Predicates:
@@ -220,7 +222,9 @@ export default class GraphQuery extends Component {
         search
         selection
         onChange={this.handlePredicateChange}
-        options={_.map(getPredicates(), (predicate, idx) => ({key: idx, text: predicate, value: predicate}))}
+        //make sure old chosen predicates are in the options for the new predicates
+        options={_.map(getPredicates(connectedNodes[0].data('categories'), connectedNodes[1].data('categories'), this.state.edgePredicates), 
+          (predicate, idx) => ({key: idx, text: predicate, value: predicate}))}
         value={this.state.edgePredicates}
       />
     </div>;
@@ -229,12 +233,12 @@ export default class GraphQuery extends Component {
 
   showEdgeOptions(edge) {
     let edgePredicates = edge.data('predicates') || [];
-    this.setState({edgePredicates: edgePredicates}, () => {
+    this.setState({edgePredicates: edgePredicates, tippyElement: edge}, () => {
       let popupContent = this.getEdgePopupContent();
 
       let tip = this.createTippy(edge, popupContent);
 
-      this.setState({tip: tip, tippyElement: edge});
+      this.setState({tip: tip});
     })
     
   }

@@ -1,5 +1,6 @@
 //lazy loads meta kg package (for better initial loading)
 import MetaKG from "@biothings-explorer/smartapi-kg";
+import _ from 'lodash';
 
 const meta_kg = new MetaKG();
 let constructed = false;
@@ -30,15 +31,14 @@ export function getCategories() {
   return categories;
 }
 
-let predicates;
 //get array of all possible predicates
-export function getPredicates() {
-  if (predicates == null) {
-    predicates = new Set();
-    getMetaKG().ops.forEach((op) => {
-      predicates.add(op.association.predicate);
-    });
-  }
+export function getPredicates(input_type, output_type, values_to_include=[]) {
+  let predicates = new Set();
+  values_to_include.forEach((value) => predicates.add(value));
+
+  getMetaKG().filter(_.pickBy({ input_type: input_type, output_type: output_type }, _.size)).forEach((op) => {
+    predicates.add(op.association.predicate);
+  });
 
   predicates = Array.from(predicates);
   predicates.sort();
