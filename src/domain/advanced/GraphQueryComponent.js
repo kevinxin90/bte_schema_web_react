@@ -7,7 +7,7 @@ import GraphModeSwitcher, { MODE } from './GraphModeSwitcher';
 
 import cytoscape from '../../shared/cytoscapeInit';
 import Tippy from 'tippy.js';
-import 'tippy.js/dist/tippy.css';
+import 'tippy.js/themes/light-border.css';
 
 import _ from 'lodash';
 
@@ -28,7 +28,6 @@ export default class GraphQuery extends Component {
       nodeIDs: [],
       nodeCategories: [],
       edgePredicates: [],
-      edge: {},
       mode: 1
     };
 
@@ -83,15 +82,15 @@ export default class GraphQuery extends Component {
   //creates popup on element with tippyContent as the content
   createTippy(element, tippyContent) {
     let dummy = document.createElement('div');
+    let ref = element.popperRef();
 
-    let tip = new Tippy(dummy, {
+    let tip = Tippy(dummy, {
+      theme: 'light-border',
       trigger: 'manual',
-      lazy: false,
       interactive: true,
       appendTo: document.body,
-      onCreate(instance) { 
-        instance.popperInstance.reference = element.popperRef(); 
-      },
+      getReferenceClientRect: ref.getBoundingClientRect,
+      arrow: true,
       content() {
         let content = document.createElement('div');
 
@@ -154,7 +153,7 @@ export default class GraphQuery extends Component {
   };
 
   getNodePopupContent() {
-    let popupContent = <div>
+    let popupContent = <div style={{paddingTop: "4px", paddingBottom: "4px"}}>
       <h3>Node</h3>
       IDs:
       <Dropdown 

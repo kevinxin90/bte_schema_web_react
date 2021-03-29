@@ -239,16 +239,16 @@ export default class CytoscapeGraph extends PureComponent {
     cy.on('click', 'node', function(event) {
       let node = event.target;
 
+      let ref = node.popperRef();
       let dummy = document.createElement('div');
 
-      let tip = new Tippy(dummy, {
+      let tip = Tippy(dummy, {
+        theme: 'light-border',
         trigger: 'manual',
-        lazy: false,
         interactive: true,
         appendTo: document.body,
-        onCreate(instance) { 
-          instance.popperInstance.reference = node.popperRef(); 
-        },
+        getReferenceClientRect: ref.getBoundingClientRect,
+        arrow: true,
         content() {
           let content = document.createElement('div');
           content.innerHTML = `
@@ -275,16 +275,16 @@ export default class CytoscapeGraph extends PureComponent {
     cy.on('click', 'edge', function(event) {
       let edge = event.target;
 
+      let ref = edge.popperRef();
       let dummy = document.createElement('div');
 
-      let tip = new Tippy(dummy, {
+      let tip = Tippy(dummy, {
+        theme: 'light-border',
         trigger: 'manual',
-        lazy: false,
         interactive: true,
         appendTo: document.body,
-        onCreate(instance) { 
-          instance.popperInstance.reference = edge.popperRef();
-        },
+        getReferenceClientRect: ref.getBoundingClientRect,
+        arrow: true,
         content() {
           let content = document.createElement('div');
           content.innerHTML = `
