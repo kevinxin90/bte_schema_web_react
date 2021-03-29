@@ -73,7 +73,10 @@ class AdvancedQuery extends Component {
         let query = this.convertJSONtoTRAPI(jsonGraph);
         axios.post('https://api.bte.ncats.io/v1/query', query).then((response) => {
           this.setState({loading: false, response: response.data});
-          console.log("Response", response, response.data);
+          console.log("Response", response.data);
+        }).catch((error) => {
+          this.setState({loading: false});
+          console.log("Error: ", error);
         });
       } else {
         console.log('Already loading');
@@ -87,7 +90,7 @@ class AdvancedQuery extends Component {
   render() {
     let edges = _.get(this.state.response, 'message.knowledge_graph.edges',{});
     let display = Object.values(edges).map(edge => {
-      return <div>{`${edge.object}-${edge.predicate}-${edge.subject}`}</div>;
+      return <div>{`${edge.subject}-${edge.predicate}-${edge.object}`}</div>;
     });
     return (
       <Container className="feature">

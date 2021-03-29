@@ -4,12 +4,9 @@ import { Grid, Icon, Button, Popup } from 'semantic-ui-react';
 import {colorSchema, semanticTypeShorthand} from '../shared/semanticTypes';
 import { getPublicationLink } from '../shared/utils';
 
-import cytoscape from 'cytoscape';
-import popper from 'cytoscape-popper';
+import cytoscape from '../shared/cytoscapeInit';
 import Tippy from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
-cytoscape.use(popper);
-
 
 export default class CytoscapeGraph extends PureComponent {
   constructor(props){

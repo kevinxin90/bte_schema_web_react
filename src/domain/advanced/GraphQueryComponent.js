@@ -5,18 +5,13 @@ import { Dropdown, Grid, Icon, Button, Popup } from 'semantic-ui-react';
 import { colorSchema, semanticTypeShorthand } from '../../shared/semanticTypes';
 import GraphModeSwitcher, { MODE } from './GraphModeSwitcher';
 
-import cytoscape from 'cytoscape';
-import edgehandles from 'cytoscape-edgehandles';
-import popper from 'cytoscape-popper';
+import cytoscape from '../../shared/cytoscapeInit';
 import Tippy from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
 
 import _ from 'lodash';
 
 import getMetaKG, { getCategories, getPredicates } from '../../shared/metaKG';
-
-// cytoscape.use(popper);
-cytoscape.use(edgehandles);
 
 export default class GraphQuery extends Component {
   constructor(props) {
@@ -116,7 +111,7 @@ export default class GraphQuery extends Component {
 
   //calculate and set node label
   setNodeLabel(node, ids, categories) {
-    if (categories.length === 0 && ids.length == 0) {
+    if (categories.length === 0 && ids.length === 0) {
       node.data('label', 'Any');
       node.data('color', 'black');
     } else if (categories.length === 1) {
@@ -319,10 +314,10 @@ export default class GraphQuery extends Component {
 
   render() {
     return (
-      <div style={{ paddingTop: "1rem", paddingBottom: "1rem" }}>
+      <div style={{ paddingTop: "1rem", paddingBottom: "0.5rem" }}>
         <Grid stackable columns={3}>
           <Grid.Row>
-            <Grid.Column width="4">
+            <Grid.Column>
               <h2>
                 Query Graph &nbsp;&nbsp;
                 <Popup 
@@ -339,10 +334,10 @@ export default class GraphQuery extends Component {
                 </Popup> 
                 </h2>
             </Grid.Column>
-            <Grid.Column style={{textAlign: "center"}}  width="8">
+            <Grid.Column style={{textAlign: "center"}}>
               <GraphModeSwitcher mode={this.state.mode} setMode={this.setMode.bind(this)} />
             </Grid.Column>
-            <Grid.Column style={{textAlign: "right"}} width="4">
+            <Grid.Column style={{textAlign: "right"}}>
               <Button basic compact style={{marginRight: 0, marginBottom: 5}} onClick={this.zoomFit.bind(this)}><Icon name="search" />Zoom Fit</Button>
               </Grid.Column>
           </Grid.Row>
