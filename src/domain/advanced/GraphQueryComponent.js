@@ -7,6 +7,7 @@ import GraphModeSwitcher, { MODE } from './GraphModeSwitcher';
 
 import cytoscape from '../../shared/cytoscapeInit';
 import Tippy from 'tippy.js';
+import 'tippy.js/dist/tippy.css';
 import 'tippy.js/themes/light-border.css';
 
 import _ from 'lodash';
@@ -178,6 +179,7 @@ export default class GraphQuery extends Component {
         options={_.map(getCategories(), (category) => ({text: category, value: category}))}
         value={this.state.nodeCategories}
       />
+      <Button onClick={() => {this.props.nodeQuery(this.state.tippyElement)}}>View Results for Node</Button>
     </div>;
     return popupContent;
   }
@@ -234,6 +236,7 @@ export default class GraphQuery extends Component {
           (predicate, idx) => ({key: idx, text: predicate, value: predicate}))}
         value={this.state.edgePredicates}
       />
+      <Button onClick={() => {this.props.edgeQuery(this.state.tippyElement)}}>View Results for Edge</Button>
     </div>;
     return popupContent;
   }

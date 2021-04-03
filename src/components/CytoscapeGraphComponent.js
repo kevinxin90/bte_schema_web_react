@@ -7,6 +7,7 @@ import { getPublicationLink } from '../shared/utils';
 import cytoscape from '../shared/cytoscapeInit';
 import Tippy from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
+import 'tippy.js/themes/light-border.css';
 
 export default class CytoscapeGraph extends PureComponent {
   constructor(props){
