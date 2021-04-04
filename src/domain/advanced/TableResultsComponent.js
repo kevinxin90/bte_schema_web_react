@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import React, { Component } from 'react'
-import { Table, Pagination, Checkbox, Icon, Popup, Accordion, Form, Button, Menu, Header } from 'semantic-ui-react'
+import { Table, Pagination, Checkbox, Icon, Popup, Accordion, Form, Button, Menu, Header, List } from 'semantic-ui-react'
+import { getPublicationLink } from '../../shared/utils';
 
 export default class TableResultsComponent extends Component {
   constructor(props) {
@@ -52,7 +53,104 @@ export default class TableResultsComponent extends Component {
     return entries;
   }
 
+  getAttributesContent(attributes) {
+    return (
+      <List>
+        {_.map(attributes, (attribute) => {
+          if (attribute.name === 'publications') {
+            return (
+              <List.Item>
+                <List.Content>Publications</List.Content>
+                <List.Description as='a' href={getPublicationLink(attribute.value)} target="_blank" rel="noopener noreferrer">
+                  Open All Publications({attribute.value.length})&nbsp;<Icon name='external alternate' color='grey' fitted size='small'/>
+                </List.Description>
+              </List.Item>
+            );
+          } else if (Array.isArray(attribute.value)) {
+            let panel = [{
+              key: `accordion-${_.uniqueId()}`,
+              title: {
+                children:(
+                /*add your icon and/or styles here*/
+                  <span>
+                    {attribute.name}&nbsp;<Icon name='plus' size='small'/>
+                  </span>
+                )
+              },
+              content: {
+                content: (
+                  <List.Description>
+                    <List items={attribute.value}/>
+                  </List.Description>
+                )
+              }
+            }]
+            return (
+              <List.Item>
+                <List.Content><Accordion panels={panel}/></List.Content>
+              </List.Item>
+            )
+          } else {
+            return (
+              <List.Item>
+                <List.Content>{attribute.name}</List.Content>
+                <List.Description>
+                  {attribute.value}
+                </List.Description>
+              </List.Item>
+            )
+          }
+        })}
+      </List>
+    )
+  }
+
+  getNodeCell(node) {
+    return (
+      <Popup on='click' trigger={
+        <Table.Cell style={{cursor: 'pointer'}}>
+          {node.name}
+        </Table.Cell>
+      }>
+        <Popup.Header>
+          <Header as='h3'>
+            {node.name}
+            <Header.Subheader>
+              {node.category}
+            </Header.Subheader>
+          </Header>
+        </Popup.Header>
+        <Popup.Content>
+          {this.getAttributesContent(node.attributes)}
+        </Popup.Content>
+      </Popup> 
+    )
+  }
+
+  getEdgeCell(edge) {
+    return (
+      <Popup on='click' trigger={
+        <Table.Cell style={{cursor: 'pointer'}}>
+          {edge.predicate}
+        </Table.Cell>
+      }>
+        <Popup.Header>
+          <Header as='h3'>
+            {edge.predicate}
+            <Header.Subheader>
+              {edge.subject} &#8594; {edge.object}
+            </Header.Subheader>
+          </Header>
+        </Popup.Header>
+        <Popup.Content>
+          {this.getAttributesContent(edge.attributes)}
+        </Popup.Content>
+      </Popup> 
+    )
+  }
+
   render() {
+    console.log("TABLE", this.state.table);
     let table;
 
     if (this.state.mode === "edge") {
@@ -74,16 +172,10 @@ export default class TableResultsComponent extends Component {
           <Table.Body>
             {_.map(this.state.table, (entry) => {
               return (
-                <Table.Row>
-                  <Table.Cell>
-                    {entry.source.name}
-                  </Table.Cell>
-                  <Table.Cell>
-                    {entry.edge.predicate}
-                  </Table.Cell>
-                  <Table.Cell>
-                    {entry.target.name}
-                  </Table.Cell>
+                <Table.Row key={`row-${_.uniqueId()}`}>
+                  {this.getNodeCell(entry.source)}
+                  {this.getEdgeCell(entry.edge)}
+                  {this.getNodeCell(entry.target)}
                 </Table.Row>
               );
             })}
@@ -104,10 +196,8 @@ export default class TableResultsComponent extends Component {
             {_.map(this.state.table, (entry) => {
               console.log(entry);
               return (
-                <Table.Row>
-                  <Table.Cell>
-                    {entry.node.name}
-                  </Table.Cell>
+                <Table.Row key={`row-${_.uniqueId()}`}>
+                  {this.getNodeCell(entry.node)}
                 </Table.Row>
               );
             })}
