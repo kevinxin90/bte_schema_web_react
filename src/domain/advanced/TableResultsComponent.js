@@ -7,20 +7,42 @@ export default class TableResultsComponent extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      table: [],
+      results: [],
+      filteredResults: [],
+      table: {
+        column: null,
+        display: [],
+        direction: null,
+        activePage: 1,
+        totalPages: 1
+      },
       mode: "edge",
     }
   }
 
   setTable(response, selectedElementID, mode) {
     if (mode === 'edge') {
-      this.setState({table: this.calculateTableGivenEdge(response, selectedElementID), mode: "edge"}, () => {
-        console.log(this.state.table);
-      });
+      let results = this.calculateTableGivenEdge(response, selectedElementID);
+      this.setState({results: results, 
+        filteredResults: results,
+        table: {
+          ...this.state.table,
+          display: results.slice(0, 10),
+          activePage: 1,
+          totalPages: Math.ceil(results.length / 10)
+        }, 
+        mode: "edge"});
     } else {
-      this.setState({table: this.calculateTableGivenNode(response, selectedElementID), mode: "node"}, () => {
-        console.log("NODE NEW TABLE", this.state.table);
-      });
+      let results = this.calculateTableGivenNode(response, selectedElementID);
+      this.setState({results: results, 
+        filteredResults: results,
+        table: {
+          ...this.state.table,
+          display: results.slice(0, 10),
+          activePage: 1,
+          totalPages: Math.ceil(results.length / 10)
+        }, 
+        mode: "node"});
     }
     
   }
@@ -35,7 +57,6 @@ export default class TableResultsComponent extends Component {
       }
     });
     entries = _.map(Array.from(ids), (id) => ({node: response.message.knowledge_graph.nodes[id]}));
-    console.log("NODE ENTRIES", ids, entries);
     return entries;
   }
 
@@ -46,7 +67,6 @@ export default class TableResultsComponent extends Component {
         let edge = response.message.knowledge_graph.edges[result.edge_bindings[selectedEdgeID][0].id]; //get knowledge graph edge
         let source = response.message.knowledge_graph.nodes[edge.subject];
         let target = response.message.knowledge_graph.nodes[edge.object];
-        console.log(source, edge, target);
         entries.push({source: source, edge: edge, target: target});
       }
     });
@@ -149,68 +169,83 @@ export default class TableResultsComponent extends Component {
     )
   }
 
+  handlePaginationChange(e, {activePage}) {
+    this.setState({
+      table: {
+          ...this.state.table,
+          display: this.state.filteredResults.slice(activePage * 10 - 10, activePage * 10),
+          activePage: activePage
+      }
+    });
+  }
+
   render() {
-    console.log("TABLE", this.state.table);
-    let table;
+    let tableContents;
 
     if (this.state.mode === "edge") {
-      table = <div style={{overflowX: "auto", marginBottom: "1em", marginTop: "0.5em"}}> 
-        <Table sortable unstackable celled compact>
-          <Table.Header>
-            <Table.Row>
-              <Table.HeaderCell>
-                Source
-              </Table.HeaderCell>
-              <Table.HeaderCell>
-                Edge
-              </Table.HeaderCell>
-              <Table.HeaderCell>
-                Target
-              </Table.HeaderCell>
-            </Table.Row>
-          </Table.Header>
-          <Table.Body>
-            {_.map(this.state.table, (entry) => {
-              return (
-                <Table.Row key={`row-${_.uniqueId()}`}>
-                  {this.getNodeCell(entry.source)}
-                  {this.getEdgeCell(entry.edge)}
-                  {this.getNodeCell(entry.target)}
-                </Table.Row>
-              );
-            })}
-          </Table.Body>
-        </Table>
-      </div>;
+      tableContents = <>
+        <Table.Header>
+          <Table.Row>
+            <Table.HeaderCell>
+              Source
+            </Table.HeaderCell>
+            <Table.HeaderCell>
+              Edge
+            </Table.HeaderCell>
+            <Table.HeaderCell>
+              Target
+            </Table.HeaderCell>
+          </Table.Row>
+        </Table.Header>
+        <Table.Body>
+          {_.map(this.state.table.display, (entry) => {
+            return (
+              <Table.Row key={`row-${_.uniqueId()}`}>
+                {this.getNodeCell(entry.source)}
+                {this.getEdgeCell(entry.edge)}
+                {this.getNodeCell(entry.target)}
+              </Table.Row>
+            );
+          })}
+        </Table.Body>
+      </>;
     } else {
-      table = <div style={{overflowX: "auto", marginBottom: "1em", marginTop: "0.5em"}}> 
-        <Table sortable unstackable celled compact>
-          <Table.Header>
-            <Table.Row>
-              <Table.HeaderCell>
-                Nodes
-              </Table.HeaderCell>
-            </Table.Row>
-          </Table.Header>
-          <Table.Body>
-            {_.map(this.state.table, (entry) => {
-              console.log(entry);
-              return (
-                <Table.Row key={`row-${_.uniqueId()}`}>
-                  {this.getNodeCell(entry.node)}
-                </Table.Row>
-              );
-            })}
-          </Table.Body>
-        </Table>
-      </div>;
+      tableContents = <>
+        <Table.Header>
+          <Table.Row>
+            <Table.HeaderCell>
+              Nodes
+            </Table.HeaderCell>
+          </Table.Row>
+        </Table.Header>
+        <Table.Body>
+          {_.map(this.state.table.display, (entry) => {
+            return (
+              <Table.Row key={`row-${_.uniqueId()}`}>
+                {this.getNodeCell(entry.node)}
+              </Table.Row>
+            );
+          })}
+        </Table.Body>
+      </>;
     }
     
+    let table = <div style={{overflowX: "auto", marginBottom: "1em", marginTop: "0.5em"}}> 
+      <Table sortable unstackable celled compact>
+        {tableContents}
+      </Table>
+      <Pagination
+          onPageChange={this.handlePaginationChange.bind(this)}
+          defaultActivePage={1}
+          totalPages={this.state.table.totalPages}
+          siblingRange={2}
+        />
+    </div>;
 
     return (
       <div style={{marginTop: "2rem"}}>
         <h3>Query Results</h3>
-        {this.state.table.length > 0 ? table : <div>Make a query to see query results.</div>}
+        {this.state.results.length > 0 ? table : <div>Make a query to see query results.</div>}
       </div>
     );
   }
