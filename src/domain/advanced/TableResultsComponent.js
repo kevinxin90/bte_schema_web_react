@@ -21,30 +21,24 @@ export default class TableResultsComponent extends Component {
   }
 
   setTable(response, selectedElementID, mode) {
+    let results;
     if (mode === 'edge') {
-      let results = this.calculateTableGivenEdge(response, selectedElementID);
-      this.setState({results: results, 
-        filteredResults: results,
-        table: {
-          ...this.state.table,
-          display: results.slice(0, 10),
-          activePage: 1,
-          totalPages: Math.ceil(results.length / 10)
-        }, 
-        mode: "edge"});
+      results = this.calculateTableGivenEdge(response, selectedElementID);
+      this.setState({mode: "edge"});
     } else {
-      let results = this.calculateTableGivenNode(response, selectedElementID);
-      this.setState({results: results, 
-        filteredResults: results,
-        table: {
-          ...this.state.table,
-          display: results.slice(0, 10),
-          activePage: 1,
-          totalPages: Math.ceil(results.length / 10)
-        }, 
-        mode: "node"});
+      results = this.calculateTableGivenNode(response, selectedElementID);
+      this.setState({mode: "node"});
     }
-    
+
+    this.setState({results: results, 
+      filteredResults: results,
+      table: {
+        ...this.state.table,
+        display: results.slice(0, 10),
+        activePage: 1,
+        totalPages: Math.ceil(results.length / 10)
+      }
+    });
   }
 
   calculateTableGivenNode(response, selectedNodeID) {
@@ -64,15 +58,19 @@ export default class TableResultsComponent extends Component {
     let entries = [];
     response.message.results.forEach((result) => {
       if (result.edge_bindings.hasOwnProperty(selectedEdgeID)) {
+        let cy_edge = this.props.cy.getElementById(selectedEdgeID);
         let edge = response.message.knowledge_graph.edges[result.edge_bindings[selectedEdgeID][0].id]; //get knowledge graph edge
         let source = response.message.knowledge_graph.nodes[edge.subject];
+        source.qg_id = cy_edge.source().id(); 
         let target = response.message.knowledge_graph.nodes[edge.object];
+        target.qg_id = cy_edge.target().id(); 
         entries.push({source: source, edge: edge, target: target});
       }
     });
     return entries;
   }
 
+  //format array of attributes
   getAttributesContent(attributes) {
     return (
       <List>
@@ -125,6 +123,7 @@ export default class TableResultsComponent extends Component {
     )
   }
 
+  //create table cell based on node
   getNodeCell(node) {
     return (
       <Popup on='click' trigger={
@@ -147,6 +146,7 @@ export default class TableResultsComponent extends Component {
     )
   }
 
+  //create table cell based on edge
   getEdgeCell(edge) {
     return (
       <Popup on='click' trigger={
@@ -179,6 +179,19 @@ export default class TableResultsComponent extends Component {
     });
   }
 
+  //handle checkboxes and synchronize with graph
+  handleSelect(e, { data }) {
+    let node = this.props.cy.getElementById(data.qg_id);
+    let entity_id = data.attributes[0].value[0];
+    let idx = node.data('ids').indexOf(entity_id);
+    if (idx === -1) {
+      node.data('ids').push(entity_id);
+    } else {
+      node.data('ids').splice(idx, 1);
+    }
+    this.props.updateCy();
+  }
+
   render() {
     let tableContents;
 
@@ -186,14 +199,20 @@ export default class TableResultsComponent extends Component {
       tableContents = <>
         <Table.Header>
           <Table.Row>
-            <Table.HeaderCell>
+            <Table.HeaderCell width={1}>
+              Add Source To Query Graph
+            </Table.HeaderCell>
+            <Table.HeaderCell width={2}>
               Source
             </Table.HeaderCell>
-            <Table.HeaderCell>
+            <Table.HeaderCell width={2}>
               Edge
             </Table.HeaderCell>
-            <Table.HeaderCell>
+            <Table.HeaderCell width={2}>
               Target
+            </Table.HeaderCell>
+            <Table.HeaderCell width={1}>
+              Add Target To Query Graph
             </Table.HeaderCell>
           </Table.Row>
         </Table.Header>
@@ -201,9 +220,21 @@ export default class TableResultsComponent extends Component {
           {_.map(this.state.table.display, (entry) => {
             return (
               <Table.Row key={`row-${_.uniqueId()}`}>
+                <Table.Cell key={`checkbox-${_.uniqueId()}`} textAlign='center'>
+                  <Checkbox onClick={this.handleSelect.bind(this)} 
+                    data={entry.source} 
+                    defaultChecked={this.props.cy.getElementById(entry.source.qg_id).data('ids').includes(entry.source.attributes[0].value[0])}
+                  />
+                </Table.Cell>
                 {this.getNodeCell(entry.source)}
                 {this.getEdgeCell(entry.edge)}
                 {this.getNodeCell(entry.target)}
+                <Table.Cell key={`checkbox-${_.uniqueId()}`} textAlign='center'>
+                  <Checkbox onClick={this.handleSelect.bind(this)} 
+                    data={entry.target} 
+                    defaultChecked={this.props.cy.getElementById(entry.target.qg_id).data('ids').includes(entry.target.attributes[0].value[0])}
+                  />
+                </Table.Cell>
               </Table.Row>
             );
           })}
@@ -231,7 +262,7 @@ export default class TableResultsComponent extends Component {
     }
     
     let table = <div style={{overflowX: "auto", marginBottom: "1em", marginTop: "0.5em"}}> 
-      <Table sortable unstackable celled compact>
+      <Table sortable unstackable celled>
         {tableContents}
       </Table>
       <Pagination

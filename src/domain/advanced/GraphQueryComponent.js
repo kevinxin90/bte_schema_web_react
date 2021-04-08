@@ -34,6 +34,12 @@ export default class GraphQuery extends Component {
 
   }
 
+  //use to update cy in parent
+  setData(element, key, value) {
+    element.data(key, value);
+    this.props.updateCy();
+  }
+
   //set mode (for mode switcher component)
   setMode(mode) {
     if (mode === MODE.addEdge) {
@@ -127,7 +133,7 @@ export default class GraphQuery extends Component {
   }
 
   handleIDChange = (e, data) => {
-    this.state.tippyElement.data('ids', data.value);
+    this.setData(this.state.tippyElement, 'ids', data.value);
     this.setNodeLabel(this.state.tippyElement, data.value, this.state.nodeCategories);
     this.setState({
       nodeIDs: data.value,
@@ -255,6 +261,10 @@ export default class GraphQuery extends Component {
 
   export() {
     return this.state.cy.json();
+  }
+
+  getCy() {
+    return this.state.cy;
   }
 
   componentDidMount() {

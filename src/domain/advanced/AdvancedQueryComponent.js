@@ -12,7 +12,8 @@ class AdvancedQuery extends Component {
     this.state = {
       response: {},
       selectedEdgeID: "",
-      loading: false
+      loading: false,
+      cy: {},
     };
 
     this.tableRef = React.createRef();
@@ -20,23 +21,22 @@ class AdvancedQuery extends Component {
   }
 
   //at least 1 node must have an id
-  //has at least 2 nodes and 1 edge
+  //has at least 1 edge
   isValidQuery(jsonGraph) {
     if (!(jsonGraph.elements.edges && jsonGraph.elements.edges.length >= 1)) {
+      alert("Must have at least 1 edge.");
       return false;
     } 
-
-    if (jsonGraph.elements.nodes && jsonGraph.elements.nodes.length >= 2) {
-
-      for (let node of jsonGraph.elements.nodes) {
-        if (node.data.ids.length > 0) {
-          return true;
-        }
+    for (let node of jsonGraph.elements.nodes) {
+      if (node.data.ids.length > 0) {
+        return true;
       }
     }
+    alert("Must have at least 1 node with an id.");
     return false;
   }
 
+  //convert cytoscape json export to TRAPI query syntax
   convertJSONtoTRAPI(jsonGraph) {
     let nodes = {};
     if (jsonGraph.elements.nodes) {
@@ -71,10 +71,12 @@ class AdvancedQuery extends Component {
     }
   }
 
+  //handle edge results
   edgeQuery(edge) {
     this.tableRef.current.setTable(this.state.response, edge.id(), "edge");
   }
 
+  //handle node results
   nodeQuery(node) {
     this.tableRef.current.setTable(this.state.response, node.id(), "node");
   }
@@ -119,11 +121,11 @@ class AdvancedQuery extends Component {
   // }
 
   //get and query graph
-  getGraph() {
+  queryGraph() {
     let jsonGraph = this.graphRef.current.export();
     if (this.isValidQuery(jsonGraph)) {
       if (!this.state.loading) {
-        this.setState({loading: true});
+        this.setState({loading: true, cy: this.graphRef.current.getCy()});
         let query = this.convertJSONtoTRAPI(jsonGraph);
 
         console.log(query);
@@ -137,21 +139,24 @@ class AdvancedQuery extends Component {
           console.log("Error: ", error);
         });
       } else {
-        console.log('Already loading');
+        console.log('Already loading.');
       }
-      
-    } else {
-      alert("Invalid query. Must have at least 2 nodes, 1 edge, and 1 node with an id.");
     }
+  }
+
+  //update cytoscape object in state
+  //needed for checkbox sync with graph
+  updateCy() {
+    this.setState({cy: this.graphRef.current.getCy()});
   }
 
   render() {
     return (
       <Container className="feature">
         <Navigation name="Advanced" />
-        <GraphQuery ref={this.graphRef} edgeQuery={this.edgeQuery.bind(this)} nodeQuery={this.nodeQuery.bind(this)}/>
-        <Button onClick={this.getGraph.bind(this)} loading={this.state.loading}>Query</Button>
-        <TableResultsComponent ref={this.tableRef} />
+        <GraphQuery ref={this.graphRef} edgeQuery={this.edgeQuery.bind(this)} nodeQuery={this.nodeQuery.bind(this)} updateCy={this.updateCy.bind(this)}/>
+        <Button onClick={this.queryGraph.bind(this)} loading={this.state.loading}>Query</Button>
+        <TableResultsComponent ref={this.tableRef} cy={this.state.cy} updateCy={this.updateCy.bind(this)}/>
       </Container>
     )
   }
