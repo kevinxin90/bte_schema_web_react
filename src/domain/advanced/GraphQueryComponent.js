@@ -185,7 +185,9 @@ export default class GraphQuery extends Component {
         options={_.map(getCategories(), (category) => ({text: category, value: category}))}
         value={this.state.nodeCategories}
       />
-      <Button onClick={() => {this.props.nodeQuery(this.state.tippyElement)}}>View Results for Node</Button>
+      <Button onClick={() => {this.props.nodeQuery(this.state.tippyElement)}} style={{marginTop: "0.75em"}}>
+        View Results for Node
+      </Button>
     </div>;
     return popupContent;
   }
@@ -242,7 +244,9 @@ export default class GraphQuery extends Component {
           (predicate, idx) => ({key: idx, text: predicate, value: predicate}))}
         value={this.state.edgePredicates}
       />
-      <Button onClick={() => {this.props.edgeQuery(this.state.tippyElement)}}>View Results for Edge</Button>
+      <Button onClick={() => {this.props.edgeQuery(this.state.tippyElement)}} style={{marginTop: "0.75em"}}>
+        View Results for Edge
+      </Button>
     </div>;
     return popupContent;
   }

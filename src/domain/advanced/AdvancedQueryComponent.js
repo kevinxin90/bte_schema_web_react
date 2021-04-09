@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Button, Container } from 'semantic-ui-react';
 import { Navigation } from '../../components/Breadcrumb';
-import TableResultsComponent from './TableResultsComponent';
+import ResultsTable from './ResultsTableComponent';
 import GraphQuery from './GraphQueryComponent';
 import axios from 'axios';
 import _ from 'lodash';
@@ -125,6 +125,7 @@ class AdvancedQuery extends Component {
     let jsonGraph = this.graphRef.current.export();
     if (this.isValidQuery(jsonGraph)) {
       if (!this.state.loading) {
+        this.tableRef.current.resetTable();
         this.setState({loading: true, cy: this.graphRef.current.getCy()});
         let query = this.convertJSONtoTRAPI(jsonGraph);
 
@@ -156,7 +157,7 @@ class AdvancedQuery extends Component {
         <Navigation name="Advanced" />
         <GraphQuery ref={this.graphRef} edgeQuery={this.edgeQuery.bind(this)} nodeQuery={this.nodeQuery.bind(this)} updateCy={this.updateCy.bind(this)}/>
         <Button onClick={this.queryGraph.bind(this)} loading={this.state.loading}>Query</Button>
-        <TableResultsComponent ref={this.tableRef} cy={this.state.cy} updateCy={this.updateCy.bind(this)}/>
+        <ResultsTable ref={this.tableRef} cy={this.state.cy} updateCy={this.updateCy.bind(this)}/>
       </Container>
     )
   }

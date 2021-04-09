@@ -1,9 +1,9 @@
 import _ from 'lodash';
 import React, { Component } from 'react'
 import { Table, Pagination, Checkbox, Icon, Popup, Accordion, Form, Button, Menu, Header, List } from 'semantic-ui-react'
-import { getPublicationLink } from '../../shared/utils';
+import ResultsTableCell from './ResultsTableCellComponent';
 
-export default class TableResultsComponent extends Component {
+export default class ResultsTable extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -18,6 +18,20 @@ export default class TableResultsComponent extends Component {
       },
       mode: "edge",
     }
+  }
+
+  resetTable() {
+    this.setState({
+      results: [],
+      filteredResults: [],
+      table: {
+        column: null,
+        display: [],
+        direction: null,
+        activePage: 1,
+        totalPages: 1
+      }
+    });
   }
 
   setTable(response, selectedElementID, mode) {
@@ -67,106 +81,9 @@ export default class TableResultsComponent extends Component {
         entries.push({source: source, edge: edge, target: target});
       }
     });
+
+    console.log(entries);
     return entries;
-  }
-
-  //format array of attributes
-  getAttributesContent(attributes) {
-    return (
-      <List>
-        {_.map(attributes, (attribute) => {
-          if (attribute.name === 'publications') {
-            return (
-              <List.Item>
-                <List.Content>Publications</List.Content>
-                <List.Description as='a' href={getPublicationLink(attribute.value)} target="_blank" rel="noopener noreferrer">
-                  Open All Publications({attribute.value.length})&nbsp;<Icon name='external alternate' color='grey' fitted size='small'/>
-                </List.Description>
-              </List.Item>
-            );
-          } else if (Array.isArray(attribute.value)) {
-            let panel = [{
-              key: `accordion-${_.uniqueId()}`,
-              title: {
-                children:(
-                /*add your icon and/or styles here*/
-                  <span>
-                    {attribute.name}&nbsp;<Icon name='plus' size='small'/>
-                  </span>
-                )
-              },
-              content: {
-                content: (
-                  <List.Description>
-                    <List items={attribute.value}/>
-                  </List.Description>
-                )
-              }
-            }]
-            return (
-              <List.Item>
-                <List.Content><Accordion panels={panel}/></List.Content>
-              </List.Item>
-            )
-          } else {
-            return (
-              <List.Item>
-                <List.Content>{attribute.name}</List.Content>
-                <List.Description>
-                  {attribute.value}
-                </List.Description>
-              </List.Item>
-            )
-          }
-        })}
-      </List>
-    )
-  }
-
-  //create table cell based on node
-  getNodeCell(node) {
-    return (
-      <Popup on='click' trigger={
-        <Table.Cell style={{cursor: 'pointer'}}>
-          {node.name}
-        </Table.Cell>
-      }>
-        <Popup.Header>
-          <Header as='h3'>
-            {node.name}
-            <Header.Subheader>
-              {node.category}
-            </Header.Subheader>
-          </Header>
-        </Popup.Header>
-        <Popup.Content>
-          {this.getAttributesContent(node.attributes)}
-        </Popup.Content>
-      </Popup> 
-    )
-  }
-
-  //create table cell based on edge
-  getEdgeCell(edge) {
-    return (
-      <Popup on='click' trigger={
-        <Table.Cell style={{cursor: 'pointer'}}>
-          {edge.predicate}
-        </Table.Cell>
-      }>
-        <Popup.Header>
-          <Header as='h3'>
-            {edge.predicate}
-            <Header.Subheader>
-              {edge.subject} &#8594; {edge.object}
-            </Header.Subheader>
-          </Header>
-        </Popup.Header>
-        <Popup.Content>
-          {this.getAttributesContent(edge.attributes)}
-        </Popup.Content>
-      </Popup> 
-    )
   }
 
   handlePaginationChange(e, {activePage}) {
@@ -226,9 +143,9 @@ export default class TableResultsComponent extends Component {
                     defaultChecked={this.props.cy.getElementById(entry.source.qg_id).data('ids').includes(entry.source.attributes[0].value[0])}
                   />
                 </Table.Cell>
-                {this.getNodeCell(entry.source)}
-                {this.getEdgeCell(entry.edge)}
-                {this.getNodeCell(entry.target)}
+                <ResultsTableCell data={entry.source} type="node" />
+                <ResultsTableCell data={entry.edge} type="edge" />
+                <ResultsTableCell data={entry.target} type="node" />
                 <Table.Cell key={`checkbox-${_.uniqueId()}`} textAlign='center'>
                   <Checkbox onClick={this.handleSelect.bind(this)} 
                     data={entry.target} 
@@ -253,7 +170,7 @@ export default class TableResultsComponent extends Component {
           {_.map(this.state.table.display, (entry) => {
             return (
               <Table.Row key={`row-${_.uniqueId()}`}>
-                {this.getNodeCell(entry.node)}
+                <ResultsTableCell data={entry.node} type="node"/>
               </Table.Row>
             );
           })}
@@ -261,7 +178,8 @@ export default class TableResultsComponent extends Component {
       </>;
     }
     
-    let table = <div style={{overflowX: "auto", marginBottom: "1em", marginTop: "0.5em"}}> 
+    let table = <div style={{overflowX: "auto", marginBottom: "1em", marginTop: "0.5em"}}>
+      <Button content='Filter Results' icon='filter' labelPosition='left' /> 
       <Table sortable unstackable celled>
         {tableContents}
       </Table>
