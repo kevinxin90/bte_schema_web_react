@@ -9,9 +9,11 @@ export default class ResultsTableCell extends Component {
     return (
       <List>
         {_.map(attributes, (attribute) => {
-          if (attribute.name === 'publications') { //handle publication attribute
+          if (attribute.name === 'source_qg_nodes' || attribute.name === 'target_qg_nodes') { //ignore these fields
+            return;
+          } else if (attribute.name === 'publications') { //handle publication attribute
             return (
-              <List.Item>
+              <List.Item key={`list-item-${_.uniqueId()}`}>
                 <List.Content>Publications</List.Content>
                 <List.Description as='a' href={getPublicationLink(attribute.value)} target="_blank" rel="noopener noreferrer">
                   Open All Publications({attribute.value.length})&nbsp;<Icon name='external alternate' color='grey' fitted size='small'/>
@@ -37,13 +39,13 @@ export default class ResultsTableCell extends Component {
               }
             }]
             return (
-              <List.Item>
+              <List.Item key={`list-item-${_.uniqueId()}`}>
                 <List.Content><Accordion panels={panel}/></List.Content>
               </List.Item>
             )
           } else { //handle all other attributes
             return (
-              <List.Item>
+              <List.Item key={`list-item-${_.uniqueId()}`}>
                 <List.Content>{attribute.name}</List.Content>
                 <List.Description>
                   {attribute.value}
@@ -60,7 +62,7 @@ export default class ResultsTableCell extends Component {
   getNodeCell(node) {
     return (
       <Popup on='click' trigger={
-        <Table.Cell style={{cursor: 'pointer'}}>
+        <Table.Cell style={{cursor: 'pointer'}} key={`cell-${_.uniqueId()}`}>
           {node.name}
         </Table.Cell>
       }>
@@ -83,7 +85,7 @@ export default class ResultsTableCell extends Component {
   getEdgeCell(edge) {
     return (
       <Popup on='click' trigger={
-        <Table.Cell style={{cursor: 'pointer'}}>
+        <Table.Cell style={{cursor: 'pointer'}} key={`cell-${_.uniqueId()}`}>
           {edge.predicate}
         </Table.Cell>
       }>

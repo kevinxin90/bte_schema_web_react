@@ -358,7 +358,7 @@ export default class GraphQuery extends Component {
               </Grid.Column>
           </Grid.Row>
         </Grid>
-        <div id="cy" style={{ height: 600, border: "1px solid #ddd" }}></div>
+        <div id="cy" style={{ height: "50vh", border: "1px solid #ddd" }}></div>
       </div>
     )
   }
