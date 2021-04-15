@@ -73,12 +73,16 @@ class AdvancedQuery extends Component {
 
   //handle edge results
   edgeQuery(edge) {
-    this.tableRef.current.setTable(this.state.response, edge.id(), "edge");
+    if (!_.isEmpty(this.state.response)) {
+      this.tableRef.current.setTable(this.state.response, edge.id(), "edge");
+    }
   }
 
   //handle node results
   nodeQuery(node) {
-    this.tableRef.current.setTable(this.state.response, node.id(), "node");
+    if (!_.isEmpty(this.state.response)) {
+      this.tableRef.current.setTable(this.state.response, node.id(), "node");
+    }
   }
 
   // edgeQuery(edge) {

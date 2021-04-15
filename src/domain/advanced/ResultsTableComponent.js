@@ -1,16 +1,16 @@
 import _ from 'lodash';
 import React, { Component } from 'react'
-import { Table, Pagination, Checkbox, Icon, Popup, Accordion, Form, Button, Menu, Header, List } from 'semantic-ui-react'
+import { Table, Pagination, Checkbox, Icon, Popup, Accordion, Dropdown, Button } from 'semantic-ui-react'
 import ResultsTableCell from './ResultsTableCellComponent';
 
 export default class ResultsTable extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      results: [],
+      results: [], 
       filteredResults: [],
-      filter: {},
-      filterOptions: {},
+      filter: {}, //all possible filter values
+      selectedFilters: {}, //current filter selections
       table: {
         column: null,
         display: [],
@@ -36,6 +36,7 @@ export default class ResultsTable extends Component {
     });
   }
 
+  //from response get results and filters
   setTable(response, selectedElementID, mode) {
     let results;
     if (mode === 'edge') {
@@ -59,6 +60,22 @@ export default class ResultsTable extends Component {
     });
   }
 
+  //flatten attributes to same level as other properties of an object
+  flattenElement(element) {
+    let flattened = {};
+    Object.keys(element).forEach((key) => {
+      if (key === 'attributes') {
+        element.attributes.forEach(attr => {
+          flattened[attr.name] = attr.value;
+        })
+      } else {
+        flattened[key] = element[key];
+      }
+    })
+
+    return flattened;
+  }
+
   calculateTableGivenNode(response, selectedNodeID) {
     let entries = [];
     let ids = new Set();
@@ -68,7 +85,7 @@ export default class ResultsTable extends Component {
         ids.add(nodeID);
       }
     });
-    entries = _.map(Array.from(ids), (id) => ({node: response.message.knowledge_graph.nodes[id]}));
+    entries = _.map(Array.from(ids), (id) => ({node: this.flattenElement(response.message.knowledge_graph.nodes[id])}));
     return entries;
   }
 
@@ -77,10 +94,10 @@ export default class ResultsTable extends Component {
     response.message.results.forEach((result) => {
       if (result.edge_bindings.hasOwnProperty(selectedEdgeID)) {
         let cy_edge = this.props.cy.getElementById(selectedEdgeID);
-        let edge = response.message.knowledge_graph.edges[result.edge_bindings[selectedEdgeID][0].id]; //get knowledge graph edge
-        let source = response.message.knowledge_graph.nodes[edge.subject];
+        let edge = this.flattenElement(response.message.knowledge_graph.edges[result.edge_bindings[selectedEdgeID][0].id]); //get knowledge graph edge
+        let source = this.flattenElement(response.message.knowledge_graph.nodes[edge.subject]);
         source.qg_id = cy_edge.source().id(); 
-        let target = response.message.knowledge_graph.nodes[edge.object];
+        let target = this.flattenElement(response.message.knowledge_graph.nodes[edge.object]);
         target.qg_id = cy_edge.target().id(); 
         entries.push({source: source, edge: edge, target: target});
       }
@@ -92,17 +109,17 @@ export default class ResultsTable extends Component {
   handlePaginationChange(e, {activePage}) {
     this.setState({
       table: {
-          ...this.state.table,
-          display: this.state.filteredResults.slice(activePage * 10 - 10, activePage * 10),
-          activePage: activePage
+        ...this.state.table,
+        display: this.state.filteredResults.slice(activePage * 10 - 10, activePage * 10),
+        activePage: activePage
       }
     });
   }
 
-  //handle checkboxes and synchronize with graph
+  //handle checkbox select and synchronize with graph
   handleSelect(e, { data }) {
     let node = this.props.cy.getElementById(data.qg_id);
-    let entity_id = data.attributes[0].value[0];
+    let entity_id = data.equivalent_identifiers[0];
     let idx = node.data('ids').indexOf(entity_id);
     if (idx === -1) {
       node.data('ids').push(entity_id);
@@ -112,27 +129,11 @@ export default class ResultsTable extends Component {
     this.props.updateCy();
   }
 
-  /*structure of filters
-    [
-      {source: obj, edge: obj, target: obj},
-      etc.
-    ] ->
-
-    {
-      source: 
-        category: []
-        name: []
-        attribute:[]
-      ,
-      edge,
-      target,
-    }
-
-  */
+  //from an array of entries, calculate the properties that can be filtered by
   calculateFilters(entries) {
     let temp = {};
     let filters  = {};
-    let filterOptions = {};
+    let selectedFilters = {};
     
     entries.forEach(entry => {
       Object.keys(entry).forEach(key => {
@@ -142,60 +143,108 @@ export default class ResultsTable extends Component {
 
     Object.keys(temp).forEach(category => {
       filters[category] = {};
-      filterOptions[category] = {};
+      selectedFilters[category] = {};
 
       temp[category].forEach(element => {
-        Object.keys(element).filter(key => (key !== 'qg_id')).forEach(key => { //ignore these fields
-          if (key === 'attributes') {
-            filters[category][key] = filters[category][key] || {};
-            filterOptions[category][key] = filterOptions[category][key] || {};
-            element.attributes.filter(attribute => (attribute.name !== 'source_qg_nodes' && attribute.name !== 'target_qg_nodes')).forEach(attribute => {//ignore these attribute fields
-              filterOptions[category][key][attribute.name] = [];
-              if (Array.isArray(attribute.value)) {
-                filters[category][key][attribute.name] = new Set([...(filters[category][key][attribute.name] || []), ...(attribute.value)]);
-              } else {
-                filters[category][key][attribute.name] = new Set([...(filters[category][key][attribute.name] || []), ...([attribute.value])]);
-              }
-            });
+        Object.keys(element).filter(key => (key !== 'qg_id' &&
+          key !== 'source_qg_nodes' && 
+          key !== 'target_qg_nodes' && 
+          key !== 'equivalent_identifiers')
+        ).forEach(key => { //ignore these fields
+          if (Array.isArray(element[key])) {
+            filters[category][key] = new Set([...(filters[category][key] || []), ...(element[key])]);
           } else {
             filters[category][key] = (filters[category][key] || new Set()).add(element[key]);
-            filterOptions[category][key] = [];
           }
+
+          selectedFilters[category][key] = new Set();
+          
         })
       });
     });
 
-    this.setState({filters: filters, filterOptions: filterOptions});
-    // return {filters: filters, filterOptions: filterOptions};
+    this.setState({filters: filters, selectedFilters: selectedFilters});
   }
 
-  convertSetToFilterValue(set) {
-    return Array.from(set).map(value => <div><Checkbox key={`checkbox-${_.uniqueId}`} label={value}/></div>);
+  //using the selected filters, filter results and update filteredResults
+  filterResults() {
+    let filteredResults = this.state.results.filter((obj) => {
+      for (const key of Object.keys(obj)) {
+        for (const k of Object.keys(this.state.selectedFilters[key])) {
+          if (obj[key].hasOwnProperty(k) && this.state.selectedFilters[key][k].size > 0) {
+            if (Array.isArray(obj[key][k])) { //return false for entry if no array values are in the set
+              let hasValueInSet = false;
+              for (const val of obj[key][k]) {
+                if (this.state.selectedFilters[key][k].has(val)) {
+                  hasValueInSet = true;
+                }
+              }
+              if (!hasValueInSet) {
+                return false;
+              }
+            } else {
+              if (!this.state.selectedFilters[key][k].has(obj[key][k])) {
+                return false;
+              }
+            }
+          }
+        }
+      }
+      return true;
+    });
+
+    this.setState({
+      filteredResults: filteredResults, 
+      table: {
+        ...this.state.table,
+        display: filteredResults.slice(0, 10),
+        activePage: 1,
+        totalPages: Math.ceil(filteredResults.length / 10)
+      }
+      
+    });
   }
 
+  //update selected filters when dropdown/checkbox is clicked/selected
+  updateFilters(e, data ) {
+    if (data.hasOwnProperty('value')) { //handle multiselect dropdown
+      let selectedFilters = this.state.selectedFilters;
+      selectedFilters[data.data.objectName][data.data.key] = new Set(data.value);
+      this.setState({selectedFilters: selectedFilters});
+    } else { //handle checkbox
+      let selectedFilters = this.state.selectedFilters;
+      if (selectedFilters[data.data.objectName][data.data.key].has(data.label)) {
+        selectedFilters[data.data.objectName][data.data.key].delete(data.label);
+      } else {
+        selectedFilters[data.data.objectName][data.data.key].add(data.label);
+      }
+      this.setState({selectedFilters: selectedFilters});
+    }
+    this.filterResults();
+  }
+
+  //convert one selectedFilters parameter (which is a set) into a display section for the filter
+  convertSetToFilterValue(set, objectName, key) {
+    let attribute_values = Array.from(set);
+    if (attribute_values.length > 5) {
+      let options = attribute_values.map((value) => ({key: value, text: value, value: value}));
+      return <div><Dropdown multiple search selection options={options} value={Array.from(this.state.selectedFilters[objectName][key])} onChange={this.updateFilters.bind(this)} data={{objectName: objectName, key: key}}/></div>;
+    } else {
+      return <div>{attribute_values.map(value => <div><Checkbox key={`checkbox-${_.uniqueId}`} label={value} checked={this.state.selectedFilters[objectName][key].has(value)} onClick={this.updateFilters.bind(this)} data={{objectName: objectName, key: key}}/></div>)}</div>;
+    }
+  }
+
+  //visual filter accordion panels
   getFilterPanels() {
-    console.log(Object.entries(this.state.filters));
-
     let panels = Object.entries(this.state.filters).map(([key, value]) => {
       let nestedPanels = Object.entries(value).map(([nestedKey, nestedValue]) => {
-        if (nestedKey === 'attributes') {
-          let attributesPanels = Object.entries(nestedValue).map(([attributesKey, attributesValue]) => 
-            ({ key: `panel-${_.uniqueId()}`, title: attributesKey, content: this.convertSetToFilterValue(attributesValue) }));
-
-          let attributesContent = <div><Accordion.Accordion panels={attributesPanels}/></div>;
-          return { key: `panel-${_.uniqueId()}`, title: nestedKey, content: { content: attributesContent} };
-        } else {
-          return { key: `panel-${_.uniqueId()}`, title: nestedKey, content: this.convertSetToFilterValue(nestedValue) };
-        }
+        return { key: `panel-${nestedKey}`, title: nestedKey, content: { content: this.convertSetToFilterValue(nestedValue, key, nestedKey) }};
       });
 
       let nestedContent = <div><Accordion.Accordion panels={nestedPanels}/></div>;
 
-
-      return { key: `panel-${_.uniqueId()}`, title: key, content: {content: nestedContent} };
+      return { key: `panel-${key}`, title: key, content: {content: nestedContent} };
     });
-
-    console.log(panels);
 
     return panels;
   }
@@ -233,7 +282,7 @@ export default class ResultsTable extends Component {
                   <Table.Cell key={`checkbox-${_.uniqueId()}`} textAlign='center'>
                     <Checkbox onClick={this.handleSelect.bind(this)} 
                       data={entry.source} 
-                      defaultChecked={this.props.cy.getElementById(entry.source.qg_id).data('ids').includes(entry.source.attributes[0].value[0])}
+                      defaultChecked={this.props.cy.getElementById(entry.source.qg_id).data('ids').includes(entry.source.equivalent_identifiers[0])}
                     />
                   </Table.Cell>
                   <ResultsTableCell data={entry.source} type="node" />
@@ -242,7 +291,7 @@ export default class ResultsTable extends Component {
                   <Table.Cell key={`checkbox-${_.uniqueId()}`} textAlign='center'>
                     <Checkbox onClick={this.handleSelect.bind(this)} 
                       data={entry.target} 
-                      defaultChecked={this.props.cy.getElementById(entry.target.qg_id).data('ids').includes(entry.target.attributes[0].value[0])}
+                      defaultChecked={this.props.cy.getElementById(entry.target.qg_id).data('ids').includes(entry.target.equivalent_identifiers[0])}
                     />
                   </Table.Cell>
                 </Table.Row>

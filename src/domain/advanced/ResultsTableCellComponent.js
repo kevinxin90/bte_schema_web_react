@@ -8,32 +8,33 @@ export default class ResultsTableCell extends Component {
   getAttributesContent(attributes) {
     return (
       <List>
-        {_.map(attributes, (attribute) => {
-          if (attribute.name === 'source_qg_nodes' || attribute.name === 'target_qg_nodes') { //ignore these fields
-            return;
-          } else if (attribute.name === 'publications') { //handle publication attribute
+        {Object.entries(attributes).filter(([key, value]) => {
+          return (key !== 'source_qg_nodes' && key !== 'target_qg_nodes' && key !== 'subject'
+          && key !== 'predicate' && key !== 'object' && key !== 'name' && key !== 'category'); //ignore these fields
+        }).map(([key, value]) => {
+          if (key === 'publications') { //handle special case publication attribute
             return (
               <List.Item key={`list-item-${_.uniqueId()}`}>
                 <List.Content>Publications</List.Content>
-                <List.Description as='a' href={getPublicationLink(attribute.value)} target="_blank" rel="noopener noreferrer">
-                  Open All Publications({attribute.value.length})&nbsp;<Icon name='external alternate' color='grey' fitted size='small'/>
+                <List.Description as='a' href={getPublicationLink(value)} target="_blank" rel="noopener noreferrer">
+                  Open All Publications({value.length})&nbsp;<Icon name='external alternate' color='grey' fitted size='small'/>
                 </List.Description>
               </List.Item>
             );
-          } else if (Array.isArray(attribute.value) && attribute.value.length > 0) { //handle list attributes
+          } else if (Array.isArray(value) && value.length > 0) { //handle list attributes
             let panel = [{
               key: `accordion-${_.uniqueId()}`,
               title: {
                 children:(
                   <span>
-                    {attribute.name}&nbsp;<Icon name='plus' size='small'/>
+                    {key}&nbsp;<Icon name='plus' size='small'/>
                   </span>
                 )
               },
               content: {
                 content: (
                   <List.Description>
-                    <List items={attribute.value} style={{paddingTop: 0}}/>
+                    <List items={value} style={{paddingTop: 0}}/>
                   </List.Description>
                 )
               }
@@ -46,9 +47,9 @@ export default class ResultsTableCell extends Component {
           } else { //handle all other attributes
             return (
               <List.Item key={`list-item-${_.uniqueId()}`}>
-                <List.Content>{attribute.name}</List.Content>
+                <List.Content>{key}</List.Content>
                 <List.Description>
-                  {attribute.value}
+                  {value}
                 </List.Description>
               </List.Item>
             )
@@ -75,7 +76,7 @@ export default class ResultsTableCell extends Component {
           </Header>
         </Popup.Header>
         <Popup.Content>
-          {this.getAttributesContent(node.attributes)}
+          {this.getAttributesContent(node)}
         </Popup.Content>
       </Popup> 
     )
@@ -98,7 +99,7 @@ export default class ResultsTableCell extends Component {
           </Header>
         </Popup.Header>
         <Popup.Content>
-          {this.getAttributesContent(edge.attributes)}
+          {this.getAttributesContent(edge)}
         </Popup.Content>
       </Popup> 
     )
