@@ -12,9 +12,10 @@ export default class ResultsTable extends Component {
       filter: {}, //all possible filter values
       selectedFilters: {}, //current filter selections
       table: {
-        column: null,
+        sortColumn: null,
+        sortProperty: null,
+        sortDirection: null,
         display: [],
-        direction: null,
         activePage: 1,
         totalPages: 1
       },
@@ -27,9 +28,10 @@ export default class ResultsTable extends Component {
       results: [],
       filteredResults: [],
       table: {
-        column: null,
+        sortColumn: null,
+        sortProperty: null,
+        sortDirection: null,
         display: [],
-        direction: null,
         activePage: 1,
         totalPages: 1
       }
@@ -201,7 +203,6 @@ export default class ResultsTable extends Component {
         activePage: 1,
         totalPages: Math.ceil(filteredResults.length / 10)
       }
-      
     });
   }
 
@@ -244,6 +245,83 @@ export default class ResultsTable extends Component {
       let nestedContent = <div><Accordion.Accordion panels={nestedPanels}/></div>;
 
       return { key: `panel-${key}`, title: key, content: {content: nestedContent} };
+    });
+
+    return panels;
+  }
+
+  sortResults() {
+    if (this.state.table.sortColumn && this.state.table.sortProperty && this.state.table.sortDirection) {
+      let newResults;
+      if (this.state.table.sortDirection === 'down') { //do not recalculate filter b/c it must have been sorted when sortDirection was up 
+        newResults = this.state.filteredResults.reverse();
+      } else {
+        if (this.state.table.sortProperty === 'publications') {//sort publications by length and everything else by alphabetical order
+          newResults = _.sortBy(this.state.filteredResults, [result => { return _.get(result, [this.state.table.sortColumn, this.state.table.sortProperty], []).length }]);
+        } else {
+          newResults = _.sortBy(this.state.filteredResults, [result => { return _.get(result, [this.state.table.sortColumn, this.state.table.sortProperty], 0) }]);
+        }
+      }
+
+      this.setState({
+        filteredResults: newResults,
+        table: {
+          ...this.state.table,
+          display: newResults.slice(this.state.table.activePage * 10 - 10, this.state.table.activePage * 10),
+        }
+      });
+    }
+    
+  }
+
+  handleSort(e, data) {
+    if (data.active) { //flip direction of sort
+      if (this.state.table.sortDirection === 'up') {
+        this.setState({
+          table: {
+            ...this.state.table,
+            sortDirection: 'down'
+          }
+        }, () => {this.sortResults();});
+      } else {
+        this.setState({
+          table: {
+            ...this.state.table,
+            sortColumn: null,
+            sortProperty: null,
+            sortDirection: null
+          }
+        });
+      }
+      
+    } else { //set new sort
+      this.setState({
+        table: {
+          ...this.state.table,
+          sortColumn: data.data.sortColumn,
+          sortProperty: data.data.sortProperty,
+          sortDirection: 'up',
+        }
+      }, () => {this.sortResults();});
+    }
+  }
+
+  getSortPanels() {
+    let panels = Object.entries(this.state.selectedFilters).map(([key, value]) => {
+      let nestedContent = <Button.Group basic vertical labeled icon>
+        {Object.keys(value).map(nestedKey => {
+          let selected = (this.state.table.sortColumn === key && this.state.table.sortProperty === nestedKey);
+          return <Button 
+            icon={selected ? `sort ${this.state.table.sortDirection}` : 'sort'}
+            data={{sortColumn: key, sortProperty: nestedKey}}
+            content={nestedKey} 
+            active={selected} 
+            onClick={this.handleSort.bind(this)}
+          />;
+        })}
+      </Button.Group>;
+
+      return { key: `sort-panel-${key}`, title: key, content: {content: nestedContent} };
     });
 
     return panels;
@@ -329,7 +407,17 @@ export default class ResultsTable extends Component {
           on='click'
           style={{padding: 0}}
         >
-          <Accordion styled panels={this.getFilterPanels(this.state.results)}/>
+          <Accordion styled panels={this.getFilterPanels()}/>
+        </Popup>
+        <Popup 
+          trigger={<Button content='Sort Results' icon='sort' labelPosition='left' />}
+          flowing
+          pinned
+          position='bottom left'
+          on='click'
+          style={{padding: 0}}
+        >
+          <Accordion styled panels={this.getSortPanels()}/>
         </Popup>
         <Table sortable unstackable celled>
           {tableContents}
