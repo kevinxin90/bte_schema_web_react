@@ -1,5 +1,5 @@
 import BTETable from '../../components/DisplayTableResult';
-import ReactLoader from '../../components/DimerComponent';
+import ReactLoader from '../../components/DimmerComponent';
 import React, { Component } from 'react';
 import { Segment, Divider, Button,  Modal } from 'semantic-ui-react';
 import CytoscapeGraph from '../../components/CytoscapeGraphComponent';
@@ -16,7 +16,7 @@ export default class ExplainQueryResult extends Component {
         return (
             <div className={this.props.shouldDisplay ? '' : 'hidden'}>
                 <Segment color='blue'>
-                    {this.props.resultReady ? null: <ReactLoader />}
+                    {this.props.resultReady ? null: <ReactLoader message="The results may take a few minutes to show up." />}
                     {this.props.resultReady && this.props.content.length === 0 ? <h2 className="emptyQueryResult">
                         Sorry, no results could be found for your query. Please refine your search!</h2> : ''}
                     {this.props.resultReady && this.props.content.length > 0? <div>
@@ -30,6 +30,7 @@ export default class ExplainQueryResult extends Component {
                         </Modal>
                         <BTETable
                             handleSelect={this.props.handleSelect}
+                            export={this.props.export}
                             table={this.props.table}
                             handleSort={this.props.handleSort}
                             filter={this.props.filter}
@@ -37,6 +38,7 @@ export default class ExplainQueryResult extends Component {
                             handleFilterSelect={this.props.handleFilterSelect}
                             handlePaginationChange={this.props.handlePaginationChange}
                             selectedQueryResults={this.props.selectedQueryResults}
+                            equivalentIds={this.props.equivalentIds}
                         />
                         <Divider />
                     </div> : null}

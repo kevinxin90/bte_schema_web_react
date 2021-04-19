@@ -1,14 +1,14 @@
-import MetaKG from "@biothings-explorer/smartapi-kg";
-
-console.log("Constructing meta kg");
-const meta_kg = new MetaKG();
-meta_kg.constructMetaKGSync();
+import getMetaKG from './metaKG'
 
 /** get link to page of results for list of publications
  * @param {Array.<string>} publications Publications in the format "type:number", also must all be the same format and either "PMID" or "PMC"
  * @returns {string} Returns either the url to all of the entries or an empty string
  */
 const getPublicationLink = (publications) => {
+    if (!publications || publications.length === 0) {
+        return "";
+    }
+
     let pubType = publications[0].split(":")[0];
 
     if (pubType === "PMID") {
@@ -83,11 +83,15 @@ const getIntermediateNodes = (metaPaths) => {
     return [...metaPaths].map(x => x.split('-').slice(1)[0])
 }
 
-const findMetaPath = async (input_type, output_type) => {
+const findMetaPath = async (inputs, outputs) => {
     try {
-        // let response = await fetch('http://localhost:8856/explorer_api/v1/find_metapath?input_cls=' + input_type + '&output_cls=' + output_type);
-        // response = await response.json();
-        // return response['edges'];
+        let meta_kg = getMetaKG();
+        console.log(inputs, outputs);
+
+        //get unique inputs and outputs
+        let input_type = [...new Set(inputs.map(input => input.type))];
+        let output_type = [...new Set(outputs.map(output => output.type))];
+
         let res1 = new Set(meta_kg.filter({ input_type: input_type }).map(rec => rec.association.output_type));
         if (res1.size === 0) {
             return [];

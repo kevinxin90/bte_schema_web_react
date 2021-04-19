@@ -44,29 +44,29 @@ export default class CytoscapeGraph extends PureComponent {
     return [domRect.width, domRect.height];
   }
 
-  addConnection(record, inputType, outputType) {
+  addConnection(res, equivalentIds) {
     let [width, height] = this.getDimensions();
-    let rec = record.split('||');
 
     //check if nodes exist and if not add them to list of nodes
-    if (this.state.cy.$id(rec[0]).length === 0) {
+    if (this.state.cy.$id(res['input_label']).length === 0) {
       this.state.cy.add({
         group: 'nodes',
         data: {
-          id: rec[0],
-          type: inputType
+          id: res['input_label'],
+          type: res['input_type'],
+          equivalentIds: equivalentIds[res['input_id']]
         },
         position: {
           x: 100,
           y: height / 2
         },
         style: {
-          'background-color': colorSchema[semanticTypeShorthand[inputType]] || 'black'
+          'background-color': colorSchema[semanticTypeShorthand[res['input_type']]] || 'black'
         }
       });
     }
 
-    if (this.state.cy.$id(rec[4]).length === 0) {
+    if (this.state.cy.$id(res['node1_label']).length === 0) {
       let slot = this.state.slots.shift(); //get first open slot
       if (this.state.slots.length === 0) {
         this.state.slots.push(slot + 1); //add slot after current if no slots remain
@@ -75,8 +75,9 @@ export default class CytoscapeGraph extends PureComponent {
       this.state.cy.add({
         group: 'nodes',
         data: {
-          id: rec[4],
-          type: rec[5],
+          id: res['node1_label'],
+          type: res['node1_type'],
+          equivalentIds: equivalentIds[res['node1_id']],
           slot: slot,
         },
         position: {
@@ -84,39 +85,40 @@ export default class CytoscapeGraph extends PureComponent {
           y: ((height / 2) + this.heightModifier(slot))
         },
         style: {
-          'background-color': colorSchema[semanticTypeShorthand[rec[5]]] || 'black'
+          'background-color': colorSchema[semanticTypeShorthand[res['node1_type']]] || 'black'
         }
       });
     }
 
-    if (this.state.cy.$id(rec[9]).length === 0) {
+    if (this.state.cy.$id(res['output_label']).length === 0) {
       this.state.cy.add({
         group: 'nodes',
         data: {
-          id: rec[9],
-          type: outputType,
+          id: res['output_label'],
+          equivalentIds: equivalentIds[res['output_id']],
+          type: res['output_type'],
         },
         position: {
           x: width - 100,
           y: height / 2
         },
         style: {
-          'background-color': colorSchema[semanticTypeShorthand[outputType]] || 'black'
+          'background-color': colorSchema[semanticTypeShorthand[res['output_type']]] || 'black'
         }
       });
     }
 
     //add edges
-    let edge1 = this.state.cy.$id(`${rec[0]}-${rec[1]}-${rec[4]}`);
+    let edge1 = this.state.cy.$id(`${res['input_label']}-${res['pred1']}-${res['node1_label']}`);
     if (edge1.length === 0) {
       this.state.cy.add({
         group: 'edges',
         data: {
-          id: `${rec[0]}-${rec[1]}-${rec[4]}`,
-          source: rec[0],
-          target: rec[4],
-          label: rec[1],
-          publications: [{api: rec[2], publication: rec[3], count: 1}],
+          id: `${res['input_label']}-${res['pred1']}-${res['node1_label']}`,
+          source: res['input_label'],
+          target: res['node1_label'],
+          label: res['pred1'],
+          publications: [{api: res['pred1_api'], publication: res['pred1_publications'], count: 1}],
           connections: 1
         }
       })
@@ -124,24 +126,24 @@ export default class CytoscapeGraph extends PureComponent {
       edge1.data('connections', edge1.data('connections') + 1); // increment connections if edge already exists
       
       //increment count if api/publication combo exists, otherwise make a new one
-      let idx = edge1.data('publications').findIndex((x) => (x.api === rec[2] && x.publication === rec[3]));
+      let idx = edge1.data('publications').findIndex((x) => (x.api === res['pred1_api'] && x.publication === res['pred1_publications']));
       if (idx === -1) {
-        edge1.data('publications').push({api: rec[2], publication: rec[3], count: 1});
+        edge1.data('publications').push({api: res['pred1_api'], publication: res['pred1_publications'], count: 1});
       } else {
         edge1.data('publications')[idx].count += 1;
       }
     }
     
-    let edge2 = this.state.cy.$id(`${rec[4]}-${rec[6]}-${rec[9]}`);
+    let edge2 = this.state.cy.$id(`${res['node1_label']}-${res['pred2']}-${res['output_label']}`);
     if (edge2.length === 0) {
       this.state.cy.add({
         group: 'edges',
         data: {
-          id: `${rec[4]}-${rec[6]}-${rec[9]}`,
-          source: rec[4],
-          target: rec[9],
-          label: rec[6],
-          publications: [{api: rec[7], publication: rec[8], count: 1}],
+          id: `${res['node1_label']}-${res['pred2']}-${res['output_label']}`,
+          source: res['node1_label'],
+          target: res['output_label'],
+          label: res['pred2'],
+          publications: [{api: res['pred2_api'], publication: res['pred2_publications'], count: 1}],
           connections: 1
         },
       })
@@ -149,24 +151,22 @@ export default class CytoscapeGraph extends PureComponent {
       edge2.data('connections', edge2.data('connections') + 1); // increment connections if edge already exists
       
       //increment count if api/publication combo exists, otherwise make a new one
-      let idx = edge2.data('publications').findIndex((x) => (x.api === rec[7] && x.publication === rec[8]));
+      let idx = edge2.data('publications').findIndex((x) => (x.api === res['pred2_api'] && x.publication === res['pred2_publications']));
       if (idx === -1) {
-        edge2.data('publications').push({api: rec[7], publication: rec[8], count: 1});
+        edge2.data('publications').push({api: res['pred2_api'], publication: res['pred2_publications'], count: 1});
       } else {
         edge2.data('publications')[idx].count += 1;
       }
     }
   }
 
-  deleteConnection(record) {
-    let rec = record.split('||');
-
-    let edge1 = this.state.cy.$id(`${rec[0]}-${rec[1]}-${rec[4]}`);
-    let edge2 = this.state.cy.$id(`${rec[4]}-${rec[6]}-${rec[9]}`);
+  deleteConnection(res) {
+    let edge1 = this.state.cy.$id(`${res['input_label']}-${res['pred1']}-${res['node1_label']}`);
+    let edge2 = this.state.cy.$id(`${res['node1_label']}-${res['pred2']}-${res['output_label']}`);
 
     //decrement publications then remove if count is 0
-    let idx1 = edge1.data('publications').findIndex((x) => (x.api === rec[2] && x.publication === rec[3]));
-    let idx2 = edge2.data('publications').findIndex((x) => (x.api === rec[7] && x.publication === rec[8]));
+    let idx1 = edge1.data('publications').findIndex((x) => (x.api === res['pred1_api'] && x.publication === res['pred1_publications']));
+    let idx2 = edge2.data('publications').findIndex((x) => (x.api === res['pred2_api'] && x.publication === res['pred2_publications']));
     edge1.data('publications')[idx1].count -= 1;
     edge2.data('publications')[idx2].count -= 1;
     if (edge1.data('publications')[idx1].count <= 0) {
@@ -189,7 +189,7 @@ export default class CytoscapeGraph extends PureComponent {
     // delete nodes if they have no edge connections
     let node_idxs = [0, 4, 9];
     node_idxs.forEach((node_idx) => {
-      let node = this.state.cy.$id(rec[node_idx]);
+      let node = this.state.cy.$id(res[node_idx]);
       if (node.degree() === 0) {
         if (node.data('slot') !== undefined) { //compare to undefined because slot can be 0
           this.state.slots.unshift(node.data('slot')); //return deleted slot to available slots
@@ -257,6 +257,12 @@ export default class CytoscapeGraph extends PureComponent {
           content.innerHTML = `
             <h3>${node.id()}</h3>
             <p>Type: ${node.data('type')}</p>
+            ${
+              Object.keys(node.data('equivalentIds'))
+              .filter(key => !["primary", "display", "type", "name", "_score"].includes(key)) //don't display these fields
+              .map((key) => `<p>${key}: ${node.data('equivalentIds')[key]}</p>`)
+              .join("")
+            }
           `;
           return content;
         },
@@ -287,12 +293,12 @@ export default class CytoscapeGraph extends PureComponent {
           content.innerHTML = `
             <h3>Publications</h3>
             ${edge.data('publications').map(x => x.publication).join("")
-              ? `<p><a href="${getPublicationLink(edge.data('publications').map(x => x.publication).join(",").split(","))}" target="_blank" rel="noopener noreferrer">Open All Publications <i class="external alternate icon"></i></a></p>`
+              ? `<p><a href="${getPublicationLink(edge.data('publications').map(x => x.publication).flat())}" target="_blank" rel="noopener noreferrer">Open All Publications <i class="external alternate icon"></i></a></p>`
               : ""}
             
             ${edge.data('publications').map((combo) => ( //convert publications into paragraphs with the format api:publications
               combo.publication //don't show a link if there are no publications
-              ? `<p><strong>${combo.api}</strong>:<br> <a href="${getPublicationLink(combo.publication.split(","))}" target="_blank" rel="noopener noreferrer">Publications (${combo.publication.split(",").length}) <i class="external alternate icon"></i></a></p>` 
+              ? `<p><strong>${combo.api}</strong>:<br> <a href="${getPublicationLink(combo.publication)}" target="_blank" rel="noopener noreferrer">Publications (${combo.publication.length}) <i class="external alternate icon"></i></a></p>` 
               : `<p><strong>${combo.api}</strong>: No publications`
             )).join("")}
           `;

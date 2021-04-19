@@ -39,6 +39,7 @@ export default function BTETable(props) {
             >
                 <Accordion as={Menu} secondary vertical panels={panels}/>
             </Popup>
+            <Button content='Export as CSV' icon='file' labelPosition='left' onClick={props.export} />
             <div style={{overflowX: "auto", marginBottom: "1em", marginTop: "0.5em"}}>
                 <Table sortable unstackable celled compact>
                     <Table.Header>
@@ -63,22 +64,55 @@ export default function BTETable(props) {
                             <Table.Cell key='checkbox' textAlign='center'>
                                 <Checkbox toggle
                                     name={Object.values(item).join('||')}
+                                    data={item}
                                     onClick={props.handleSelect}
                                     checked={props.selectedQueryResults.has(Object.values(item).join('||'))}
                                 /> 
                             </Table.Cell>
                             {_.map(headers, (col, i) => {
-                                if (Array.isArray(item[col])) { //if the item is an array, make it a space separated string (only applies to publications)
-                                    return ( // use collapsing to prevent icon from wrapping
-                                        <Table.Cell key={i} collapsing>
-                                            <div>
-                                                <a href={getPublicationLink(item[col])} target="_blank" rel="noopener noreferrer">Publications ({item[col].length})&nbsp;&nbsp;<Icon name='external alternate' /></a>
-                                            </div>
-                                        </Table.Cell>
+                                if (col.includes("_publications")) { //get links for publication column
+                                    if (item[col]) { //handle undefined
+                                        return ( // use collapsing to prevent icon from wrapping
+                                            <Table.Cell key={`cell-${_.uniqueId()}`} collapsing>
+                                                <div>
+                                                    <a href={getPublicationLink(item[col])} target="_blank" rel="noopener noreferrer">Publications ({item[col].length})&nbsp;&nbsp;<Icon name='external alternate' /></a>
+                                                </div>
+                                            </Table.Cell>
+                                        );
+                                    } else {
+                                        return <Table.Cell key={`cell-${_.uniqueId()}`} collapsing></Table.Cell>;
+                                    }
+                                    
+                                } else if (col.includes("_id") || col.includes("_label")) { //show popup for id and label columns
+                                    return (
+                                        <Popup trigger={
+                                                <Table.Cell key={`cell-${_.uniqueId()}`}>
+                                                    {item[col]}
+                                                </Table.Cell>
+                                            }
+                                            key={`popup-${_.uniqueId()}`}
+                                            hoverable
+                                            popperModifiers={{
+                                                preventOverflow: {
+                                                    boundariesElement: "viewport"
+                                                }
+                                            }}
+                                        >
+                                            <Popup.Header>Equivalent IDs</Popup.Header>
+                                            <Popup.Content>
+                                                {
+                                                    Object.keys(props.equivalentIds[item[col.replace("_label", "_id")]])
+                                                    .filter(key => !["primary", "display", "type", "name", "_score"].includes(key)) //idon't display these fields
+                                                    .map((key) => <p style={{marginBottom: 0, marginTop: 5}} key={`p-${_.uniqueId()}`}>{`${key}: ${props.equivalentIds[item[col.replace("_label", "_id")]][key]}`}</p>)
+                                                }
+                                            </Popup.Content>
+                                        </Popup>
+                                        
+                                        
                                     );
                                 } else {
                                     return (
-                                        <Table.Cell key={i}>
+                                        <Table.Cell key={`cell-${_.uniqueId()}`}>
                                             {item[col]}
                                         </Table.Cell>
                                     );

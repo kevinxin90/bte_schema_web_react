@@ -6,7 +6,7 @@ import predict from '../assets/bte-predict.png';
 
 const Home = () => (
   <div className="container">
-  <Segment style={{ border: "none", borderRadius: 0 }}>
+  <Segment basic>
     <Grid columns={2} stackable textAlign='center'>
       <Grid.Column>
         <Card centered href="/explorer/explain" color="red" className="homeCard">

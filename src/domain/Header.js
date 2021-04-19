@@ -38,7 +38,7 @@ class Header extends Component {
                     </Menu.Item>
                 </Menu>
 
-                <Grid style={{'backgroundColor': '#9f7de8'}} textAlign='center'>
+                <Grid style={{'backgroundColor': '#9f7de8', marginBottom: '2rem'}} textAlign='center'>
                     <Grid.Column mobile={16} tablet={8} computer={8}>
                         <Image src={network} />
                     </Grid.Column>
@@ -51,9 +51,6 @@ class Header extends Component {
                     </Grid.Column>
                 </Grid>
 
-                <Message warning>
-                    <Message.Header>This web service is a simple demo for our <a href="https://github.com/biothings/biothings_explorer" target="_blank" rel="noopener noreferrer">Python Client</a>.</Message.Header>
-                </Message>
             </React.Fragment>
         )
     }
