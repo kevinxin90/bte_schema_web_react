@@ -75,6 +75,12 @@ class AdvancedQuery extends Component {
     if (!_.isEmpty(this.state.response)) {
       this.tableRef.current.setTable(this.state.response, edge.id(), "edge");
       this.graphRef.current.setSelectedElementID(edge.id());
+    } else {
+      this.queryGraph(() => {
+        this.tableRef.current.setTable(this.state.response, edge.id(), "edge");
+        this.graphRef.current.setSelectedElementID(edge.id());
+      });
+      
     }
   }
 
@@ -83,11 +89,28 @@ class AdvancedQuery extends Component {
     if (!_.isEmpty(this.state.response)) {
       this.tableRef.current.setTable(this.state.response, node.id(), "node");
       this.graphRef.current.setSelectedElementID(node.id());
+    } else {
+      this.queryGraph(() => {
+        this.tableRef.current.setTable(this.state.response, node.id(), "node");
+        this.graphRef.current.setSelectedElementID(node.id());
+      }); 
     }
   }
 
+  //open results for first edge by default
+  defaultQuery() {
+    let edgeID;
+    if (this.graphRef.current.getCy().edges().length > 0) {
+      edgeID = this.graphRef.current.getCy().edges()[0].id();
+    }
+    this.queryGraph(() => {
+      this.tableRef.current.setTable(this.state.response, edgeID, "edge");
+      this.graphRef.current.setSelectedElementID(edgeID);
+    })
+  }
+
   //get and query graph
-  queryGraph() {
+  queryGraph(callback) { //pass optional callback function that executes after response is recieved
     let jsonGraph = this.graphRef.current.export();
     if (this.isValidQuery(jsonGraph)) {
       if (!this.state.loading) {
@@ -98,7 +121,9 @@ class AdvancedQuery extends Component {
         console.log(query);
 
         axios.post('https://api.bte.ncats.io/v1/query', query).then((response) => {
-          this.setState({loading: false, response: response.data});
+          this.setState({loading: false, response: response.data}, () => {
+            callback();
+          });
           console.log("Response", response.data);
         }).catch((error) => {
           this.setState({loading: false});
@@ -121,7 +146,7 @@ class AdvancedQuery extends Component {
       <Container className="feature">
         <Navigation name="Advanced" />
         <GraphQuery ref={this.graphRef} edgeQuery={this.edgeQuery.bind(this)} nodeQuery={this.nodeQuery.bind(this)} updateCy={this.updateCy.bind(this)}/>
-        <Button onClick={this.queryGraph.bind(this)} loading={this.state.loading}>Query</Button>
+        <Button onClick={this.defaultQuery.bind(this)} loading={this.state.loading}>Query</Button>
         <ResultsTable ref={this.tableRef} cy={this.state.cy} updateCy={this.updateCy.bind(this)}/>
       </Container>
     )
