@@ -22,8 +22,9 @@ export default class GraphQuery extends Component {
     getMetaKG();
 
     this.state = {
-      cy: {},
-      eh: {},
+      cy: {}, //cytoscape object
+      eh: {}, //cytoscape edgehandles object
+      selectedElementID: "", //element displayed on table
       tippyElement: {}, // element that current tippy is bound to
       tip: {}, //store current tippy object
       nodeIDs: [],
@@ -34,10 +35,16 @@ export default class GraphQuery extends Component {
 
   }
 
-  //use to update cy in parent
+  //use to update cy from parent
   setData(element, key, value) {
     element.data(key, value);
     this.props.updateCy();
+  }
+
+  setSelectedElementID(elementID) {
+    this.state.cy.getElementById(this.state.selectedElementID).removeClass('highlight'); //remove overlay from old selected element
+    this.state.cy.getElementById(elementID).addClass('highlight'); //add overlay to new selected element
+    this.setState({selectedElementID: elementID});
   }
 
   //set mode (for mode switcher component)
@@ -132,6 +139,7 @@ export default class GraphQuery extends Component {
     }
   }
 
+  //node popup handling
   handleIDChange = (e, data) => {
     this.setData(this.state.tippyElement, 'ids', data.value);
     this.setNodeLabel(this.state.tippyElement, data.value, this.state.nodeCategories);
@@ -145,6 +153,7 @@ export default class GraphQuery extends Component {
     });
   }
 
+  //node popup handling
   handleCategoryChange = (e, data) => {
     this.state.tippyElement.data('categories', data.value);
     this.setNodeLabel(this.state.tippyElement, this.state.nodeIDs, data.value);
@@ -185,7 +194,7 @@ export default class GraphQuery extends Component {
         options={_.map(getCategories(), (category) => ({text: category, value: category}))}
         value={this.state.nodeCategories}
       />
-      <Button onClick={() => {this.props.nodeQuery(this.state.tippyElement)}} style={{marginTop: "0.75em"}}>
+      <Button onClick={() => { this.props.nodeQuery(this.state.tippyElement) }} style={{marginTop: "0.75em"}}>
         View Results for Node
       </Button>
     </div>;
@@ -214,6 +223,7 @@ export default class GraphQuery extends Component {
     edge.data('label', predicates.join(', '));
   }
 
+  //edge popup handling
   handlePredicateChange = (e, data) => {
     this.state.tippyElement.data('predicates', data.value);
     this.setEdgeLabel(this.state.tippyElement, data.value);
@@ -244,7 +254,7 @@ export default class GraphQuery extends Component {
           (predicate, idx) => ({key: idx, text: predicate, value: predicate}))}
         value={this.state.edgePredicates}
       />
-      <Button onClick={() => {this.props.edgeQuery(this.state.tippyElement)}} style={{marginTop: "0.75em"}}>
+      <Button onClick={() => { this.props.edgeQuery(this.state.tippyElement) }} style={{marginTop: "0.75em"}}>
         View Results for Edge
       </Button>
     </div>;
@@ -260,7 +270,6 @@ export default class GraphQuery extends Component {
 
       this.setState({tip: tip});
     })
-    
   }
 
   export() {
@@ -280,10 +289,12 @@ export default class GraphQuery extends Component {
           selector: 'node',
           style: {
             'label': 'data(label)',
-            'background-color': 'data(color)'
+            'background-color': 'data(color)',
+            'overlay-opacity': 0,
+            'overlay-color': '#000',
+            'overlay-padding': 7,
           }
         },
-
         {
           selector: 'edge',
           style: {
@@ -295,9 +306,27 @@ export default class GraphQuery extends Component {
             'target-arrow-shape': 'triangle',
             'line-color': 'black',
             'target-arrow-color': 'black',
-            'opacity': 0.5
+            'opacity': 0.5,
+            'overlay-opacity': 0,
+            'overlay-color': '#000',
+            'overlay-padding': 7,
           }
-        }
+        },
+        {
+          selector: ':active',
+          style: {
+            'overlay-opacity': 0.4,
+            'overlay-color': '#000',
+            'overlay-padding': 7,
+          }
+        }, {
+          selector: '.highlight',
+          style: {
+            'overlay-opacity': 0.4, 
+            'overlay-color': '#51cbee', 
+            'overlay-padding': 7 
+          }
+        },
       ],
       minZoom: 0.1,
       maxZoom: 15,

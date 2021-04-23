@@ -51,7 +51,6 @@ class AdvancedQuery extends Component {
     let edges = {};
     if (jsonGraph.elements.edges) {
       jsonGraph.elements.edges.forEach((edge) => {
-        this.setState({selectedEdgeID: edge.data.id});
         let pred = _.map(edge.data.predicates, predicate => `biolink:${predicate}`);
         edges[edge.data.id] = {
           "subject": edge.data.source,
@@ -75,6 +74,7 @@ class AdvancedQuery extends Component {
   edgeQuery(edge) {
     if (!_.isEmpty(this.state.response)) {
       this.tableRef.current.setTable(this.state.response, edge.id(), "edge");
+      this.graphRef.current.setSelectedElementID(edge.id());
     }
   }
 
@@ -82,47 +82,9 @@ class AdvancedQuery extends Component {
   nodeQuery(node) {
     if (!_.isEmpty(this.state.response)) {
       this.tableRef.current.setTable(this.state.response, node.id(), "node");
+      this.graphRef.current.setSelectedElementID(node.id());
     }
   }
-
-  // edgeQuery(edge) {
-  //   console.log("Clicked", edge.id(), edge.source(), edge.target());
-  //   let nodes = {};
-  //   let edges = {};
-
-  //   nodes[edge.source().id()] = {
-  //     "id": edge.source().data.ids,
-  //     "category": _.map(edge.source().data.categories, c => `biolink:${c}`)
-  //   };
-
-  //   nodes[edge.target().id()] = {
-  //     "id": edge.target().data.ids,
-  //     "category": _.map(edge.target().data.categories, c => `biolink:${c}`)
-  //   }
-
-  //   edges[edge.id()] = {
-  //     "subject": edge.source().id(),
-  //     "predicate": _.map(edge.target().data.categories, c => `biolink:${c}`)edge.data.predicates,
-  //     "object": edge.target().id()
-  //   };
-
-  //   let query = {
-  //     "message": {
-  //       "query_graph": {
-  //         "nodes": nodes,
-  //         "edges": edges
-  //       }
-  //     }
-  //   }
-  //   console.log(query);
-  //   axios.post('https://api.bte.ncats.io/v1/query', query).then((response) => {
-  //     this.setState({loading: false, response: response.data});
-  //     console.log("Response", response.data);
-  //   }).catch((error) => {
-  //     this.setState({loading: false});
-  //     console.log("Error: ", error);
-  //   });
-  // }
 
   //get and query graph
   queryGraph() {
@@ -138,7 +100,6 @@ class AdvancedQuery extends Component {
         axios.post('https://api.bte.ncats.io/v1/query', query).then((response) => {
           this.setState({loading: false, response: response.data});
           console.log("Response", response.data);
-          this.tableRef.current.setTable(response.data, this.state.selectedEdgeID);
         }).catch((error) => {
           this.setState({loading: false});
           console.log("Error: ", error);
