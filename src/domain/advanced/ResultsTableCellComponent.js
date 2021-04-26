@@ -2,16 +2,14 @@ import React, { Component } from 'react';
 import _ from 'lodash';
 import { Table, Popup, Icon, List, Header, Accordion } from 'semantic-ui-react';
 import { getPublicationLink } from '../../shared/utils';
+import { TOOLTIP_FIELDS_TO_IGNORE } from './advancedQueryConfig';
 
 export default class ResultsTableCell extends Component {
   //format array of attributes
   getAttributesContent(attributes) {
     return (
       <List>
-        {Object.entries(attributes).filter(([key, value]) => {
-          return (key !== 'source_qg_nodes' && key !== 'target_qg_nodes' && key !== 'subject'
-          && key !== 'predicate' && key !== 'object' && key !== 'name' && key !== 'category'); //ignore these fields
-        }).map(([key, value]) => {
+        {Object.entries(attributes).filter(([key, value]) => (!TOOLTIP_FIELDS_TO_IGNORE.includes(key))).map(([key, value]) => {
           if (key === 'publications') { //handle special case publication attribute
             return (
               <List.Item key={`list-item-${_.uniqueId()}`}>
