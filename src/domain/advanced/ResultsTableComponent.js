@@ -2,6 +2,7 @@ import _ from 'lodash';
 import React, { Component } from 'react'
 import { Table, Pagination, Checkbox, Icon, Popup, Accordion, Dropdown, Button } from 'semantic-ui-react'
 import ResultsTableCell from './ResultsTableCellComponent';
+import { FILTER_FIELDS_TO_IGNORE, SORT_FIELDS_TO_IGNORE } from './advancedQueryConfig';
 
 export default class ResultsTable extends Component {
   constructor(props) {
@@ -148,11 +149,7 @@ export default class ResultsTable extends Component {
       selectedFilters[category] = {};
 
       temp[category].forEach(element => {
-        Object.keys(element).filter(key => (key !== 'qg_id' &&
-          key !== 'source_qg_nodes' && 
-          key !== 'target_qg_nodes' && 
-          key !== 'equivalent_identifiers')
-        ).forEach(key => { //ignore these fields
+        Object.keys(element).filter(key => (!FILTER_FIELDS_TO_IGNORE.includes(key))).forEach(key => { //ignore these fields
           if (Array.isArray(element[key])) {
             filters[category][key] = new Set([...(filters[category][key] || []), ...(element[key])]);
           } else {
@@ -256,11 +253,16 @@ export default class ResultsTable extends Component {
       if (this.state.table.sortDirection === 'down') { //do not recalculate filter b/c it must have been sorted when sortDirection was up 
         newResults = this.state.filteredResults.reverse();
       } else {
-        if (this.state.table.sortProperty === 'publications') {//sort publications by length and everything else by alphabetical order
-          newResults = _.sortBy(this.state.filteredResults, [result => { return _.get(result, [this.state.table.sortColumn, this.state.table.sortProperty], []).length }]);
-        } else {
-          newResults = _.sortBy(this.state.filteredResults, [result => { return _.get(result, [this.state.table.sortColumn, this.state.table.sortProperty], 0) }]);
-        }
+        newResults = _.sortBy(this.state.filteredResults, [result => {  
+          //sort publications and array fields by length and everything else by alphabetical order
+          if (Array.isArray(_.get(result, [this.state.table.sortColumn, this.state.table.sortProperty], 0)) ||
+            this.state.table.sortProperty === 'publications'
+          ) {
+            return _.get(result, [this.state.table.sortColumn, this.state.table.sortProperty], []).length;
+          } else {
+            return _.get(result, [this.state.table.sortColumn, this.state.table.sortProperty], 0);
+          }
+        }]);
       }
 
       this.setState({
@@ -271,7 +273,6 @@ export default class ResultsTable extends Component {
         }
       });
     }
-    
   }
 
   handleSort(e, data) {
@@ -309,7 +310,7 @@ export default class ResultsTable extends Component {
   getSortPanels() {
     let panels = Object.entries(this.state.selectedFilters).map(([key, value]) => {
       let nestedContent = <Button.Group basic vertical labeled icon>
-        {Object.keys(value).map(nestedKey => {
+        {Object.keys(value).filter(k => !SORT_FIELDS_TO_IGNORE.includes(k)).map(nestedKey => {
           let selected = (this.state.table.sortColumn === key && this.state.table.sortProperty === nestedKey);
           return <Button 
             icon={selected ? `sort ${this.state.table.sortDirection}` : 'sort'}
