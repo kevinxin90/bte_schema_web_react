@@ -250,7 +250,7 @@ export default class ResultsTable extends Component {
   sortResults() {
     if (this.state.table.sortColumn && this.state.table.sortProperty && this.state.table.sortDirection) {
       let newResults;
-      if (this.state.table.sortDirection === 'down') { //do not recalculate filter b/c it must have been sorted when sortDirection was up 
+      if (this.state.table.sortDirection === 'descending') { //do not recalculate filter b/c it must have been sorted when sortDirection was up 
         newResults = this.state.filteredResults.reverse();
       } else {
         newResults = _.sortBy(this.state.filteredResults, [result => {  
@@ -276,12 +276,13 @@ export default class ResultsTable extends Component {
   }
 
   handleSort(e, data) {
-    if (data.active) { //flip direction of sort
-      if (this.state.table.sortDirection === 'up') {
+    console.log(data);
+    if (data.active || (data.source === 'table' && this.state.table.sortColumn === data.data.sortColumn)) { //flip direction of sort
+      if (this.state.table.sortDirection === 'ascending') {
         this.setState({
           table: {
             ...this.state.table,
-            sortDirection: 'down'
+            sortDirection: 'descending'
           }
         }, () => {this.sortResults();});
       } else {
@@ -301,7 +302,7 @@ export default class ResultsTable extends Component {
           ...this.state.table,
           sortColumn: data.data.sortColumn,
           sortProperty: data.data.sortProperty,
-          sortDirection: 'up',
+          sortDirection: 'ascending',
         }
       }, () => {this.sortResults();});
     }
@@ -340,13 +341,22 @@ export default class ResultsTable extends Component {
               <Table.HeaderCell width={1}>
                 Add Source To Query Graph
               </Table.HeaderCell>
-              <Table.HeaderCell width={2}>
+              <Table.HeaderCell width={2}
+                sorted={this.state.table.sortColumn === 'source' ? this.state.table.sortDirection : null}
+                onClick={() => {this.handleSort(undefined, {data: {sortColumn: 'source', sortProperty: 'name'}, source: 'table'} )}}
+              >
                 Source
               </Table.HeaderCell>
-              <Table.HeaderCell width={2}>
+              <Table.HeaderCell width={2}
+                sorted={this.state.table.sortColumn === 'edge' ? this.state.table.sortDirection : null}
+                onClick={() => {this.handleSort(undefined, {data: {sortColumn: 'edge', sortProperty: 'predicate'}, source: 'table'} )}}
+              >
                 Edge
               </Table.HeaderCell>
-              <Table.HeaderCell width={2}>
+              <Table.HeaderCell width={2}
+                sorted={this.state.table.sortColumn === 'target' ? this.state.table.sortDirection : null}
+                onClick={() => {this.handleSort(undefined, {data: {sortColumn: 'target', sortProperty: 'name'}, source: 'table'} )}}
+              >
                 Target
               </Table.HeaderCell>
               <Table.HeaderCell width={1}>
@@ -382,7 +392,10 @@ export default class ResultsTable extends Component {
         tableContents = <>
           <Table.Header>
             <Table.Row>
-              <Table.HeaderCell>
+              <Table.HeaderCell 
+                sorted={this.state.table.sortColumn === 'node' ? this.state.table.sortDirection : null}
+                onClick={() => {this.handleSort(undefined, {data: {sortColumn: 'node', sortProperty: 'name'}, source: 'table'} )}}
+              >
                 Nodes
               </Table.HeaderCell>
             </Table.Row>
