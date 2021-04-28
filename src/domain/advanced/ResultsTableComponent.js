@@ -7,106 +7,27 @@ import { FILTER_FIELDS_TO_IGNORE, SORT_FIELDS_TO_IGNORE } from './advancedQueryC
 export default class ResultsTable extends Component {
   constructor(props) {
     super(props);
+
+    let filters, selectedFilters;
+    if (props.results.length > 0) {
+      ({filters, selectedFilters} = this.calculateFilters(props.results));
+    }
+
     this.state = {
-      results: [], 
-      filteredResults: [],
-      filter: {}, //all possible filter values
-      selectedFilters: {}, //current filter selections
+      results: props.results || [], 
+      filteredResults: props.results || [],
+      filters: filters || {}, //all possible filter values
+      selectedFilters: selectedFilters || {}, //current filter selections
       table: {
         sortColumn: null,
         sortProperty: null,
         sortDirection: null,
-        display: [],
+        display: props.results.slice(0, 10),
         activePage: 1,
-        totalPages: 1
+        totalPages: Math.max(Math.ceil(props.results.length / 10), 1)
       },
-      mode: "edge",
+      mode: props.mode,
     }
-  }
-
-  resetTable() {
-    this.setState({
-      results: [],
-      filteredResults: [],
-      table: {
-        sortColumn: null,
-        sortProperty: null,
-        sortDirection: null,
-        display: [],
-        activePage: 1,
-        totalPages: 1
-      }
-    });
-  }
-
-  //from response get results and filters
-  setTable(response, selectedElementID, mode) {
-    let results;
-    if (mode === 'edge') {
-      results = this.calculateTableGivenEdge(response, selectedElementID);
-      this.setState({mode: "edge"});
-    } else {
-      results = this.calculateTableGivenNode(response, selectedElementID);
-      this.setState({mode: "node"});
-    }
-
-    this.calculateFilters(results);
-
-    this.setState({results: results, 
-      filteredResults: results,
-      table: {
-        ...this.state.table,
-        display: results.slice(0, 10),
-        activePage: 1,
-        totalPages: Math.ceil(results.length / 10)
-      }
-    });
-  }
-
-  //flatten attributes to same level as other properties of an object
-  flattenElement(element) {
-    let flattened = {};
-    Object.keys(element).forEach((key) => {
-      if (key === 'attributes') {
-        element.attributes.forEach(attr => {
-          flattened[attr.name] = attr.value;
-        })
-      } else {
-        flattened[key] = element[key];
-      }
-    })
-
-    return flattened;
-  }
-
-  calculateTableGivenNode(response, selectedNodeID) {
-    let entries = [];
-    let ids = new Set();
-    response.message.results.forEach((result) => {
-      if (result.node_bindings.hasOwnProperty(selectedNodeID)) {
-        let nodeID = result.node_bindings[selectedNodeID][0].id;
-        ids.add(nodeID);
-      }
-    });
-    entries = _.map(Array.from(ids), (id) => ({node: this.flattenElement(response.message.knowledge_graph.nodes[id])}));
-    return entries;
-  }
-
-  calculateTableGivenEdge(response, selectedEdgeID) {
-    let entries = [];
-    response.message.results.forEach((result) => {
-      if (result.edge_bindings.hasOwnProperty(selectedEdgeID)) {
-        let cy_edge = this.props.cy.getElementById(selectedEdgeID);
-        let edge = this.flattenElement(response.message.knowledge_graph.edges[result.edge_bindings[selectedEdgeID][0].id]); //get knowledge graph edge
-        let source = this.flattenElement(response.message.knowledge_graph.nodes[edge.subject]);
-        source.qg_id = cy_edge.source().id(); 
-        let target = this.flattenElement(response.message.knowledge_graph.nodes[edge.object]);
-        target.qg_id = cy_edge.target().id(); 
-        entries.push({source: source, edge: edge, target: target});
-      }
-    });
-
-    return entries;
   }
 
   handlePaginationChange(e, {activePage}) {
@@ -123,6 +44,8 @@ export default class ResultsTable extends Component {
   handleSelect(e, { data }) {
     let node = this.props.cy.getElementById(data.qg_id);
     let entity_id = data.equivalent_identifiers[0];
+
+    //if entity is already selected remove it else add it
     let idx = node.data('ids').indexOf(entity_id);
     if (idx === -1) {
       node.data('ids').push(entity_id);
@@ -162,11 +85,11 @@ export default class ResultsTable extends Component {
       });
     });
 
-    this.setState({filters: filters, selectedFilters: selectedFilters});
+    return {filters: filters, selectedFilters: selectedFilters};
   }
 
   //using the selected filters, filter results and update filteredResults
-  filterResults() {
+  filterResults(updateFilters = false) {
     let filteredResults = this.state.results.filter((obj) => {
       for (const key of Object.keys(obj)) {
         for (const k of Object.keys(this.state.selectedFilters[key])) {
@@ -191,6 +114,12 @@ export default class ResultsTable extends Component {
       }
       return true;
     });
+
+    if (updateFilters) {
+      let filters;
+      ({ filters } = this.calculateFilters(filteredResults));
+      this.setState({filters: filters})
+    }
 
     this.setState({
       filteredResults: filteredResults, 
@@ -276,7 +205,6 @@ export default class ResultsTable extends Component {
   }
 
   handleSort(e, data) {
-    console.log(data);
     if (data.active || (data.source === 'table' && this.state.table.sortColumn === data.data.sortColumn)) { //flip direction of sort
       if (this.state.table.sortDirection === 'ascending') {
         this.setState({
@@ -392,7 +320,10 @@ export default class ResultsTable extends Component {
         tableContents = <>
           <Table.Header>
             <Table.Row>
-              <Table.HeaderCell 
+              <Table.HeaderCell width={1}>
+                Add Node To Query Graph
+              </Table.HeaderCell>
+              <Table.HeaderCell  width={3}
                 sorted={this.state.table.sortColumn === 'node' ? this.state.table.sortDirection : null}
                 onClick={() => {this.handleSort(undefined, {data: {sortColumn: 'node', sortProperty: 'name'}, source: 'table'} )}}
               >
@@ -404,6 +335,12 @@ export default class ResultsTable extends Component {
             {_.map(this.state.table.display, (entry) => {
               return (
                 <Table.Row key={`row-${_.uniqueId()}`}>
+                  <Table.Cell key={`checkbox-${_.uniqueId()}`} textAlign='center'>
+                    <Checkbox onClick={this.handleSelect.bind(this)} 
+                      data={entry.node} 
+                      defaultChecked={this.props.cy.getElementById(entry.node.qg_id).data('ids').includes(entry.node.equivalent_identifiers[0])}
+                    />
+                  </Table.Cell>
                   <ResultsTableCell data={entry.node} type="node"/>
                 </Table.Row>
               );

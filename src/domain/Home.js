@@ -36,7 +36,7 @@ const Home = () => (
           </Card.Content>
         </Card>
       </Grid.Column>
-      <Grid.Column>
+      {/* <Grid.Column>
         <Card centered href="/explorer/advanced" color="purple" className="homeCard">
           <Image src={predict} />
           <Card.Content textAlign="center">
@@ -49,7 +49,7 @@ const Home = () => (
             <Link to='/advanced'><Button>Try it Out</Button></Link>
           </Card.Content>
         </Card>
-      </Grid.Column>
+      </Grid.Column> */}
     </Grid>
   </Segment>
   </div>

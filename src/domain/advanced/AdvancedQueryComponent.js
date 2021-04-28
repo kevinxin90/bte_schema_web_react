@@ -11,12 +11,13 @@ class AdvancedQuery extends Component {
     super(props);
     this.state = {
       response: {},
-      selectedEdgeID: "",
+      tableEntries: [],
+      selectedElementID: "",
+      mode: "",
       loading: false,
       cy: {},
     };
 
-    this.tableRef = React.createRef();
     this.graphRef = React.createRef();
   }
 
@@ -70,14 +71,83 @@ class AdvancedQuery extends Component {
     }
   }
 
+  //flatten attributes to same level as other properties of an object
+  flattenElement(element) {
+    let flattened = {};
+    Object.keys(element).forEach((key) => {
+      if (key === 'attributes') {
+        element.attributes.forEach(attr => {
+          flattened[attr.name] = attr.value;
+        })
+      } else {
+        flattened[key] = element[key];
+      }
+    })
+
+    return flattened;
+  }
+
+  calculateTableGivenNode(response, selectedNodeID) {
+    let entries = [];
+    let ids = new Set();
+
+    //get all ids associated with node
+    response.message.results.forEach((result) => {
+      if (result.node_bindings.hasOwnProperty(selectedNodeID)) {
+        let nodeID = result.node_bindings[selectedNodeID][0].id;
+        ids.add(nodeID);
+      }
+    });
+
+    //get the data from the knowledge graph for those ids
+    entries = _.map(Array.from(ids), (id) => {
+      let entry = {node: this.flattenElement(response.message.knowledge_graph.nodes[id])};
+      entry.node.qg_id = selectedNodeID;
+      return entry;
+    });
+    return entries;
+  }
+
+  calculateTableGivenEdge(response, selectedEdgeID) {
+    let entries = [];
+
+    //get all results that are related to the edge then flatten them to the desired shape
+    response.message.results.forEach((result) => {
+      if (result.edge_bindings.hasOwnProperty(selectedEdgeID)) {
+        let cy_edge = this.state.cy.getElementById(selectedEdgeID);
+
+        let edge = this.flattenElement(response.message.knowledge_graph.edges[result.edge_bindings[selectedEdgeID][0].id]); //get knowledge graph edge
+        
+        let source = this.flattenElement(response.message.knowledge_graph.nodes[edge.subject]);
+        source.qg_id = cy_edge.source().id(); 
+
+        let target = this.flattenElement(response.message.knowledge_graph.nodes[edge.object]);
+        target.qg_id = cy_edge.target().id(); 
+
+        entries.push({source: source, edge: edge, target: target});
+      }
+    });
+
+    return entries;
+  }
+
+
   //handle edge results
   edgeQuery(edge) {
     if (!_.isEmpty(this.state.response)) {
-      this.tableRef.current.setTable(this.state.response, edge.id(), "edge");
+      this.setState({
+        tableEntries: this.calculateTableGivenEdge(this.state.response, edge.id()),
+        selectedElementID: edge.id(),
+        mode: "edge"
+      });
       this.graphRef.current.setSelectedElementID(edge.id());
     } else {
       this.queryGraph(() => {
-        this.tableRef.current.setTable(this.state.response, edge.id(), "edge");
+        this.setState({
+          tableEntries: this.calculateTableGivenEdge(this.state.response, edge.id()),
+          selectedElementID: edge.id(),
+          mode: "edge"
+        });
         this.graphRef.current.setSelectedElementID(edge.id());
       });
       
@@ -87,11 +157,19 @@ class AdvancedQuery extends Component {
   //handle node results
   nodeQuery(node) {
     if (!_.isEmpty(this.state.response)) {
-      this.tableRef.current.setTable(this.state.response, node.id(), "node");
+      this.setState({
+        tableEntries: this.calculateTableGivenNode(this.state.response, node.id()),
+        selectedElementID: node.id(),
+        mode: "node"
+      });
       this.graphRef.current.setSelectedElementID(node.id());
     } else {
       this.queryGraph(() => {
-        this.tableRef.current.setTable(this.state.response, node.id(), "node");
+        this.setState({
+          tableEntries: this.calculateTableGivenNode(this.state.response, node.id()),
+          selectedElementID: node.id(),
+          mode: "node"
+        });
         this.graphRef.current.setSelectedElementID(node.id());
       }); 
     }
@@ -104,7 +182,11 @@ class AdvancedQuery extends Component {
       edgeID = this.graphRef.current.getCy().edges()[0].id();
     }
     this.queryGraph(() => {
-      this.tableRef.current.setTable(this.state.response, edgeID, "edge");
+      this.setState({
+        tableEntries: this.calculateTableGivenEdge(this.state.response, edgeID),
+        selectedElementID: edgeID, 
+        mode: "edge"
+      });
       this.graphRef.current.setSelectedElementID(edgeID);
     })
   }
@@ -114,7 +196,6 @@ class AdvancedQuery extends Component {
     let jsonGraph = this.graphRef.current.export();
     if (this.isValidQuery(jsonGraph)) {
       if (!this.state.loading) {
-        this.tableRef.current.resetTable();
         this.setState({loading: true, cy: this.graphRef.current.getCy()});
         let query = this.convertJSONtoTRAPI(jsonGraph);
 
@@ -147,7 +228,14 @@ class AdvancedQuery extends Component {
         <Navigation name="Advanced" />
         <GraphQuery ref={this.graphRef} edgeQuery={this.edgeQuery.bind(this)} nodeQuery={this.nodeQuery.bind(this)} updateCy={this.updateCy.bind(this)}/>
         <Button onClick={this.defaultQuery.bind(this)} loading={this.state.loading}>Query</Button>
-        <ResultsTable ref={this.tableRef} cy={this.state.cy} updateCy={this.updateCy.bind(this)}/>
+        <ResultsTable 
+          results={this.state.tableEntries} 
+          selectedElementID={this.state.selectedElementID} 
+          mode={this.state.mode} 
+          cy={this.state.cy} 
+          updateCy={this.updateCy.bind(this)}
+          key={this.state.selectedElementID}
+        />
       </Container>
     )
   }
