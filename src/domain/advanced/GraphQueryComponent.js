@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import { Dropdown, Grid, Icon, Button, Popup } from 'semantic-ui-react';
+import BiomedicalIDDropdown from './BiomedicalIDDropdown';
 
 import { colorSchema, semanticTypeShorthand } from '../../shared/semanticTypes';
 import GraphModeSwitcher, { MODE } from './GraphModeSwitcher';
@@ -28,6 +29,7 @@ export default class GraphQuery extends Component {
       tippyElement: {}, // element that current tippy is bound to
       tip: {}, //store current tippy object
       nodeIDs: [],
+      nodeIDOptions: [],
       nodeCategories: [],
       edgePredicates: [],
       mode: 1
@@ -80,6 +82,7 @@ export default class GraphQuery extends Component {
         label: "Any",
         color: "black",
         ids: [],
+        options: [],
         categories: [],
       },
       renderedPosition: {
@@ -142,9 +145,11 @@ export default class GraphQuery extends Component {
   //node popup handling
   handleIDChange = (e, data) => {
     this.setData(this.state.tippyElement, 'ids', data.value);
+    this.setData(this.state.tippyElement, 'options', data.options);
     this.setNodeLabel(this.state.tippyElement, data.value, this.state.nodeCategories);
     this.setState({
       nodeIDs: data.value,
+      nodeIDOptions: data.options.filter((option) => (data.value.includes(option.value))) //only include options that are selected
     }, () => {
       let popupContent = this.getNodePopupContent();
       let content = document.createElement('div');
@@ -172,16 +177,7 @@ export default class GraphQuery extends Component {
     let popupContent = <div style={{paddingTop: "4px", paddingBottom: "4px"}}>
       <h3>Node</h3>
       IDs:
-      <Dropdown 
-        placeholder='IDs  eg.MONDO:0016575'
-        multiple
-        search
-        selection
-        allowAdditions
-        onChange={this.handleIDChange}
-        options={_.map(this.state.nodeIDs, (nodeID) => ({text: nodeID, value: nodeID}))}
-        value={this.state.nodeIDs}
-      />
+      <BiomedicalIDDropdown handleIDChange={this.handleIDChange.bind(this)} nodeIDOptions={this.state.nodeIDOptions} nodeIDs={this.state.nodeIDs} />
       Categories:
       <Dropdown 
         placeholder='Categories'
@@ -202,11 +198,10 @@ export default class GraphQuery extends Component {
   }
 
   showNodeOptions(node) {
-    let nodeCategories = node.data('categories');
-    let nodeIDs = node.data('ids')
     this.setState({
-      nodeCategories: nodeCategories, 
-      nodeIDs: nodeIDs,
+      nodeCategories: node.data('categories'), 
+      nodeIDs: node.data('ids'),
+      nodeIDOptions: node.data('options'),
       tippyElement: node 
     }, () => {
       let popupContent = this.getNodePopupContent();

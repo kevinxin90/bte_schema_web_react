@@ -1,4 +1,5 @@
-import getMetaKG from './metaKG'
+import getMetaKG from './metaKG';
+import React from 'react';
 
 /** get link to page of results for list of publications
  * @param {Array.<string>} publications Publications in the format "type:number", also must all be the same format and either "PMID" or "PMC"
@@ -55,6 +56,24 @@ const getFilteredResults = (results, filter) => {
     });
 }
 
+/** generate autocomplete dropdown option from biomedical-id-autocomplete record
+ * @param {Object} record record object
+ * @returns {Object} dropdown option object
+ */
+const recordToDropdownOption = (record) => {
+    return {
+        key: record.primary.value,
+        text: record.name,
+        image: {spaced: 'right', src: `/assets/images/icons/${record.type}.png`},
+        content: <span>
+            <b>{record.name}</b> <br /><br />
+            <small>{record.display}</small>
+          </span>,
+        data: record,
+        title: record.type,
+        value: record.primary.value
+    };
+}
 
 const recordsToTreeGraph = (records) => {
     records = Array.from(records);
@@ -134,4 +153,4 @@ const fetchQueryResult = async (input, output, intermediate) => {
     }
 }
 
-export { getIntermediateNodes, fetchQueryResult, findMetaPath, recordsToTreeGraph, getPublicationLink, getFieldOptions, getFilteredResults };
+export { getIntermediateNodes, fetchQueryResult, findMetaPath, recordsToTreeGraph, getPublicationLink, getFieldOptions, getFilteredResults, recordToDropdownOption };

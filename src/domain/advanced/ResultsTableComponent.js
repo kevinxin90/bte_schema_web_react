@@ -2,7 +2,8 @@ import _ from 'lodash';
 import React, { Component } from 'react'
 import { Table, Pagination, Checkbox, Icon, Popup, Accordion, Dropdown, Button } from 'semantic-ui-react'
 import ResultsTableCell from './ResultsTableCellComponent';
-import { FILTER_FIELDS_TO_IGNORE, SORT_FIELDS_TO_IGNORE } from './advancedQueryConfig';
+import { FILTER_FIELDS_TO_IGNORE, SORT_FIELDS_TO_IGNORE } from './AdvancedQueryConfig';
+import { recordToDropdownOption } from '../../shared/utils';
 
 export default class ResultsTable extends Component {
   constructor(props) {
@@ -49,8 +50,17 @@ export default class ResultsTable extends Component {
     let idx = node.data('ids').indexOf(entity_id);
     if (idx === -1) {
       node.data('ids').push(entity_id);
+      node.data('options').push(recordToDropdownOption({
+        display: data.equivalent_identifiers[0],
+        name: data.name,
+        primary: {
+          value: data.equivalent_identifiers[0]
+        },
+        type: data.category.split(':')[1] //get type without the biolink:
+      }));
     } else {
       node.data('ids').splice(idx, 1);
+      node.data('options', node.data('options').filter(option => node.data('ids').includes(option.value)));
     }
     this.props.updateCy();
   }
