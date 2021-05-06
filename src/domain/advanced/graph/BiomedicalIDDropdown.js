@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { autocomplete } from 'biomedical-id-autocomplete';
 import { Dropdown } from 'semantic-ui-react';
-import { recordToDropdownOption } from '../../shared/utils';
+import { recordToDropdownOption } from '../../../shared/utils';
 
 export default class BiomedicalIDDropdown extends Component {
   constructor(props) {
@@ -20,6 +20,7 @@ export default class BiomedicalIDDropdown extends Component {
 
   handleSearchChange(e, { searchQuery }) {
     autocomplete(searchQuery).then(response => {
+      console.log("Autocomplete response", response);
       let new_options = [];
       for (let record of Object.keys(response).map((key) => response[key]).flat().sort((a, b) => (b._score - a._score))) {
         new_options.push(recordToDropdownOption(record));

@@ -3,17 +3,17 @@ import ReactDOM from 'react-dom';
 import { Dropdown, Grid, Icon, Button, Popup } from 'semantic-ui-react';
 import BiomedicalIDDropdown from './BiomedicalIDDropdown';
 
-import { colorSchema, semanticTypeShorthand } from '../../shared/semanticTypes';
+import { colorSchema, semanticTypeShorthand } from '../../../shared/semanticTypes';
 import GraphModeSwitcher, { MODE } from './GraphModeSwitcher';
 
-import cytoscape from '../../shared/cytoscapeInit';
+import cytoscape from '../../../shared/cytoscapeInit';
 import Tippy from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
 import 'tippy.js/themes/light-border.css';
 
 import _ from 'lodash';
 
-import getMetaKG, { getCategories, getPredicates } from '../../shared/metaKG';
+import getMetaKG, { getCategories, getPredicates } from '../../../shared/metaKG';
 
 export default class GraphQuery extends Component {
   constructor(props) {
@@ -35,6 +35,10 @@ export default class GraphQuery extends Component {
       mode: 1
     };
 
+    this.handleIDChange = this.handleIDChange.bind(this);
+    this.handleCategoryChange = this.handleCategoryChange.bind(this);
+    this.zoomFit = this.zoomFit.bind(this);
+    this.setMode = this.setMode.bind(this);
   }
 
   //use to update cy from parent
@@ -177,7 +181,7 @@ export default class GraphQuery extends Component {
     let popupContent = <div style={{paddingTop: "4px", paddingBottom: "4px"}}>
       <h3>Node</h3>
       IDs:
-      <BiomedicalIDDropdown handleIDChange={this.handleIDChange.bind(this)} nodeIDOptions={this.state.nodeIDOptions} nodeIDs={this.state.nodeIDs} />
+      <BiomedicalIDDropdown handleIDChange={this.handleIDChange} nodeIDOptions={this.state.nodeIDOptions} nodeIDs={this.state.nodeIDs} />
       Categories:
       <Dropdown 
         placeholder='Categories'
@@ -375,10 +379,10 @@ export default class GraphQuery extends Component {
                 </h2>
             </Grid.Column>
             <Grid.Column style={{textAlign: "center"}}>
-              <GraphModeSwitcher mode={this.state.mode} setMode={this.setMode.bind(this)} />
+              <GraphModeSwitcher mode={this.state.mode} setMode={this.setMode} />
             </Grid.Column>
             <Grid.Column style={{textAlign: "right"}}>
-              <Button basic compact style={{marginRight: 0, marginBottom: 5}} onClick={this.zoomFit.bind(this)}><Icon name="search" />Zoom Fit</Button>
+              <Button basic compact style={{marginRight: 0, marginBottom: 5}} onClick={this.zoomFit}><Icon name="search" />Zoom Fit</Button>
               </Grid.Column>
           </Grid.Row>
         </Grid>

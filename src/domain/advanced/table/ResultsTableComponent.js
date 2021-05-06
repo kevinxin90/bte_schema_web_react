@@ -1,9 +1,11 @@
 import _ from 'lodash';
-import React, { Component } from 'react'
-import { Table, Pagination, Checkbox, Icon, Popup, Accordion, Dropdown, Button } from 'semantic-ui-react'
+import React, { Component } from 'react';
+import { Table, Pagination, Checkbox, Icon } from 'semantic-ui-react';
 import ResultsTableCell from './ResultsTableCellComponent';
-import { FILTER_FIELDS_TO_IGNORE, SORT_FIELDS_TO_IGNORE } from './AdvancedQueryConfig';
-import { recordToDropdownOption } from '../../shared/utils';
+import ResultsTableFilter from './ResultsTableFilterComponent';
+import ResultsTableSort from './ResultsTableSortComponent';
+import { FILTER_FIELDS_TO_IGNORE } from '../AdvancedQueryConfig';
+import { recordToDropdownOption } from '../../../shared/utils';
 
 export default class ResultsTable extends Component {
   constructor(props) {
@@ -29,6 +31,11 @@ export default class ResultsTable extends Component {
       },
       mode: props.mode,
     }
+
+    this.handleSelect = this.handleSelect.bind(this);
+    this.updateFilters = this.updateFilters.bind(this);
+    this.handlePaginationChange = this.handlePaginationChange.bind(this);
+    this.handleSort = this.handleSort.bind(this);
   }
 
   handlePaginationChange(e, {activePage}) {
@@ -160,32 +167,6 @@ export default class ResultsTable extends Component {
     this.filterResults();
   }
 
-  //convert one selectedFilters parameter (which is a set) into a display section for the filter
-  convertSetToFilterValue(set, objectName, key) {
-    let attribute_values = Array.from(set);
-    if (attribute_values.length > 5) {
-      let options = attribute_values.map((value) => ({key: value, text: value, value: value}));
-      return <div><Dropdown multiple search selection options={options} value={Array.from(this.state.selectedFilters[objectName][key])} onChange={this.updateFilters.bind(this)} data={{objectName: objectName, key: key}}/></div>;
-    } else {
-      return <div>{attribute_values.map(value => <div><Checkbox key={`checkbox-${_.uniqueId}`} label={value} checked={this.state.selectedFilters[objectName][key].has(value)} onClick={this.updateFilters.bind(this)} data={{objectName: objectName, key: key}}/></div>)}</div>;
-    }
-  }
-
-  //visual filter accordion panels
-  getFilterPanels() {
-    let panels = Object.entries(this.state.filters).map(([key, value]) => {
-      let nestedPanels = Object.entries(value).map(([nestedKey, nestedValue]) => {
-        return { key: `panel-${nestedKey}`, title: nestedKey, content: { content: this.convertSetToFilterValue(nestedValue, key, nestedKey) }};
-      });
-
-      let nestedContent = <div><Accordion.Accordion panels={nestedPanels}/></div>;
-
-      return { key: `panel-${key}`, title: key, content: {content: nestedContent} };
-    });
-
-    return panels;
-  }
-
   sortResults() {
     if (this.state.table.sortColumn && this.state.table.sortProperty && this.state.table.sortDirection) {
       let newResults;
@@ -246,27 +227,6 @@ export default class ResultsTable extends Component {
     }
   }
 
-  getSortPanels() {
-    let panels = Object.entries(this.state.selectedFilters).map(([key, value]) => {
-      let nestedContent = <Button.Group basic vertical labeled icon>
-        {Object.keys(value).filter(k => !SORT_FIELDS_TO_IGNORE.includes(k)).map(nestedKey => {
-          let selected = (this.state.table.sortColumn === key && this.state.table.sortProperty === nestedKey);
-          return <Button 
-            icon={selected ? `sort ${this.state.table.sortDirection}` : 'sort'}
-            data={{sortColumn: key, sortProperty: nestedKey}}
-            content={nestedKey} 
-            active={selected} 
-            onClick={this.handleSort.bind(this)}
-          />;
-        })}
-      </Button.Group>;
-
-      return { key: `sort-panel-${key}`, title: key, content: {content: nestedContent} };
-    });
-
-    return panels;
-  }
-
   render() {
     let tableContents;
     let table;
@@ -307,7 +267,7 @@ export default class ResultsTable extends Component {
               return (
                 <Table.Row key={`row-${_.uniqueId()}`}>
                   <Table.Cell key={`checkbox-${_.uniqueId()}`} textAlign='center'>
-                    <Checkbox onClick={this.handleSelect.bind(this)} 
+                    <Checkbox onClick={this.handleSelect} 
                       data={entry.source} 
                       defaultChecked={this.props.cy.getElementById(entry.source.qg_id).data('ids').includes(entry.source.equivalent_identifiers[0])}
                     />
@@ -316,7 +276,7 @@ export default class ResultsTable extends Component {
                   <ResultsTableCell data={entry.edge} type="edge" />
                   <ResultsTableCell data={entry.target} type="node" />
                   <Table.Cell key={`checkbox-${_.uniqueId()}`} textAlign='center'>
-                    <Checkbox onClick={this.handleSelect.bind(this)} 
+                    <Checkbox onClick={this.handleSelect} 
                       data={entry.target} 
                       defaultChecked={this.props.cy.getElementById(entry.target.qg_id).data('ids').includes(entry.target.equivalent_identifiers[0])}
                     />
@@ -346,7 +306,7 @@ export default class ResultsTable extends Component {
               return (
                 <Table.Row key={`row-${_.uniqueId()}`}>
                   <Table.Cell key={`checkbox-${_.uniqueId()}`} textAlign='center'>
-                    <Checkbox onClick={this.handleSelect.bind(this)} 
+                    <Checkbox onClick={this.handleSelect} 
                       data={entry.node} 
                       defaultChecked={this.props.cy.getElementById(entry.node.qg_id).data('ids').includes(entry.node.equivalent_identifiers[0])}
                     />
@@ -360,31 +320,13 @@ export default class ResultsTable extends Component {
       }
       
       table = <div style={{overflowX: "auto", marginBottom: "1em", marginTop: "0.5em"}}>
-        <Popup 
-          trigger={<Button content='Filter Results' icon='filter' labelPosition='left' />}
-          flowing
-          pinned
-          position='bottom left'
-          on='click'
-          style={{padding: 0}}
-        >
-          <Accordion styled panels={this.getFilterPanels()}/>
-        </Popup>
-        <Popup 
-          trigger={<Button content='Sort Results' icon='sort' labelPosition='left' />}
-          flowing
-          pinned
-          position='bottom left'
-          on='click'
-          style={{padding: 0}}
-        >
-          <Accordion styled panels={this.getSortPanels()}/>
-        </Popup>
+        <ResultsTableFilter filters={this.state.filters} selectedFilters={this.state.selectedFilters} updateFilters={this.updateFilters} />
+        <ResultsTableSort selectedFilters={this.state.selectedFilters} tableParameters={this.state.table} handleSort={this.handleSort} />
         <Table sortable unstackable celled>
           {tableContents}
         </Table>
         <Pagination
-            onPageChange={this.handlePaginationChange.bind(this)}
+            onPageChange={this.handlePaginationChange}
             defaultActivePage={1}
             totalPages={this.state.table.totalPages}
             siblingRange={2}

@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import _ from 'lodash';
 import { Table, Popup, Icon, List, Header, Accordion } from 'semantic-ui-react';
-import { getPublicationLink } from '../../shared/utils';
-import { TOOLTIP_FIELDS_TO_IGNORE } from './AdvancedQueryConfig';
+import { getPublicationLink } from '../../../shared/utils';
+import { TOOLTIP_FIELDS_TO_IGNORE } from '../AdvancedQueryConfig';
 
 export default class ResultsTableCell extends Component {
   //format array of attributes

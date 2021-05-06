@@ -7,6 +7,7 @@ export const MODE = {
   "addEdge": 3
 };
 
+//handles input mode of graph
 export default class GraphModeSwitcher extends Component {
   render() {
     return (

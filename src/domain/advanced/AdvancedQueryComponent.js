@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import { Button, Container } from 'semantic-ui-react';
 import { Navigation } from '../../components/Breadcrumb';
-import ResultsTable from './ResultsTableComponent';
-import GraphQuery from './GraphQueryComponent';
+import ResultsTable from './table/ResultsTableComponent';
+import GraphQuery from './graph/GraphQueryComponent';
 import axios from 'axios';
 import _ from 'lodash';
 
@@ -19,6 +19,11 @@ class AdvancedQuery extends Component {
     };
 
     this.graphRef = React.createRef();
+
+    this.updateCy = this.updateCy.bind(this);
+    this.edgeQuery = this.edgeQuery.bind(this);
+    this.nodeQuery = this.nodeQuery.bind(this);
+    this.defaultQuery = this.defaultQuery.bind(this);
   }
 
   //at least 1 node must have an id
@@ -226,14 +231,14 @@ class AdvancedQuery extends Component {
     return (
       <Container className="feature">
         <Navigation name="Advanced" />
-        <GraphQuery ref={this.graphRef} edgeQuery={this.edgeQuery.bind(this)} nodeQuery={this.nodeQuery.bind(this)} updateCy={this.updateCy.bind(this)}/>
-        <Button onClick={this.defaultQuery.bind(this)} loading={this.state.loading}>Query</Button>
+        <GraphQuery ref={this.graphRef} edgeQuery={this.edgeQuery} nodeQuery={this.nodeQuery} updateCy={this.updateCy}/>
+        <Button onClick={this.defaultQuery} loading={this.state.loading}>Query</Button>
         <ResultsTable 
           results={this.state.tableEntries} 
           selectedElementID={this.state.selectedElementID} 
           mode={this.state.mode} 
           cy={this.state.cy} 
-          updateCy={this.updateCy.bind(this)}
+          updateCy={this.updateCy}
           key={this.state.selectedElementID}
         />
       </Container>
