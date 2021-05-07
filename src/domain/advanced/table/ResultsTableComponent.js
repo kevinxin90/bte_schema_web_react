@@ -51,17 +51,17 @@ export default class ResultsTable extends Component {
   //handle checkbox select and synchronize with graph
   handleSelect(e, { data }) {
     let node = this.props.cy.getElementById(data.qg_id);
-    let entity_id = data.equivalent_identifiers[0];
+    let entity_id = data.entity_id;
 
     //if entity is already selected remove it else add it
     let idx = node.data('ids').indexOf(entity_id);
     if (idx === -1) {
       node.data('ids').push(entity_id);
       node.data('options').push(recordToDropdownOption({
-        display: data.equivalent_identifiers[0],
+        display: data.entity_id,
         name: data.name,
         primary: {
-          value: data.equivalent_identifiers[0]
+          value: data.entity_id
         },
         type: data.category.split(':')[1] //get type without the biolink:
       }));
@@ -269,7 +269,7 @@ export default class ResultsTable extends Component {
                   <Table.Cell key={`checkbox-${_.uniqueId()}`} textAlign='center'>
                     <Checkbox onClick={this.handleSelect} 
                       data={entry.source} 
-                      defaultChecked={this.props.cy.getElementById(entry.source.qg_id).data('ids').includes(entry.source.equivalent_identifiers[0])}
+                      defaultChecked={this.props.cy.getElementById(entry.source.qg_id).data('ids').includes(entry.source.entity_id)}
                     />
                   </Table.Cell>
                   <ResultsTableCell data={entry.source} type="node" />
@@ -278,7 +278,7 @@ export default class ResultsTable extends Component {
                   <Table.Cell key={`checkbox-${_.uniqueId()}`} textAlign='center'>
                     <Checkbox onClick={this.handleSelect} 
                       data={entry.target} 
-                      defaultChecked={this.props.cy.getElementById(entry.target.qg_id).data('ids').includes(entry.target.equivalent_identifiers[0])}
+                      defaultChecked={this.props.cy.getElementById(entry.target.qg_id).data('ids').includes(entry.target.entity_id)}
                     />
                   </Table.Cell>
                 </Table.Row>
@@ -308,7 +308,7 @@ export default class ResultsTable extends Component {
                   <Table.Cell key={`checkbox-${_.uniqueId()}`} textAlign='center'>
                     <Checkbox onClick={this.handleSelect} 
                       data={entry.node} 
-                      defaultChecked={this.props.cy.getElementById(entry.node.qg_id).data('ids').includes(entry.node.equivalent_identifiers[0])}
+                      defaultChecked={this.props.cy.getElementById(entry.node.qg_id).data('ids').includes(entry.node.entity_id)}
                     />
                   </Table.Cell>
                   <ResultsTableCell data={entry.node} type="node"/>

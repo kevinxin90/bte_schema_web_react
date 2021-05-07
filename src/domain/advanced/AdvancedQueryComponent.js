@@ -107,6 +107,7 @@ class AdvancedQuery extends Component {
     //get the data from the knowledge graph for those ids
     entries = _.map(Array.from(ids), (id) => {
       let entry = {node: this.flattenElement(response.message.knowledge_graph.nodes[id])};
+      entry.node.entity_id = id;
       entry.node.qg_id = selectedNodeID;
       return entry;
     });
@@ -124,9 +125,11 @@ class AdvancedQuery extends Component {
         let edge = this.flattenElement(response.message.knowledge_graph.edges[result.edge_bindings[selectedEdgeID][0].id]); //get knowledge graph edge
         
         let source = this.flattenElement(response.message.knowledge_graph.nodes[edge.subject]);
+        source.entity_id = edge.subject;
         source.qg_id = cy_edge.source().id(); 
 
         let target = this.flattenElement(response.message.knowledge_graph.nodes[edge.object]);
+        target.entity_id = edge.object;
         target.qg_id = cy_edge.target().id(); 
 
         entries.push({source: source, edge: edge, target: target});
