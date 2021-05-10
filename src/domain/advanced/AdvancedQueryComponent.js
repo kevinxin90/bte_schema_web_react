@@ -24,6 +24,16 @@ class AdvancedQuery extends Component {
     this.edgeQuery = this.edgeQuery.bind(this);
     this.nodeQuery = this.nodeQuery.bind(this);
     this.defaultQuery = this.defaultQuery.bind(this);
+    this.setElementID = this.setElementID.bind(this);
+  }
+
+  setElementID(id) {
+    if (this.state.response.message && this.state.response.message.results.length > 0) {
+      this.setState({
+        selectedElementID: id
+      })
+      this.graphRef.current.setSelectedElementID(id);
+    }
   }
 
   //at least 1 node must have an id
@@ -145,18 +155,15 @@ class AdvancedQuery extends Component {
     if (!_.isEmpty(this.state.response)) {
       this.setState({
         tableEntries: this.calculateTableGivenEdge(this.state.response, edge.id()),
-        selectedElementID: edge.id(),
         mode: "edge"
-      });
-      this.graphRef.current.setSelectedElementID(edge.id());
+      }, () => this.setElementID(edge.id()));
+      
     } else {
       this.queryGraph(() => {
         this.setState({
           tableEntries: this.calculateTableGivenEdge(this.state.response, edge.id()),
-          selectedElementID: edge.id(),
           mode: "edge"
-        });
-        this.graphRef.current.setSelectedElementID(edge.id());
+        }, () => this.setElementID(edge.id()));
       });
       
     }
@@ -167,18 +174,14 @@ class AdvancedQuery extends Component {
     if (!_.isEmpty(this.state.response)) {
       this.setState({
         tableEntries: this.calculateTableGivenNode(this.state.response, node.id()),
-        selectedElementID: node.id(),
         mode: "node"
-      });
-      this.graphRef.current.setSelectedElementID(node.id());
+      }, () => this.setElementID(node.id()));
     } else {
       this.queryGraph(() => {
         this.setState({
           tableEntries: this.calculateTableGivenNode(this.state.response, node.id()),
-          selectedElementID: node.id(),
           mode: "node"
-        });
-        this.graphRef.current.setSelectedElementID(node.id());
+        }, () => this.setElementID(node.id()));
       }); 
     }
   }
@@ -192,10 +195,9 @@ class AdvancedQuery extends Component {
     this.queryGraph(() => {
       this.setState({
         tableEntries: this.calculateTableGivenEdge(this.state.response, edgeID),
-        selectedElementID: edgeID, 
         mode: "edge"
       });
-      this.graphRef.current.setSelectedElementID(edgeID);
+      this.setElementID(edgeID);
     })
   }
 
