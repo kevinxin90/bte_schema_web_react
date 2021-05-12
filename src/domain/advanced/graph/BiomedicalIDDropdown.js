@@ -11,6 +11,7 @@ export default class BiomedicalIDDropdown extends Component {
     };
   }
 
+  //handle user manually adding an item
   handleAddItem(e, { value }) {
     this.props.handleIDChange(e, {
       options: [{text: value, value: value}, ...this.props.nodeIDOptions],
@@ -18,6 +19,7 @@ export default class BiomedicalIDDropdown extends Component {
     });
   }
 
+  //refresh the options when the search query changes
   handleSearchChange(e, { searchQuery }) {
     autocomplete(searchQuery).then(response => {
       console.log("Autocomplete response", response);
@@ -29,6 +31,7 @@ export default class BiomedicalIDDropdown extends Component {
     });
   }
 
+  //handle selection
   handleChange(e, data) {
     this.props.handleIDChange(e, data);
   }

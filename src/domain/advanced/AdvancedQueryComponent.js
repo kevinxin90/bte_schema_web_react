@@ -33,6 +33,8 @@ class AdvancedQuery extends Component {
         selectedElementID: id
       })
       this.graphRef.current.setSelectedElementID(id);
+    } else {
+      console.log("No results.");
     }
   }
 

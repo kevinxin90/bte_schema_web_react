@@ -148,12 +148,22 @@ export default class GraphQuery extends Component {
 
   //node popup handling
   handleIDChange = (e, data) => {
+    //calculate which items from all items are selected
+    let selectedOptions = data.options.filter((option) => (data.value.includes(option.value)));
+    let selectedCategories = [...selectedOptions.map(option => option.title), ...this.state.nodeCategories]; //list of unique cateogries of selected objects + previous selected categories
+    selectedCategories = [...new Set(selectedCategories)];
+
+    //update data in cytoscape graph
     this.setData(this.state.tippyElement, 'ids', data.value);
-    this.setData(this.state.tippyElement, 'options', data.options);
-    this.setNodeLabel(this.state.tippyElement, data.value, this.state.nodeCategories);
+    this.setData(this.state.tippyElement, 'options', selectedOptions);
+    this.setData(this.state.tippyElement, 'categories', selectedCategories);
+    this.setNodeLabel(this.state.tippyElement, data.value, selectedCategories);
+
+    //update state and update popup with updated info
     this.setState({
       nodeIDs: data.value,
-      nodeIDOptions: data.options.filter((option) => (data.value.includes(option.value))) //only include options that are selected
+      nodeIDOptions: selectedOptions, //only include options that are selected
+      nodeCategories: selectedCategories
     }, () => {
       let popupContent = this.getNodePopupContent();
       let content = document.createElement('div');
