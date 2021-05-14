@@ -25,8 +25,12 @@ export default class BiomedicalIDDropdown extends Component {
       console.log("Autocomplete response", response);
       let new_options = [];
       for (let record of Object.keys(response).map((key) => response[key]).flat().sort((a, b) => (b._score - a._score))) {
-        new_options.push(recordToDropdownOption(record));
+        let new_option = recordToDropdownOption(record);
+        if (new_option) { //avoid pushing undefined
+          new_options.push(new_option);
+        }
       }
+      console.log("New Options", new_options);
       this.setState({autocompleteOptions: new_options});
     });
   }

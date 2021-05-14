@@ -61,18 +61,24 @@ const getFilteredResults = (results, filter) => {
  * @returns {Object} dropdown option object
  */
 const recordToDropdownOption = (record) => {
-    return {
-        key: record.primary.value,
-        text: record.name,
-        image: {spaced: 'right', src: `/assets/images/icons/${record.type}.png`},
-        content: <span>
-            <b>{record.name}</b> <br /><br />
-            <small>{record.display}</small>
-          </span>,
-        data: record,
-        title: record.type,
-        value: record.primary.value
-    };
+    if (record.primary) { //avoid some problem entries
+        return {
+            key: record.primary.value,
+            text: record.name,
+            image: {spaced: 'right', src: `/assets/images/icons/${record.type}.png`},
+            content: <div style={{marginTop: '-21px'}}>
+                <div style={{paddingLeft: '39px', display: 'flex', alignItems: 'center', minHeight: '28px', marginBottom: '5px'}}>
+                    <div>
+                        <b>{record.name}</b> 
+                    </div>
+                </div>
+                <small>{record.display}</small>
+            </div>,
+            data: record,
+            title: record.type,
+            value: record.primary.value
+        };
+    }   
 }
 
 const recordsToTreeGraph = (records) => {
