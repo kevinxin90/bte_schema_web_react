@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Button, Container } from 'semantic-ui-react';
+import { Button, Header, Container, Modal } from 'semantic-ui-react';
 import { Navigation } from '../../components/Breadcrumb';
 import ResultsTable from './table/ResultsTableComponent';
 import GraphQuery from './graph/GraphQueryComponent';
@@ -15,6 +15,8 @@ class AdvancedQuery extends Component {
       selectedElementID: "",
       mode: "",
       loading: false,
+      modalOpen: false,
+      TRAPIQuery: {},
       cy: {},
     };
 
@@ -25,6 +27,23 @@ class AdvancedQuery extends Component {
     this.nodeQuery = this.nodeQuery.bind(this);
     this.defaultQuery = this.defaultQuery.bind(this);
     this.setElementID = this.setElementID.bind(this);
+    this.handleModalClose = this.handleModalClose.bind(this);
+    this.handleModalOpen = this.handleModalOpen.bind(this);
+    this.calculateCurrentTRAPIQuery = this.calculateCurrentTRAPIQuery.bind(this);
+  } 
+
+  calculateCurrentTRAPIQuery() {
+    let jsonGraph = this.graphRef.current.export();
+    let query = this.convertJSONtoTRAPI(jsonGraph);
+    this.setState({TRAPIQuery: JSON.stringify(query, null, 2)});
+  }
+
+  handleModalOpen() {
+    this.setState({modalOpen: true});
+  }
+
+  handleModalClose() {
+    this.setState({modalOpen: false});
   }
 
   setElementID(id) {
@@ -211,8 +230,6 @@ class AdvancedQuery extends Component {
         this.setState({loading: true, cy: this.graphRef.current.getCy()});
         let query = this.convertJSONtoTRAPI(jsonGraph);
 
-        console.log(query);
-
         axios.post('https://api.bte.ncats.io/v1/query', query).then((response) => {
           this.setState({loading: false, response: response.data}, () => {
             callback();
@@ -240,6 +257,20 @@ class AdvancedQuery extends Component {
         <Navigation name="Advanced" />
         <GraphQuery ref={this.graphRef} edgeQuery={this.edgeQuery} nodeQuery={this.nodeQuery} updateCy={this.updateCy}/>
         <Button onClick={this.defaultQuery} loading={this.state.loading}>Query</Button>
+        <Modal
+          closeIcon
+          open={this.state.modalOpen}
+          trigger={<Button onClick={this.calculateCurrentTRAPIQuery}>View TRAPI Query</Button>}
+          onClose={this.handleModalClose}
+          onOpen={this.handleModalOpen}
+        >
+          <Header>Current TRAPI Query</Header>
+          <Modal.Content>
+            <p style={{"whiteSpace": "pre-wrap"}}>
+              {this.state.TRAPIQuery}
+            </p>
+          </Modal.Content>
+        </Modal>
         <ResultsTable 
           results={this.state.tableEntries} 
           selectedElementID={this.state.selectedElementID} 

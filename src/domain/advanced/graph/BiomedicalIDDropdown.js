@@ -22,7 +22,6 @@ export default class BiomedicalIDDropdown extends Component {
   //refresh the options when the search query changes
   handleSearchChange(e, { searchQuery }) {
     autocomplete(searchQuery).then(response => {
-      console.log("Autocomplete response", response);
       let new_options = [];
       for (let record of Object.keys(response).map((key) => response[key]).flat().sort((a, b) => (b._score - a._score))) {
         let new_option = recordToDropdownOption(record);
@@ -30,7 +29,6 @@ export default class BiomedicalIDDropdown extends Component {
           new_options.push(new_option);
         }
       }
-      console.log("New Options", new_options);
       this.setState({autocompleteOptions: new_options});
     });
   }
