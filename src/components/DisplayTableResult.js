@@ -92,11 +92,12 @@ export default function BTETable(props) {
                                             }
                                             key={`popup-${_.uniqueId()}`}
                                             hoverable
-                                            popperModifiers={{
-                                                preventOverflow: {
+                                            popperModifiers={[{
+                                                name: 'preventOverflow',
+                                                options: {
                                                     boundariesElement: "viewport"
                                                 }
-                                            }}
+                                            }]}
                                         >
                                             <Popup.Header>Equivalent IDs</Popup.Header>
                                             <Popup.Content>

@@ -4,12 +4,10 @@ import { Grid, Icon, Button, Popup } from 'semantic-ui-react';
 import {colorSchema, semanticTypeShorthand} from '../shared/semanticTypes';
 import { getPublicationLink } from '../shared/utils';
 
-import cytoscape from 'cytoscape';
-import popper from 'cytoscape-popper';
+import cytoscape from '../shared/cytoscapeInit';
 import Tippy from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
-cytoscape.use(popper);
-
+import 'tippy.js/themes/light-border.css';
 
 export default class CytoscapeGraph extends PureComponent {
   constructor(props){
@@ -242,16 +240,16 @@ export default class CytoscapeGraph extends PureComponent {
     cy.on('click', 'node', function(event) {
       let node = event.target;
 
+      let ref = node.popperRef();
       let dummy = document.createElement('div');
 
-      let tip = new Tippy(dummy, {
+      let tip = Tippy(dummy, {
+        theme: 'light-border',
         trigger: 'manual',
-        lazy: false,
         interactive: true,
         appendTo: document.body,
-        onCreate(instance) { 
-          instance.popperInstance.reference = node.popperRef(); 
-        },
+        getReferenceClientRect: ref.getBoundingClientRect,
+        arrow: true,
         content() {
           let content = document.createElement('div');
           content.innerHTML = `
@@ -278,16 +276,16 @@ export default class CytoscapeGraph extends PureComponent {
     cy.on('click', 'edge', function(event) {
       let edge = event.target;
 
+      let ref = edge.popperRef();
       let dummy = document.createElement('div');
 
-      let tip = new Tippy(dummy, {
+      let tip = Tippy(dummy, {
+        theme: 'light-border',
         trigger: 'manual',
-        lazy: false,
         interactive: true,
         appendTo: document.body,
-        onCreate(instance) { 
-          instance.popperInstance.reference = edge.popperRef();
-        },
+        getReferenceClientRect: ref.getBoundingClientRect,
+        arrow: true,
         content() {
           let content = document.createElement('div');
           content.innerHTML = `
