@@ -78,9 +78,14 @@ class AdvancedQuery extends Component {
     let nodes = {};
     if (jsonGraph.elements.nodes) {
       jsonGraph.elements.nodes.forEach((node) => {
-        nodes[node.data.id] = {
-          "id": node.data.ids,
-          "category": _.map(node.data.categories, category => `biolink:${category}`)
+        nodes[node.data.id] = {};
+
+        //don't include ids or categories field if they are empty arrays
+        if (Array.isArray(node.data.ids) && node.data.ids.length > 0) {
+          nodes[node.data.id].ids = node.data.ids;
+        };
+        if (Array.isArray(node.data.categories) && node.data.categories.length > 0) {
+          nodes[node.data.id].categories = _.map(node.data.categories, category => `biolink:${category}`);
         }
       });
     }
@@ -91,7 +96,7 @@ class AdvancedQuery extends Component {
         let pred = _.map(edge.data.predicates, predicate => `biolink:${predicate}`);
         edges[edge.data.id] = {
           "subject": edge.data.source,
-          "predicate": pred.length ? pred : undefined,
+          "predicates": pred.length ? pred : undefined,
           "object": edge.data.target
         };
       });
