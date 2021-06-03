@@ -18,6 +18,7 @@ class AdvancedQuery extends Component {
       modalOpen: false,
       TRAPIQuery: {},
       cy: {},
+      arsPK: ""
     };
 
     this.graphRef = React.createRef();
@@ -227,6 +228,16 @@ class AdvancedQuery extends Component {
     })
   }
 
+  makeARSQuery(query) {
+    axios.post('https://ars.transltr.io/ars/api/submit', query).then((response) => {
+      this.setState({arsPK: response.data.pk});
+      console.log("ARS response", response);
+    }).catch((error) => {
+      this.setState({loading: false});
+      console.log("Error: ", error);
+    });
+  }
+
   //get and query graph
   queryGraph(callback) { //pass optional callback function that executes after response is recieved
     let jsonGraph = this.graphRef.current.export();
@@ -234,6 +245,7 @@ class AdvancedQuery extends Component {
       if (!this.state.loading) {
         this.setState({loading: true, cy: this.graphRef.current.getCy()});
         let query = this.convertJSONtoTRAPI(jsonGraph);
+        this.makeARSQuery(query);
 
         axios.post('https://api.bte.ncats.io/v1/query', query).then((response) => {
           this.setState({loading: false, response: response.data}, () => {
@@ -283,6 +295,7 @@ class AdvancedQuery extends Component {
           cy={this.state.cy} 
           updateCy={this.updateCy}
           key={this.state.selectedElementID}
+          arsPK={this.state.arsPK}
         />
       </Container>
     )

@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import React, { Component } from 'react';
-import { Table, Pagination, Checkbox, Icon } from 'semantic-ui-react';
+import { Table, Pagination, Checkbox, Icon, Button } from 'semantic-ui-react';
 import ResultsTableCell from './ResultsTableCellComponent';
 import ResultsTableFilter from './ResultsTableFilterComponent';
 import ResultsTableSort from './ResultsTableSortComponent';
@@ -322,6 +322,7 @@ export default class ResultsTable extends Component {
       table = <div style={{overflowX: "auto", marginBottom: "1em", marginTop: "0.5em"}}>
         <ResultsTableFilter filters={this.state.filters} selectedFilters={this.state.selectedFilters} updateFilters={this.updateFilters} />
         <ResultsTableSort selectedFilters={this.state.selectedFilters} tableParameters={this.state.table} handleSort={this.handleSort} />
+        <Button as='a' href={`https://arax.ncats.io/?source=ARS&id=${this.props.arsPK}`} icon='external' labelPosition='left' content="Open ARS" target="_blank" />
         <Table sortable unstackable celled>
           {tableContents}
         </Table>
