@@ -4,6 +4,10 @@ import ErrorMessage from '../../components/DisplayErrorComponent';
 
 import InputSelect from '../../components/InputSelectComponent';
 
+import Disease from '../../assets/icons/Disease.png';
+import Gene from '../../assets/icons/Gene.png';
+import ChemicalSubstance from '../../assets/icons/ChemicalSubstance.png';
+
 export default class ExplainInput extends Component {
     constructor(props) {
         super(props);
@@ -48,7 +52,7 @@ export default class ExplainInput extends Component {
             key: "Imatinib",
             text: "Imatinib",
             value: "Imatinib",
-            image: {spaced: 'right', src: `/assets/images/icons/ChemicalSubstance.png`},
+            image: {spaced: 'right', src: ChemicalSubstance},
             data: { "CHEMBL.COMPOUND": "CHEMBL941", "DRUGBANK": "DB00619", "name": "Imatinib", "PUBCHEM": 5291, "UMLS": "C0935989", "MESH": "D000068877", "CHEBI": "CHEBI:45783", "smiles": "Cc1ccc(NC(=O)c2ccc(CN3CCN(C)CC3)cc2)cc1Nc1nccc(-c2cccnc2)n1", "display": "chembl(CHEMBL941) drugbank(DB00619) name(Imatinib) pubchem(5291) umls(C0935989) mesh(D000068877) chebi(CHEBI:45783) smiles(Cc1ccc(NC(=O)c2ccc(CN3CCN(C)CC3)cc2)cc1Nc1nccc(-c2cccnc2)n1) ", "type": "ChemicalSubstance", "primary": { "identifier": "CHEMBL.COMPOUND", "cls": "ChemicalSubstance", "value": "CHEMBL941" } }
         };
         
@@ -56,7 +60,7 @@ export default class ExplainInput extends Component {
             key: "chronic myelogenous leukemia",
             text: "chronic myelogenous leukemia",
             value: "chronic myelogenous leukemia",
-            image: {spaced: 'right', src: `/assets/images/icons/Disease.png`},
+            image: {spaced: 'right', src: Disease},
             data: { "MONDO": "MONDO:0011996", "DOID": "DOID:8552", "UMLS": "C1292772", "MESH": "D015464", "name": "chronic myelogenous leukemia", "display": "mondo(MONDO:0011996) doid(DOID:8552) umls(C1292772) mesh(D015464) name(chronic myelogenous leukemia) ", "type": "Disease", "primary": { "identifier": "MONDO", "cls": "Disease", "value": "MONDO:0011996" } }
         };
 
@@ -80,7 +84,7 @@ export default class ExplainInput extends Component {
             key: "C-X-C motif chemokine receptor 4",
             text: "C-X-C motif chemokine receptor 4",
             value: "C-X-C motif chemokine receptor 4",
-            image: {spaced: 'right', src: `/assets/images/icons/Gene.png`},
+            image: {spaced: 'right', src: Gene},
             data: { "NCBIGene": "7852", "name": "C-X-C motif chemokine receptor 4", "SYMBOL": "CXCR4", "UMLS": "C1332823", "UNIPROTKB": "P61073", "HGNC": "2561", "ENSEMBL": "ENSG00000121966", "display": "NCBIGene(7852) ENSEMBL(ENSG00000121966) HGNC(2561) UMLS(C1332823) UNIPROTKB(P61073) SYMBOL(CXCR4)", "type": "Gene", "primary": { "identifier": "NCBIGene", "cls": "Gene", "value": "7852" } }
         };
         
@@ -88,7 +92,7 @@ export default class ExplainInput extends Component {
             key: "C-X-C motif chemokine receptor 2",
             text: "C-X-C motif chemokine receptor 2",
             value: "C-X-C motif chemokine receptor 2",
-            image: {spaced: 'right', src: `/assets/images/icons/Gene.png`},
+            image: {spaced: 'right', src: Gene},
             data: { "NCBIGene": "3579", "name": "C-X-C motif chemokine receptor 2", "SYMBOL": "CXCR2", "UMLS": "C1334126", "UNIPROTKB": "P25025", "HGNC": "6027", "ENSEMBL": "ENSG00000180871", "display": "NCBIGene(3579) ENSEMBL(ENSG00000180871) HGNC(6027) UMLS(C1334126) UNIPROTKB(P25025) SYMBOL(CXCR2)", "type": "Gene", "primary": { "identifier": "NCBIGene", "cls": "Gene", "value": "3579" } }
         };
 

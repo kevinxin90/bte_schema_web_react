@@ -65,7 +65,7 @@ const recordToDropdownOption = (record) => {
         return {
             key: record.primary.value,
             text: record.name,
-            image: {spaced: 'right', src: `/assets/images/icons/${record.type}.png`},
+            image: {spaced: 'right', src: `../assets/images/icons/${record.type}.png`},
             content: <div style={{marginTop: '-21px'}}>
                 <div style={{paddingLeft: '39px', display: 'flex', alignItems: 'center', minHeight: '28px', marginBottom: '5px'}}>
                     <div>
