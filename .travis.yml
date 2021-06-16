@@ -11,6 +11,6 @@ addons:
     - libgconf-2-4
 
 script:
-  - npm run instrumented &
-  - npm run cypress:run -- --record
+  - npm run instrumented & wait-on http://localhost:8855
+  - npm run cypress:run
   - kill $(jobs -p) || true
