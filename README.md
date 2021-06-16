@@ -117,6 +117,9 @@ A docker file is included in the base directory and can be used to build the cus
 
 ```bash
 docker build -t bte_web .
+
+# or add --squash if docker engine supports
+docker build -t bte_web . --squash
 ```
 
 Container can be built and started using docker-compose
@@ -126,6 +129,18 @@ docker-compose up
 ```
 
 Public Docker image located at [link](https://hub.docker.com/repository/docker/biothings/bte_web)
+
+When it's ready, tag local image and push to the docker hub:
+```bash
+docker tag 44a82f18983e biothings/bte_web:latest
+docker push biothings/bte_web:latest
+```
+
+To use the latest image from docker hub (e.g. deploy it at the production server):
+```bash
+docker pull biothings/bte_web:latest
+docker run --rm --name bte_web -p 8853:8853 -d biothings/bte_web:latest
+```
 
 ## Usage
 
