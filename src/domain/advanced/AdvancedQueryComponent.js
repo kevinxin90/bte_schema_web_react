@@ -1,83 +1,70 @@
-import React, { Component } from 'react';
-import { Button, Header, Container, Modal } from 'semantic-ui-react';
+import React, { Component, useState } from 'react';
+import { Button, Header, Container, Modal, Message } from 'semantic-ui-react';
 import { Navigation } from '../../components/Breadcrumb';
 import ResultsTable from './table/ResultsTableComponent';
-import GraphQuery from './graph/GraphQueryComponent';
+import AdvancedQueryGraph from './graph/AdvancedQueryGraphComponent';
 import axios from 'axios';
 import _ from 'lodash';
+
+const TRAPIQueryButton = ({TRAPIQuery}) => {
+  const [modalOpen, setModalOpen] = useState(false);
+
+  return <Modal
+    closeIcon
+    open={modalOpen}
+    trigger={<Button>View TRAPI Query</Button>}
+    onClose={() => setModalOpen(false)}
+    onOpen={() => setModalOpen(true)}
+  >
+    <Header>Current TRAPI Query</Header>
+    <Modal.Content>
+      <p style={{"whiteSpace": "pre-wrap"}}>
+        {JSON.stringify(TRAPIQuery(), null, 2)}
+      </p>
+    </Modal.Content>
+  </Modal>
+}
 
 class AdvancedQuery extends Component {
   constructor(props) {
     super(props);
     this.state = {
       response: {},
-      tableEntries: [],
       selectedElementID: "",
       mode: "",
       loading: false,
-      modalOpen: false,
-      TRAPIQuery: {},
       cy: {},
-      arsPK: ""
+      arsPK: "",
+      messageVisible: true,
     };
+
+    this.setCy = this.setCy.bind(this);
+    this.cyJSON = this.cyJSON.bind(this);
+    this.TRAPIQuery = this.TRAPIQuery.bind(this);
 
     this.graphRef = React.createRef();
 
-    this.updateCy = this.updateCy.bind(this);
     this.edgeQuery = this.edgeQuery.bind(this);
     this.nodeQuery = this.nodeQuery.bind(this);
     this.defaultQuery = this.defaultQuery.bind(this);
     this.setElementID = this.setElementID.bind(this);
-    this.handleModalClose = this.handleModalClose.bind(this);
-    this.handleModalOpen = this.handleModalOpen.bind(this);
-    this.calculateCurrentTRAPIQuery = this.calculateCurrentTRAPIQuery.bind(this);
+    this.closeMessage = this.closeMessage.bind(this);
   } 
 
-  calculateCurrentTRAPIQuery() {
-    let jsonGraph = this.graphRef.current.export();
-    let query = this.convertJSONtoTRAPI(jsonGraph);
-    this.setState({TRAPIQuery: JSON.stringify(query, null, 2)});
+  closeMessage() {
+    this.setState({messageVisible: false});
   }
 
-  handleModalOpen() {
-    this.setState({modalOpen: true});
+  //cy graph in json format
+  cyJSON() {
+    return this.state.cy.json && this.state.cy.json();
   }
 
-  handleModalClose() {
-    this.setState({modalOpen: false});
-  }
-
-  setElementID(id) {
-    if (this.state.response.message && this.state.response.message.results.length > 0) {
-      this.setState({
-        selectedElementID: id
-      })
-      this.graphRef.current.setSelectedElementID(id);
-    } else {
-      console.log("No results.");
-    }
-  }
-
-  //at least 1 node must have an id
-  //has at least 1 edge
-  isValidQuery(jsonGraph) {
-    if (!(jsonGraph.elements.edges && jsonGraph.elements.edges.length >= 1)) {
-      alert("Must have at least 1 edge.");
-      return false;
-    } 
-    for (let node of jsonGraph.elements.nodes) {
-      if (node.data.ids.length > 0) {
-        return true;
-      }
-    }
-    alert("Must have at least 1 node with an id.");
-    return false;
-  }
-
-  //convert cytoscape json export to TRAPI query syntax
-  convertJSONtoTRAPI(jsonGraph) {
+  //get trapi query for cy graph
+  TRAPIQuery() {
+    let jsonGraph = this.cyJSON();
     let nodes = {};
-    if (jsonGraph.elements.nodes) {
+    if (jsonGraph && jsonGraph.elements.nodes) {
       jsonGraph.elements.nodes.forEach((node) => {
         nodes[node.data.id] = {};
 
@@ -92,7 +79,7 @@ class AdvancedQuery extends Component {
     }
 
     let edges = {};
-    if (jsonGraph.elements.edges) {
+    if (jsonGraph && jsonGraph.elements.edges) {
       jsonGraph.elements.edges.forEach((edge) => {
         let pred = _.map(edge.data.predicates, predicate => `biolink:${predicate}`);
         edges[edge.data.id] = {
@@ -113,144 +100,83 @@ class AdvancedQuery extends Component {
     }
   }
 
-  //flatten attributes to same level as other properties of an object
-  flattenElement(element) {
-    let flattened = {};
-    Object.keys(element).forEach((key) => {
-      if (key === 'attributes') {
-        element.attributes.forEach(attr => {
-          flattened[attr.name] = attr.value;
-        })
-      } else {
-        flattened[key] = element[key];
+  //a valid query must have at least 1 node with an id and 1 edge
+  isValidQuery(jsonGraph) {
+    if (!(jsonGraph.elements.edges && jsonGraph.elements.edges.length >= 1)) {
+      alert("Graph must have at least 1 edge.");
+      return false;
+    } 
+    for (let node of jsonGraph.elements.nodes) {
+      if (node.data.ids.length > 0) {
+        return true;
       }
+    }
+    alert("Graph must have at least 1 node with an id.");
+    return false;
+  }
+
+  setElementID(id) {
+    this.setState({
+      selectedElementID: id
     })
-
-    return flattened;
+    this.graphRef.current.setSelectedElementID(id);
   }
-
-  calculateTableGivenNode(response, selectedNodeID) {
-    let entries = [];
-    let ids = new Set();
-
-    //get all ids associated with node
-    response.message.results.forEach((result) => {
-      if (result.node_bindings.hasOwnProperty(selectedNodeID)) {
-        let nodeID = result.node_bindings[selectedNodeID][0].id;
-        ids.add(nodeID);
-      }
-    });
-
-    //get the data from the knowledge graph for those ids
-    entries = _.map(Array.from(ids), (id) => {
-      let entry = {node: this.flattenElement(response.message.knowledge_graph.nodes[id])};
-      entry.node.entity_id = id;
-      entry.node.qg_id = selectedNodeID;
-      return entry;
-    });
-    return entries;
-  }
-
-  calculateTableGivenEdge(response, selectedEdgeID) {
-    let entries = [];
-
-    //get all results that are related to the edge then flatten them to the desired shape
-    response.message.results.forEach((result) => {
-      if (result.edge_bindings.hasOwnProperty(selectedEdgeID)) {
-        let cy_edge = this.state.cy.getElementById(selectedEdgeID);
-
-        let edge = this.flattenElement(response.message.knowledge_graph.edges[result.edge_bindings[selectedEdgeID][0].id]); //get knowledge graph edge
-        
-        let source = this.flattenElement(response.message.knowledge_graph.nodes[edge.subject]);
-        source.entity_id = edge.subject;
-        source.qg_id = cy_edge.source().id(); 
-
-        let target = this.flattenElement(response.message.knowledge_graph.nodes[edge.object]);
-        target.entity_id = edge.object;
-        target.qg_id = cy_edge.target().id(); 
-
-        entries.push({source: source, edge: edge, target: target});
-      }
-    });
-
-    return entries;
-  }
-
 
   //handle edge results
   edgeQuery(edge) {
-    if (!_.isEmpty(this.state.response)) {
-      this.setState({
-        tableEntries: this.calculateTableGivenEdge(this.state.response, edge.id()),
-        mode: "edge"
-      }, () => this.setElementID(edge.id()));
-      
-    } else {
-      this.queryGraph(() => {
-        this.setState({
-          tableEntries: this.calculateTableGivenEdge(this.state.response, edge.id()),
-          mode: "edge"
-        }, () => this.setElementID(edge.id()));
-      });
-      
+    if (!_.isEmpty(this.state.response)) { //use existing results if they exist
+      this.setState({mode: "edge"});
+      this.setElementID(edge.id())
+    } else { //requery if they don't exist
+      this.queryGraph();
+      this.setState({mode: "edge"});
+      this.setElementID(edge.id()); 
     }
   }
 
   //handle node results
   nodeQuery(node) {
-    if (!_.isEmpty(this.state.response)) {
-      this.setState({
-        tableEntries: this.calculateTableGivenNode(this.state.response, node.id()),
-        mode: "node"
-      }, () => this.setElementID(node.id()));
-    } else {
-      this.queryGraph(() => {
-        this.setState({
-          tableEntries: this.calculateTableGivenNode(this.state.response, node.id()),
-          mode: "node"
-        }, () => this.setElementID(node.id()));
-      }); 
+    if (!_.isEmpty(this.state.response)) { //use existing results if they exist
+      this.setState({mode: "node"});
+      this.setElementID(node.id())
+    } else { //requery if they don't exist
+      this.queryGraph(); 
+      this.setState({mode: "node"});
+      this.setElementID(node.id());
     }
   }
 
   //open results for first edge by default
+  //also force requeries the whole graph
   defaultQuery() {
-    let edgeID;
-    if (this.graphRef.current.getCy().edges().length > 0) {
-      edgeID = this.graphRef.current.getCy().edges()[0].id();
+    let edge;
+    if (this.isValidQuery(this.cyJSON())) {
+      edge = this.state.cy.edges()[0];
+      this.queryGraph();
+      this.edgeQuery(edge);
     }
-    this.queryGraph(() => {
-      this.setState({
-        tableEntries: this.calculateTableGivenEdge(this.state.response, edgeID),
-        mode: "edge"
-      });
-      this.setElementID(edgeID);
-    })
   }
 
   makeARSQuery(query) {
-    axios.post('https://ars.transltr.io/ars/api/submit', query).then((response) => {
+    axios.post('https://ars-dev.transltr.io/ars/api/submit', query).then((response) => {
       this.setState({arsPK: response.data.pk});
       console.log("ARS response", response);
     }).catch((error) => {
-      this.setState({loading: false});
       console.log("Error: ", error);
     });
   }
 
   //get and query graph
-  queryGraph(callback) { //pass optional callback function that executes after response is recieved
-    let jsonGraph = this.graphRef.current.export();
-    if (this.isValidQuery(jsonGraph)) {
+  queryGraph() {
+    console.log("Querying...");
+    if (this.isValidQuery(this.cyJSON())) {
       if (!this.state.loading) {
-        this.setState({loading: true, cy: this.graphRef.current.getCy()});
-        let query = this.convertJSONtoTRAPI(jsonGraph);
+        this.setState({loading: true});
+        let query = this.TRAPIQuery();
         this.makeARSQuery(query);
 
         axios.post('https://api.bte.ncats.io/v1/query', query).then((response) => {
-          this.setState({loading: false, response: response.data}, () => {
-            callback();
-          });
+          this.setState({loading: false, response: response.data});
           console.log("Response", response.data);
         }).catch((error) => {
           this.setState({loading: false});
@@ -262,40 +188,46 @@ class AdvancedQuery extends Component {
     }
   }
 
-  //update cytoscape object in state
-  //needed for checkbox sync with graph
-  updateCy() {
-    this.setState({cy: this.graphRef.current.getCy()});
+  //use to intialize cy and force update
+  setCy(cy) {
+    this.setState({cy: cy});
   }
 
   render() {
     return (
       <Container className="feature">
         <Navigation name="Advanced" />
-        <GraphQuery ref={this.graphRef} edgeQuery={this.edgeQuery} nodeQuery={this.nodeQuery} updateCy={this.updateCy}/>
+        
+        <AdvancedQueryGraph ref={this.graphRef} edgeQuery={this.edgeQuery} nodeQuery={this.nodeQuery} cy={this.state.cy} setCy={this.setCy}/>
+        
         <Button onClick={this.defaultQuery} loading={this.state.loading}>Query</Button>
-        <Modal
-          closeIcon
-          open={this.state.modalOpen}
-          trigger={<Button onClick={this.calculateCurrentTRAPIQuery}>View TRAPI Query</Button>}
-          onClose={this.handleModalClose}
-          onOpen={this.handleModalOpen}
-        >
-          <Header>Current TRAPI Query</Header>
-          <Modal.Content>
-            <p style={{"whiteSpace": "pre-wrap"}}>
-              {this.state.TRAPIQuery}
-            </p>
-          </Modal.Content>
-        </Modal>
+        
+        <TRAPIQueryButton TRAPIQuery={this.TRAPIQuery}/>
+
+        {
+          this.state.arsPK && 
+          <Button 
+            as='a' href={`https://arax.ncats.io/?source=ARS&id=${this.state.arsPK}`} 
+            icon='external' labelPosition='left' content="Open ARS" target="_blank" 
+          />
+        }
+
+        {
+          this.state.arsPK && this.state.messageVisible && 
+          <Message warning floating onDismiss={this.closeMessage}
+            content="ARS results may take a minute to show up, try waiting 
+            a minute and refreshing the page if results don't show up immediately."
+          />
+        } 
+
+
         <ResultsTable 
-          results={this.state.tableEntries} 
-          selectedElementID={this.state.selectedElementID} 
-          mode={this.state.mode} 
-          cy={this.state.cy} 
-          updateCy={this.updateCy}
-          key={this.state.selectedElementID}
-          arsPK={this.state.arsPK}
+          response={this.state.response}
+          mode={this.state.mode}
+          selectedElementID={this.state.selectedElementID}
+          cy={this.state.cy}
+          setCy={this.setCy}
+          key={this.state.selectedElementID} //force creation of new element when selected element changes
         />
       </Container>
     )

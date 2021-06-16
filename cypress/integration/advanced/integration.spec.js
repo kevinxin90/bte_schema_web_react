@@ -6,7 +6,7 @@
 // https://on.cypress.io/writing-first-test
 describe('Test Advanced Query Page', () => {
   it('Visits the advanced page', () => {
-    cy.visit('/advanced');
+    cy.visit('/explorer/advanced');
   })
 
   // it('Reset things to make screenshots work', () => {
@@ -27,7 +27,6 @@ describe('Test Advanced Query Page', () => {
   it('Can add edges', () => {
     cy.get('.button').contains('Add Edge').click();
     cy.get('#cy').then($el => $el[0].getBoundingClientRect()).then((rect) => {
-      console.log(rect);
       cy.get('#cy').trigger('mousedown', { which: 1, clientX: rect.x + 100, clientY: rect.y + 100 })
         .trigger('mousemove', { which: 1, clientX: rect.x + 300, clientY: rect.y + 100 })
         .trigger('mouseup');
@@ -37,7 +36,6 @@ describe('Test Advanced Query Page', () => {
       cy.get('#cy').trigger('mousedown', { which: 1, clientX: rect.x + 100, clientY: rect.y + 100 })
         .trigger('mousemove', { which: 1, clientX: rect.x + 300, clientY: rect.y + 300 })
         .trigger('mouseup');
-      
     });
     
     // cy.screenshot('add-edges');
@@ -80,7 +78,7 @@ describe('Test Advanced Query Page', () => {
 
   it('Can successfully make a query', () => {
     cy.get('.button:visible').contains('Query').click();
-    cy.get('table:visible').should('exist', { timeout: 15000});
+    cy.get('table:visible', { timeout: 15000}).should('exist');
   })
 
   it('Has a popup when an entry is clicked', () => {

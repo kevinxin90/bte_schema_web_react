@@ -9,14 +9,15 @@ export default class BiomedicalIDDropdown extends Component {
     this.state = {
       autocompleteOptions: [],
     };
+
+    this.handleAddItem = this.handleAddItem.bind(this);
+    this.handleSearchChange = this.handleSearchChange.bind(this);
+    this.handleChange = this.handleChange.bind(this);
   }
 
-  //handle user manually adding an item
+  //update options only (select handled by handleChange)
   handleAddItem(e, { value }) {
-    this.props.handleIDChange(e, {
-      options: [{text: value, value: value}, ...this.props.nodeIDOptions],
-      value: [value, ...this.props.nodeIDs]
-    });
+    this.props.handleAddItem([{text: value, value: value}, ...this.props.node.data('options')], this.props.node);
   }
 
   //refresh the options when the search query changes
@@ -35,7 +36,7 @@ export default class BiomedicalIDDropdown extends Component {
 
   //handle selection
   handleChange(e, data) {
-    this.props.handleIDChange(e, data);
+    this.props.handleIDChange(data, this.props.node);
   }
 
   render () {
@@ -46,11 +47,11 @@ export default class BiomedicalIDDropdown extends Component {
         search
         selection
         allowAdditions
-        onSearchChange={this.handleSearchChange.bind(this)}
-        onChange={this.handleChange.bind(this)}
-        onAddItem={this.handleAddItem.bind(this)}
-        options={[...this.props.nodeIDOptions, ...this.state.autocompleteOptions]}
-        value={this.props.nodeIDs}
+        onSearchChange={this.handleSearchChange}
+        onChange={this.handleChange}
+        onAddItem={this.handleAddItem}
+        options={[...this.props.node.data('options'), ...this.state.autocompleteOptions]}
+        value={this.props.node.data('ids')}
       />
     );
   }
