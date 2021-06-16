@@ -18,10 +18,12 @@ const { renameSync } = require('fs');
  */
 // eslint-disable-next-line no-unused-vars
 module.exports = (on, config) => {
+  require('@cypress/code-coverage/task')(on, config);
   //overwrite existing screenshot instead of creataing a new one every time
   on('after:screenshot', ({ path }) => {
     renameSync(path, path.replace(/ \(\d*\)/i, ''));
   });
+
 
   return config;
 };

@@ -66,7 +66,7 @@ export default class ResultsTable extends Component {
         primary: {
           value: data.entity_id
         },
-        type: data.category.split(':')[1] //get type without the biolink:
+        type: data.categories[0].split(':')[1] //get type without the biolink:
       }));
     } else {
       node.data('ids').splice(idx, 1);

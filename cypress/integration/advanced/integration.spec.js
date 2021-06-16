@@ -55,26 +55,43 @@ describe('Test Advanced Query Page', () => {
     // cy.screenshot('remove-edges');
   })
 
-  it('Can specify and remove an input', () => {
-    cy.get('.button').contains('Edit').click();
-    cy.get('#cy').click(100, 100);
-    cy.get('.tippy-content:visible').find('.multiple').first().click().type('ebola');
-    cy.get('.tippy-content:visible').find('.addition').click();
-    cy.get('.tippy-content:visible').find('.delete').click();
-  })
-
   it('Can enter a sample query', () => {
+    cy.get('.button').contains('Edit').click();
     cy.get('#cy').click();
     cy.wait(500);
     cy.get('#cy').click(100, 100);
-    cy.get('.tippy-content:visible').find('.multiple').first().click().type('ebola');
-    cy.get('.tippy-content:visible').find('.item').contains('Ebola hemorrhagic fever').click();
+    cy.get('.tippy-content:visible').find('.multiple').first().click().type('MONDO:0005737');
+    cy.get('.tippy-content:visible').find('.addition').click();
+    cy.get('.tippy-content:visible').find('.multiple').eq(1).click().type('disease');
+    cy.get('.tippy-content:visible').find('.item').first().click();
+
     cy.get('#cy').click();
     cy.wait(500);
     cy.get('#cy').click(300, 100);
     cy.get('.tippy-content:visible').find('.multiple').eq(1).click().type('gene');
     cy.get('.tippy-content:visible').find('.item').first().click();
   })
+  
+  // it('Can specify and remove an input', () => {
+  //   cy.get('.button').contains('Edit').click();
+  //   cy.get('#cy').click(100, 100);
+  //   cy.get('.tippy-content:visible').find('.multiple').first().click().type('ebola');
+  //   cy.get('.tippy-content:visible').find('.addition').click();
+  //   cy.get('.tippy-content:visible').find('.delete').click();
+  // })
+
+  // it('Can enter a sample query', () => {
+  //   cy.get('#cy').click();
+  //   cy.wait(500);
+  //   cy.get('#cy').click(100, 100);
+  //   cy.get('.tippy-content:visible').find('.multiple').first().click().type('ebola');
+  //   cy.get('.tippy-content:visible').find('.item').contains('Ebola hemorrhagic fever').click();
+  //   cy.get('#cy').click();
+  //   cy.wait(500);
+  //   cy.get('#cy').click(300, 100);
+  //   cy.get('.tippy-content:visible').find('.multiple').eq(1).click().type('gene');
+  //   cy.get('.tippy-content:visible').find('.item').first().click();
+  // })
 
   it('Can successfully make a query', () => {
     cy.get('.button:visible').contains('Query').click();
