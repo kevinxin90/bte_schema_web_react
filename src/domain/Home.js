@@ -9,7 +9,7 @@ const Home = () => (
   <Segment basic>
     <Grid columns={3} stackable divided textAlign='center'>
       <Grid.Column>
-        <Card centered href="/explorer/explain" color="red" className="homeCard">
+        <Card centered color="red" className="homeCard" as={Link} to='/explain'>
           <Image src={explain} />
           <Card.Content textAlign="center">
             <Card.Header>EXPLAIN</Card.Header>
@@ -18,12 +18,12 @@ const Home = () => (
             </Card.Description>
           </Card.Content>
           <Card.Content extra textAlign="center">
-            <Link to='/explain'><Button>Try it Out</Button></Link>
+            <Button>Try it Out</Button>
           </Card.Content>
         </Card>
       </Grid.Column>
       <Grid.Column>
-        <Card centered href="/explorer/predict" color="green" className="homeCard">
+        <Card centered color="green" className="homeCard" as={Link} to='/predict'>
           <Image src={predict} />
           <Card.Content textAlign="center">
             <Card.Header>PREDICT</Card.Header>
@@ -32,7 +32,7 @@ const Home = () => (
             </Card.Description>
           </Card.Content>
           <Card.Content extra textAlign="center">
-            <Link to='/predict'><Button>Try it Out</Button></Link>
+            <Button>Try it Out</Button>
           </Card.Content>
         </Card>
       </Grid.Column>

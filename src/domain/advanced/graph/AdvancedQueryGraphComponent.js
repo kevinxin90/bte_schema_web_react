@@ -15,7 +15,7 @@ import _ from 'lodash';
 
 import getMetaKG, { getCategories, getPredicates } from '../../../shared/metaKG';
 
-export default class GraphQuery extends Component {
+export default class AdvancedQueryGraph extends Component {
   constructor(props) {
     super(props);
     
@@ -23,33 +23,23 @@ export default class GraphQuery extends Component {
     getMetaKG();
 
     this.state = {
-      cy: {}, //cytoscape object
       eh: {}, //cytoscape edgehandles object
       selectedElementID: "", //element displayed on table
-      tippyElement: {}, // element that current tippy is bound to
       tip: {}, //store current tippy object
-      nodeIDs: [],
-      nodeIDOptions: [],
-      nodeCategories: [],
-      edgePredicates: [],
       mode: 1
     };
 
-    this.handleIDChange = this.handleIDChange.bind(this);
-    this.handleCategoryChange = this.handleCategoryChange.bind(this);
-    this.zoomFit = this.zoomFit.bind(this);
     this.setMode = this.setMode.bind(this);
-  }
-
-  //use to update cy from parent
-  setData(element, key, value) {
-    element.data(key, value);
-    this.props.updateCy();
+    this.zoomFit = this.zoomFit.bind(this);
+    this.handleIDChange = this.handleIDChange.bind(this);
+    this.handleAddItem = this.handleAddItem.bind(this);
+    this.handleCategoryChange = this.handleCategoryChange.bind(this);
+    this.handlePredicateChange = this.handlePredicateChange.bind(this);
   }
 
   setSelectedElementID(elementID) {
-    this.state.cy.getElementById(this.state.selectedElementID).removeClass('highlight'); //remove overlay from old selected element
-    this.state.cy.getElementById(elementID).addClass('highlight'); //add overlay to new selected element
+    this.props.cy.getElementById(this.state.selectedElementID).removeClass('highlight'); //remove overlay from old selected element
+    this.props.cy.getElementById(elementID).addClass('highlight'); //add overlay to new selected element
     this.setState({selectedElementID: elementID});
   }
 
@@ -74,13 +64,13 @@ export default class GraphQuery extends Component {
 
   zoomFit() {
     let [width, height] = this.getDimensions();
-    this.state.cy.fit();
-    this.state.cy.zoom({level: this.state.cy.zoom() * 0.99, position: {x: width/2, y: height/2}});
+    this.props.cy.fit();
+    this.props.cy.zoom({level: this.props.cy.zoom() * 0.99, position: {x: width/2, y: height/2}});
   }
 
   //create node based on mouse position
   createNode(e) {
-    this.state.cy.add([{
+    this.props.cy.add([{
       group: "nodes",
       data: {
         label: "Any",
@@ -97,7 +87,7 @@ export default class GraphQuery extends Component {
   }
 
   removeElement(e) {
-    this.state.cy.remove(e);
+    this.props.cy.remove(e);
   }
 
   //creates popup on element with tippyContent as the content
@@ -119,7 +109,7 @@ export default class GraphQuery extends Component {
         return content;
       },
       onUntrigger(instance) {
-        this.setState({tippyElement: {}, tip: {}, nodeIDs: [], nodeCategories: []});
+        this.setState({tip: {}});
         instance.destroy();
       }
     });
@@ -147,51 +137,52 @@ export default class GraphQuery extends Component {
   }
 
   //node popup handling
-  handleIDChange = (e, data) => {
+  handleIDChange(data, node) {
     //calculate which items from all items are selected
     let selectedOptions = data.options.filter((option) => (data.value.includes(option.value)));
-    let selectedCategories = [...selectedOptions.map(option => option.title), ...this.state.nodeCategories]; //list of unique cateogries of selected objects + previous selected categories
+    let selectedCategories = [...selectedOptions.map(option => option.title), ...node.data('categories')]; //list of unique cateogries of selected objects + previous selected categories
     selectedCategories = [...new Set(selectedCategories)];
 
     //update data in cytoscape graph
-    this.setData(this.state.tippyElement, 'ids', data.value);
-    this.setData(this.state.tippyElement, 'options', selectedOptions);
-    this.setData(this.state.tippyElement, 'categories', selectedCategories);
-    this.setNodeLabel(this.state.tippyElement, data.value, selectedCategories);
+    node.data('ids', data.value);
+    node.data('options', selectedOptions);
+    node.data('categories', selectedCategories);
 
-    //update state and update popup with updated info
-    this.setState({
-      nodeIDs: data.value,
-      nodeIDOptions: selectedOptions, //only include options that are selected
-      nodeCategories: selectedCategories
-    }, () => {
-      let popupContent = this.getNodePopupContent();
-      let content = document.createElement('div');
-      ReactDOM.render(popupContent, content);
-      this.state.tip.setContent(content);
-    });
+    this.setNodeLabel(node, data.value, selectedCategories);
+
+    //rerender popup
+    let popupContent = this.getNodePopupContent(node);
+    let content = document.createElement('div');
+    ReactDOM.render(popupContent, content);
+    this.state.tip.setContent(content);
+  }
+
+  handleAddItem(newOptions, node) {
+    node.data('options', newOptions);
+
+    //rerender popup
+    let popupContent = this.getNodePopupContent(node);
+    let content = document.createElement('div');
+    ReactDOM.render(popupContent, content);
+    this.state.tip.setContent(content);
   }
 
   //node popup handling
-  handleCategoryChange = (e, data) => {
-    this.state.tippyElement.data('categories', data.value);
-    this.setNodeLabel(this.state.tippyElement, this.state.nodeIDs, data.value);
+  handleCategoryChange (e, data, node) {
+    node.data('categories', data.value);
+    this.setNodeLabel(node, node.data('ids'), data.value);
 
-    this.setState({
-      nodeCategories: data.value,
-    }, () => {
-      let popupContent = this.getNodePopupContent();
-      let content = document.createElement('div');
-      ReactDOM.render(popupContent, content);
-      this.state.tip.setContent(content);
-    });
+    let popupContent = this.getNodePopupContent(node);
+    let content = document.createElement('div');
+    ReactDOM.render(popupContent, content);
+    this.state.tip.setContent(content);
   };
 
-  getNodePopupContent() {
+  getNodePopupContent(node) {
     let popupContent = <div style={{paddingTop: "4px", paddingBottom: "4px"}}>
       <h3>Node</h3>
       IDs:
-      <BiomedicalIDDropdown handleIDChange={this.handleIDChange} nodeIDOptions={this.state.nodeIDOptions} nodeIDs={this.state.nodeIDs} />
+      <BiomedicalIDDropdown handleIDChange={this.handleIDChange} node={node} handleAddItem={this.handleAddItem} />
       Categories:
       <Dropdown 
         placeholder='Categories'
@@ -200,11 +191,11 @@ export default class GraphQuery extends Component {
         multiple
         search
         selection
-        onChange={this.handleCategoryChange}
+        onChange={(e, data) => (this.handleCategoryChange(e, data, node))}
         options={_.map(getCategories(), (category) => ({text: category, value: category}))}
-        value={this.state.nodeCategories}
+        value={node.data('categories')}
       />
-      <Button onClick={() => { this.props.nodeQuery(this.state.tippyElement) }} style={{marginTop: "0.75em"}}>
+      <Button onClick={() => { this.props.nodeQuery(node) }} style={{marginTop: "0.75em"}}>
         View Results for Node
       </Button>
     </div>;
@@ -212,19 +203,11 @@ export default class GraphQuery extends Component {
   }
 
   showNodeOptions(node) {
-    this.setState({
-      nodeCategories: node.data('categories'), 
-      nodeIDs: node.data('ids'),
-      nodeIDOptions: node.data('options'),
-      tippyElement: node 
-    }, () => {
-      let popupContent = this.getNodePopupContent();
-    
-      let tip = this.createTippy(node, popupContent);
+    let popupContent = this.getNodePopupContent(node);
+  
+    let tip = this.createTippy(node, popupContent);
 
-      this.setState({tip: tip});
-    })
-    
+    this.setState({tip: tip});
   }
 
   //calculate and set edge label
@@ -233,22 +216,19 @@ export default class GraphQuery extends Component {
   }
 
   //edge popup handling
-  handlePredicateChange = (e, data) => {
-    this.state.tippyElement.data('predicates', data.value);
-    this.setEdgeLabel(this.state.tippyElement, data.value);
+  handlePredicateChange = (e, data, edge) => {
+    edge.data('predicates', data.value);
+    this.setEdgeLabel(edge, data.value);
 
-    this.setState({
-      edgePredicates: data.value,
-    }, () => {
-      let popupContent = this.getEdgePopupContent();
-      let content = document.createElement('div');
-      ReactDOM.render(popupContent, content);
-      this.state.tip.setContent(content);
-    });
+    let popupContent = this.getEdgePopupContent(edge);
+    let content = document.createElement('div');
+    ReactDOM.render(popupContent, content);
+    this.state.tip.setContent(content);
   };
 
-  getEdgePopupContent() {
-    let connectedNodes = this.state.tippyElement.connectedNodes();
+  getEdgePopupContent(edge) {
+    let connectedNodes = edge.connectedNodes();
+    let edgePredicates = edge.data('predicates') || [];
     let popupContent = <div>
       <h3>Edge</h3>
       Predicates:
@@ -257,13 +237,13 @@ export default class GraphQuery extends Component {
         multiple
         search
         selection
-        onChange={this.handlePredicateChange}
+        onChange={(e, data) => (this.handlePredicateChange(e, data, edge))}
         //make sure old chosen predicates are in the options for the new predicates
-        options={_.map(getPredicates(connectedNodes[0].data('categories'), connectedNodes[1].data('categories'), this.state.edgePredicates), 
+        options={_.map(getPredicates(connectedNodes[0].data('categories'), connectedNodes[1].data('categories'), edgePredicates), 
           (predicate, idx) => ({key: idx, text: predicate, value: predicate}))}
-        value={this.state.edgePredicates}
+        value={edgePredicates}
       />
-      <Button onClick={() => { this.props.edgeQuery(this.state.tippyElement) }} style={{marginTop: "0.75em"}}>
+      <Button onClick={() => { this.props.edgeQuery(edge) }} style={{marginTop: "0.75em"}}>
         View Results for Edge
       </Button>
     </div>;
@@ -271,26 +251,17 @@ export default class GraphQuery extends Component {
   }
 
   showEdgeOptions(edge) {
-    let edgePredicates = edge.data('predicates') || [];
-    this.setState({edgePredicates: edgePredicates, tippyElement: edge}, () => {
-      let popupContent = this.getEdgePopupContent();
+    let popupContent = this.getEdgePopupContent(edge);
 
-      let tip = this.createTippy(edge, popupContent);
+    let tip = this.createTippy(edge, popupContent);
 
-      this.setState({tip: tip});
-    })
-  }
-
-  export() {
-    return this.state.cy.json();
-  }
-
-  getCy() {
-    return this.state.cy;
+    this.setState({tip: tip});
   }
 
   componentDidMount() {
     const container = document.getElementById('cy');
+
+    //cytoscape config and init
     const cy = cytoscape({
       container: container,
       style: [
@@ -342,6 +313,7 @@ export default class GraphQuery extends Component {
       wheelSensitivity: 0.4,
     });
 
+    //handle left click
     cy.on('tap', (event) => {
       if (this.state.mode === MODE.addNode) {
         this.createNode(event);
@@ -361,9 +333,10 @@ export default class GraphQuery extends Component {
       }
     });
 
-    let eh = cy.edgehandles({hoverDelay: 50});
+    let eh = cy.edgehandles({hoverDelay: 0});
 
-    this.setState({cy: cy, eh: eh}); 
+    this.props.setCy(cy);
+    this.setState({eh: eh}); 
   } 
 
   render() {
