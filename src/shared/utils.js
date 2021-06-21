@@ -1,5 +1,6 @@
 import getMetaKG from './metaKG';
 import React from 'react';
+import _ from 'lodash';
 
 /** get link to page of results for list of publications
  * @param {Array.<string>} publications Publications in the format "type:number", also must all be the same format and either "PMID" or "PMC"
@@ -63,7 +64,7 @@ const getFilteredResults = (results, filter) => {
 const recordToDropdownOption = (record) => {
     if (record.primary) { //avoid some problem entries
         return {
-            key: record.primary.value,
+            key: `${record.primary.value}-${_.uniqueId()}`,
             text: record.name,
             image: {spaced: 'right', src: `/explorer/assets/images/icons/${record.type}.png`},
             content: <div style={{marginTop: '-21px'}}>

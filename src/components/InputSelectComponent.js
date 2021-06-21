@@ -20,7 +20,7 @@ export default class InputSelect extends Component {
           new_options.push({
             key: record.display + _.uniqueId(),
             text: record.name,
-            image: {spaced: 'right', src: `../assets/images/icons/${record.type}.png`},
+            image: {spaced: 'right', src: `/explorer/assets/images/icons/${record.type}.png`},
             content: <span>
                 <b>{record.name}</b> <br /><br />
                 <small>{record.display}</small>
