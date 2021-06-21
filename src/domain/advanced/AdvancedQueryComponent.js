@@ -84,9 +84,13 @@ class AdvancedQuery extends Component {
         let pred = _.map(edge.data.predicates, predicate => `biolink:${predicate}`);
         edges[edge.data.id] = {
           "subject": edge.data.source,
-          "predicates": pred.length ? pred : undefined,
           "object": edge.data.target
         };
+
+        //only include predicates field if it is defined
+        if (pred.length) {
+          edges[edge.data.id].prediates = pred;
+        }
       });
     }
 
@@ -124,37 +128,42 @@ class AdvancedQuery extends Component {
 
   //handle edge results
   edgeQuery(edge) {
-    if (!_.isEmpty(this.state.response)) { //use existing results if they exist
+    let resp_edge = _.get(this.state.response, ['message', 'query_graph', 'edges', edge.id()]);
+    let query_edge = _.get(this.TRAPIQuery(), ['message', 'query_graph', 'edges', edge.id()]);
+
+    if (_.isEqual(resp_edge, query_edge)) { //use existing results if the query graph for the edge is unchanged
       this.setState({mode: "edge"});
       this.setElementID(edge.id())
-    } else { //requery if they don't exist
-      this.queryGraph();
-      this.setState({mode: "edge"});
-      this.setElementID(edge.id()); 
+    } else { //otherwise requery the graph
+      this.queryGraph(() => {
+        this.setState({mode: "edge"});
+        this.setElementID(edge.id()); 
+      });
+      
     }
   }
 
   //handle node results
   nodeQuery(node) {
-    if (!_.isEmpty(this.state.response)) { //use existing results if they exist
-      this.setState({mode: "node"});
-      this.setElementID(node.id())
-    } else { //requery if they don't exist
-      this.queryGraph(); 
+    let resp_node = _.get(this.state.response, ['message', 'query_graph', 'nodes', node.id()]);
+    let query_node = _.get(this.TRAPIQuery(), ['message', 'query_graph', 'nodes', node.id()]);
+
+    if (_.isEqual(resp_node, query_node)) { //use existing results if they exist
       this.setState({mode: "node"});
       this.setElementID(node.id());
+    } else { //requery if they don't exist
+      this.queryGraph(() => {
+        this.setState({mode: "node"});
+        this.setElementID(node.id());
+      }); 
     }
   }
 
-  //open results for first edge by default
-  //also force requeries the whole graph
+  //by default show results for first edge
   defaultQuery() {
-    let edge;
-    if (this.isValidQuery(this.cyJSON())) {
-      edge = this.state.cy.edges()[0];
-      this.queryGraph();
-      this.edgeQuery(edge);
-    }
+    this.queryGraph();
+    let edge = this.state.cy.edges()[0];
+    this.edgeQuery(edge);
   }
 
   makeARSQuery(query) {
@@ -167,7 +176,7 @@ class AdvancedQuery extends Component {
   }
 
   //get and query graph
-  queryGraph() {
+  queryGraph(callback) {
     console.log("Querying...");
     if (this.isValidQuery(this.cyJSON())) {
       if (!this.state.loading) {
@@ -177,6 +186,9 @@ class AdvancedQuery extends Component {
 
         axios.post('https://api.bte.ncats.io/v1/query', query).then((response) => {
           this.setState({loading: false, response: response.data});
+          if (callback !== undefined) {
+            callback();
+          }
           console.log("Response", response.data);
         }).catch((error) => {
           this.setState({loading: false});

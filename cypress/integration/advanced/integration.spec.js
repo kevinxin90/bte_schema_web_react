@@ -55,6 +55,16 @@ describe('Test Advanced Query Page', () => {
     // cy.screenshot('remove-edges');
   })
 
+  it('Can specify edge predicates', () => {
+    cy.get('.button').contains('Edit').click();
+    cy.get('#cy').click();
+    cy.wait(500);
+    cy.get('#cy').click(200, 100);
+    cy.get('.tippy-content:visible').find('.multiple').first().click().type('related');
+    cy.get('.tippy-content:visible').find('.item').first().click();
+    cy.get('.tippy-content:visible').find('.delete').click();
+  })
+
   it('Can enter a sample query', () => {
     cy.get('.button').contains('Edit').click();
     cy.get('#cy').click();
@@ -96,6 +106,13 @@ describe('Test Advanced Query Page', () => {
   it('Can successfully make a query', () => {
     cy.get('.button:visible').contains('Query').click();
     cy.get('table:visible', { timeout: 15000}).should('exist');
+  })
+
+  it('Shows ARS button and popup after query', () => {
+    cy.get('a').contains('ARS').should('exist');
+    cy.get('.warning').should('exist');
+    cy.get('.close').first().click();
+    cy.get('.warning').should('not.exist');
   })
 
   it('Has a popup when an entry is clicked', () => {
@@ -141,5 +158,14 @@ describe('Test Advanced Query Page', () => {
     cy.get('tbody > :nth-child(n) > :nth-child(3)').each(($el, index, $list) => {
       cy.wrap($el).contains('affected');
     })
+  })
+
+  it('Can switch to node table view', () => {
+    cy.get('#cy').click();
+    cy.wait(500);
+    cy.get('#cy').click(100, 100);
+
+    cy.get('button').contains('View Results').click();
+    cy.get('th').contains('Node').should('exist');
   })
 });
