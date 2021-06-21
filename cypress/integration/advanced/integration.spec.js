@@ -55,6 +55,16 @@ describe('Test Advanced Query Page', () => {
     // cy.screenshot('remove-edges');
   })
 
+  it('Can specify edge predicates', () => {
+    cy.get('.button').contains('Edit').click();
+    cy.get('#cy').click();
+    cy.wait(500);
+    cy.get('#cy').click(200, 100);
+    cy.get('.tippy-content:visible').find('.multiple').first().click().type('related');
+    cy.get('.tippy-content:visible').find('.item').first().click();
+    cy.get('.tippy-content:visible').find('.delete').click();
+  })
+
   it('Can enter a sample query', () => {
     cy.get('.button').contains('Edit').click();
     cy.get('#cy').click();
