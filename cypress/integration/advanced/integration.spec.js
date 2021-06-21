@@ -98,6 +98,13 @@ describe('Test Advanced Query Page', () => {
     cy.get('table:visible', { timeout: 15000}).should('exist');
   })
 
+  it('Shows ARS button and popup after query', () => {
+    cy.get('a').contains('ARS').should('exist');
+    cy.get('.warning').should('exist');
+    cy.get('.close').first().click();
+    cy.get('.warning').should('not.exist');
+  })
+
   it('Has a popup when an entry is clicked', () => {
     cy.get('tbody > :nth-child(1) > :nth-child(2)').click();
     cy.get('.popup:visible').contains('equivalent_identifiers').should('exist');
@@ -141,5 +148,14 @@ describe('Test Advanced Query Page', () => {
     cy.get('tbody > :nth-child(n) > :nth-child(3)').each(($el, index, $list) => {
       cy.wrap($el).contains('affected');
     })
+  })
+
+  it('Can switch to node table view', () => {
+    cy.get('#cy').click();
+    cy.wait(500);
+    cy.get('#cy').click(100, 100);
+
+    cy.get('button').contains('View Results').click();
+    cy.get('th').contains('Node').should('exist');
   })
 });
