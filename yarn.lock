@@ -2870,10 +2870,10 @@
     "debug" "^4.1.1"
     "lodash" "^4.17.19"
 
-"biomedical-id-autocomplete@^1.2.4":
-  "integrity" "sha512-/Z73VQhXSEgyELM439ED9IG+awwEvPIOQhwBbfYL/MF6mEQ/9ZxD9VdqYOAJoZnH5buV/5Shbsh5Z5UIJEP0qw=="
-  "resolved" "https://registry.npmjs.org/biomedical-id-autocomplete/-/biomedical-id-autocomplete-1.2.4.tgz"
-  "version" "1.2.4"
+"biomedical-id-autocomplete@^1.2.5":
+  "integrity" "sha512-A9GBh7Sfo23OBmj+YeukweemtiY+QwCZZchV8hG4VTK6yHIwfAMvXM0+gIo2IXvMyy23DYs1kl1RmDvg5d8o3g=="
+  "resolved" "https://registry.npmjs.org/biomedical-id-autocomplete/-/biomedical-id-autocomplete-1.2.5.tgz"
+  "version" "1.2.5"
   dependencies:
     "axios" "^0.21.1"
 
