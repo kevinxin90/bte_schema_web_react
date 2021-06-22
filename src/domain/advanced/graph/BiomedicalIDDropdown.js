@@ -10,6 +10,8 @@ export default class BiomedicalIDDropdown extends Component {
       autocompleteOptions: [],
     };
 
+    this.currentSearchQuery = '';
+
     this.handleAddItem = this.handleAddItem.bind(this);
     this.handleSearchChange = this.handleSearchChange.bind(this);
     this.handleChange = this.handleChange.bind(this);
@@ -22,15 +24,18 @@ export default class BiomedicalIDDropdown extends Component {
 
   //refresh the options when the search query changes
   handleSearchChange(e, { searchQuery }) {
+    this.currentSearchQuery = searchQuery;
     autocomplete(searchQuery).then(response => {
-      let new_options = [];
-      for (let record of Object.keys(response).map((key) => response[key]).flat().sort((a, b) => (b._score - a._score))) {
-        let new_option = recordToDropdownOption(record);
-        if (new_option) { //avoid pushing undefined
-          new_options.push(new_option);
+      if (this.currentSearchQuery === searchQuery) { //prevent old queries returning from updating the autocomplete to an unwanted value
+        let new_options = [];
+        for (let record of Object.keys(response).map((key) => response[key]).flat().sort((a, b) => (b._score - a._score))) {
+          let new_option = recordToDropdownOption(record);
+          if (new_option) { //avoid pushing undefined
+            new_options.push(new_option);
+          }
         }
+        this.setState({autocompleteOptions: new_options});
       }
-      this.setState({autocompleteOptions: new_options});
     });
   }
 
