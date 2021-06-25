@@ -131,7 +131,11 @@ class AdvancedQuery extends Component {
     let resp_edge = _.get(this.state.response, ['message', 'query_graph', 'edges', edge.id()]);
     let query_edge = _.get(this.TRAPIQuery(), ['message', 'query_graph', 'edges', edge.id()]);
 
-    if (_.isEqual(resp_edge, query_edge)) { //use existing results if the query graph for the edge is unchanged
+    let resp_source_node = _.get(this.state.response, ['message', 'query_graph', 'nodes', _.get(resp_edge, 'subject')]);
+    let query_source_node = _.get(this.TRAPIQuery(), ['message', 'query_graph', 'nodes', _.get(query_edge, 'subject')]);
+    console.log(resp_edge, query_edge, resp_source_node, query_source_node);
+
+    if (_.isEqual(resp_edge, query_edge) && _.isEqual(resp_source_node, query_source_node)) { //use existing results if the query graph for the edge is unchanged
       this.setState({mode: "edge"});
       this.setElementID(edge.id())
     } else { //otherwise requery the graph
@@ -160,10 +164,12 @@ class AdvancedQuery extends Component {
   }
 
   //by default show results for first edge
+  //if there is already a selected ed
   defaultQuery() {
-    this.queryGraph();
-    let edge = this.state.cy.edges()[0];
-    this.edgeQuery(edge);
+    this.queryGraph(() => {
+      let edge = this.state.cy.edges()[0];
+      this.edgeQuery(edge);
+    });
   }
 
   makeARSQuery(query) {
@@ -185,10 +191,11 @@ class AdvancedQuery extends Component {
         this.makeARSQuery(query);
 
         axios.post('https://api.bte.ncats.io/v1/query', query).then((response) => {
-          this.setState({loading: false, response: response.data});
-          if (callback !== undefined) {
-            callback();
-          }
+          this.setState({loading: false, response: response.data}, () => {
+            if (callback !== undefined) {
+              callback();
+            }
+          });
           console.log("Response", response.data);
         }).catch((error) => {
           this.setState({loading: false});
