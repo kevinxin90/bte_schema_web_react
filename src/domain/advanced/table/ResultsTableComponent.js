@@ -68,13 +68,13 @@ const ResultsTable = ({response, mode, selectedElementID, cy, ...props}) => {
   }
 
   if (!response || _.isEmpty(response)) {//handle no query
-    return <div style={{marginTop: "2rem"}}>
+    return <div>
       <h3>Query Results</h3>
       <div>Make a query to see query results.</div>
     </div>;
 
   } else if (response.message.results.length === 0) {//handle query gives no results
-    return <div style={{marginTop: "2rem"}}>
+    return <div>
       <h3>Query Results</h3>
       <div>No results.</div>
     </div>;
@@ -87,7 +87,7 @@ const ResultsTable = ({response, mode, selectedElementID, cy, ...props}) => {
       entries = calculateTableGivenNode(response, selectedElementID);
     } 
 
-    return <div style={{marginTop: "2rem"}}>
+    return <div>
       <h3>Query Results</h3>
       <ResultsTableDisplay 
         results={entries}
