@@ -70,7 +70,7 @@ const ResultsTable = ({response, mode, selectedElementID, cy, ...props}) => {
   if (!response || _.isEmpty(response)) {//handle no query
     return <div>
       <h3>Query Results</h3>
-      <div>Make a query to see query results.</div>
+      <div>Click 'Query BTE' to get query results.</div>
     </div>;
 
   } else if (response.message.results.length === 0) {//handle query gives no results

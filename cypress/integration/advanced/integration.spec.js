@@ -103,17 +103,11 @@ describe('Test Advanced Query Page', () => {
   //   cy.get('.tippy-content:visible').find('.item').first().click();
   // })
 
-  it('Can successfully make a query', () => {
-    cy.get('.button:visible').contains('Query').click();
+  it('Can successfully query BTE', () => {
+    cy.get('.button:visible').contains('Query BTE').click();
     cy.get('table:visible', { timeout: 15000}).should('exist');
   })
 
-  it('Shows ARS button and popup after query', () => {
-    cy.get('a').contains('ARS').should('exist');
-    cy.get('.warning').should('exist');
-    cy.get('.close').first().click();
-    cy.get('.warning').should('not.exist');
-  })
 
   it('Has a popup when an entry is clicked', () => {
     cy.get('tbody > :nth-child(1) > :nth-child(2)').click();
@@ -167,5 +161,11 @@ describe('Test Advanced Query Page', () => {
 
     cy.get('button').contains('View Results').click();
     cy.get('th').contains('Node').should('exist');
+  })
+
+  it('Can successfully query ARS', () => {
+    cy.get('.button:visible').contains('Query ARS').click();
+    cy.get('#ars-button').should('exist');
+    cy.get('.warning').should('exist');
   })
 });

@@ -1,5 +1,5 @@
 import React, { Component, useState } from 'react';
-import { Button, Header, Container, Modal, Message, Menu, Segment } from 'semantic-ui-react';
+import { Button, Header, Container, Modal, Message, Menu } from 'semantic-ui-react';
 import { Navigation } from '../../components/Breadcrumb';
 import ResultsTable from './table/ResultsTableComponent';
 import AdvancedQueryGraph from './graph/AdvancedQueryGraphComponent';
@@ -12,7 +12,7 @@ const TRAPIQueryButton = ({TRAPIQuery}) => {
   return <Modal
     closeIcon
     open={modalOpen}
-    trigger={<Button>View TRAPI Query</Button>}
+    trigger={<Button basic color='violet'>View TRAPI Query</Button>}
     onClose={() => setModalOpen(false)}
     onOpen={() => setModalOpen(true)}
   >
@@ -26,22 +26,17 @@ const TRAPIQueryButton = ({TRAPIQuery}) => {
 }
 
 const ARSDisplay = ({arsPK}) => {
-  const [messageVisible, setMessageVisible] = useState(true);
-
   if (arsPK) {
     return (
       <div>
         <h3>ARS Results</h3>
-        {
-          messageVisible && 
-          <Message warning floating
-            content="ARS results may take a minute to show up, try waiting 
-            a minute and refreshing the page if results don't show up immediately."
-          />
-        } 
+        <Message warning floating
+          content="ARS results may take a minute to show up, try waiting 
+          a minute and refreshing the page if results don't show up immediately."
+        />
         <Button 
           as='a' href={`https://arax.ncats.io/?source=ARS&id=${arsPK}`} 
-          icon='external' labelPosition='left' content="Open ARS" target="_blank" 
+          icon='external' labelPosition='left' content="Open ARS" target="_blank" id="ars-button"
         />
       </div>
     );
@@ -263,8 +258,8 @@ class AdvancedQuery extends Component {
         
         <AdvancedQueryGraph ref={this.graphRef} edgeQuery={this.edgeQuery} nodeQuery={this.nodeQuery} cy={this.state.cy} setCy={this.setCy}/>
         
-        <Button onClick={this.defaultQuery} loading={this.state.loading}>Query BTE</Button>
-        <Button onClick={this.makeARSQuery} loading={this.state.loadingARS}>Query ARS</Button>
+        <Button color='violet' onClick={this.defaultQuery} loading={this.state.loading}>Query BTE</Button>
+        <Button color='violet' onClick={this.makeARSQuery} loading={this.state.loadingARS}>Query ARS</Button>
         
         <TRAPIQueryButton TRAPIQuery={this.TRAPIQuery}/>
 
