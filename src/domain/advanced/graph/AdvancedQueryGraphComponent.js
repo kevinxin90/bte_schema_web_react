@@ -326,14 +326,12 @@ export default class AdvancedQueryGraph extends Component {
 
     //handle left click
     cy.on('tap', (event) => {
-      if (this.state.mode === MODE.addNode) {
+      if (event.target !== cy && event.target.isNode()) {
+        this.showNodeOptions(event.target);
+      } else if (event.target !== cy && event.target.isEdge()) {
+        this.showEdgeOptions(event.target);
+      } else if (this.state.mode === MODE.addNode) {
         this.createNode(event);
-      } else if (this.state.mode === MODE.edit) {
-        if (event.target !== cy && event.target.isNode()) {
-          this.showNodeOptions(event.target);
-        } else if (event.target !== cy && event.target.isEdge()) {
-          this.showEdgeOptions(event.target);
-        }
       }
     });
 
