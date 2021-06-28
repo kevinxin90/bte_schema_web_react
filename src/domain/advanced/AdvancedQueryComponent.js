@@ -1,5 +1,5 @@
 import React, { Component, useState } from 'react';
-import { Button, Header, Container, Modal, Message } from 'semantic-ui-react';
+import { Button, Header, Container, Modal, Message, Menu } from 'semantic-ui-react';
 import { Navigation } from '../../components/Breadcrumb';
 import ResultsTable from './table/ResultsTableComponent';
 import AdvancedQueryGraph from './graph/AdvancedQueryGraphComponent';
@@ -12,7 +12,7 @@ const TRAPIQueryButton = ({TRAPIQuery}) => {
   return <Modal
     closeIcon
     open={modalOpen}
-    trigger={<Button>View TRAPI Query</Button>}
+    trigger={<Button basic color='violet'>View TRAPI Query</Button>}
     onClose={() => setModalOpen(false)}
     onOpen={() => setModalOpen(true)}
   >
@@ -25,6 +25,31 @@ const TRAPIQueryButton = ({TRAPIQuery}) => {
   </Modal>
 }
 
+const ARSDisplay = ({arsPK}) => {
+  if (arsPK) {
+    return (
+      <div>
+        <h3>ARS Results</h3>
+        <Message warning floating
+          content="ARS results may take a minute to show up, try waiting 
+          a minute and refreshing the page if results don't show up immediately."
+        />
+        <Button 
+          as='a' href={`https://arax.ncats.io/?source=ARS&id=${arsPK}`} 
+          icon='external' labelPosition='left' content="Open ARS" target="_blank" id="ars-button"
+        />
+      </div>
+    );
+  } else {
+    return (
+      <div>
+        <h3>ARS Results</h3>
+        <div>Click 'Query ARS' to get ARS results.</div>
+      </div>
+    );
+  }
+}
+
 class AdvancedQuery extends Component {
   constructor(props) {
     super(props);
@@ -33,9 +58,11 @@ class AdvancedQuery extends Component {
       selectedElementID: "",
       mode: "",
       loading: false,
+      loadingARS: false,
       cy: {},
       arsPK: "",
       messageVisible: true,
+      activeItem: "BTE"
     };
 
     this.setCy = this.setCy.bind(this);
@@ -47,9 +74,15 @@ class AdvancedQuery extends Component {
     this.edgeQuery = this.edgeQuery.bind(this);
     this.nodeQuery = this.nodeQuery.bind(this);
     this.defaultQuery = this.defaultQuery.bind(this);
+    this.makeARSQuery = this.makeARSQuery.bind(this);
     this.setElementID = this.setElementID.bind(this);
     this.closeMessage = this.closeMessage.bind(this);
+    this.handleMenuClick = this.handleMenuClick.bind(this);
   } 
+
+  handleMenuClick(e, { name }) {
+    this.setState({activeItem: name});
+  }
 
   closeMessage() {
     this.setState({messageVisible: false});
@@ -131,12 +164,15 @@ class AdvancedQuery extends Component {
     let resp_edge = _.get(this.state.response, ['message', 'query_graph', 'edges', edge.id()]);
     let query_edge = _.get(this.TRAPIQuery(), ['message', 'query_graph', 'edges', edge.id()]);
 
-    if (_.isEqual(resp_edge, query_edge)) { //use existing results if the query graph for the edge is unchanged
-      this.setState({mode: "edge"});
+    let resp_source_node = _.get(this.state.response, ['message', 'query_graph', 'nodes', _.get(resp_edge, 'subject')]);
+    let query_source_node = _.get(this.TRAPIQuery(), ['message', 'query_graph', 'nodes', _.get(query_edge, 'subject')]);
+
+    if (_.isEqual(resp_edge, query_edge) && _.isEqual(resp_source_node, query_source_node)) { //use existing results if the query graph for the edge is unchanged
+      this.setState({mode: "edge", activeItem: "BTE"});
       this.setElementID(edge.id())
     } else { //otherwise requery the graph
       this.queryGraph(() => {
-        this.setState({mode: "edge"});
+        this.setState({mode: "edge", activeItem: "BTE"});
         this.setElementID(edge.id()); 
       });
       
@@ -149,30 +185,39 @@ class AdvancedQuery extends Component {
     let query_node = _.get(this.TRAPIQuery(), ['message', 'query_graph', 'nodes', node.id()]);
 
     if (_.isEqual(resp_node, query_node)) { //use existing results if they exist
-      this.setState({mode: "node"});
+      this.setState({mode: "node", activeItem: "BTE"});
       this.setElementID(node.id());
     } else { //requery if they don't exist
       this.queryGraph(() => {
-        this.setState({mode: "node"});
+        this.setState({mode: "node", activeItem: "BTE"});
         this.setElementID(node.id());
       }); 
     }
   }
 
   //by default show results for first edge
+  //if there is already a selected ed
   defaultQuery() {
-    this.queryGraph();
-    let edge = this.state.cy.edges()[0];
-    this.edgeQuery(edge);
+    this.queryGraph(() => {
+      let edge = this.state.cy.edges()[0];
+      this.edgeQuery(edge);
+    });
   }
 
-  makeARSQuery(query) {
-    axios.post('https://ars-dev.transltr.io/ars/api/submit', query).then((response) => {
-      this.setState({arsPK: response.data.pk});
-      console.log("ARS response", response);
-    }).catch((error) => {
-      console.log("Error: ", error);
-    });
+  makeARSQuery() {
+    console.log("Querying ARS...");
+    if (this.isValidQuery(this.cyJSON())) {
+      if (!this.state.loadingARS) {
+        this.setState({loadingARS: true, activeItem: 'ARS'});
+
+        axios.post('https://ars-dev.transltr.io/ars/api/submit', this.TRAPIQuery()).then((response) => {
+          this.setState({arsPK: response.data.pk, loadingARS: false});
+          console.log("ARS response", response);
+        }).catch((error) => {
+          console.log("Error: ", error);
+        });
+      }
+    }
   }
 
   //get and query graph
@@ -182,13 +227,13 @@ class AdvancedQuery extends Component {
       if (!this.state.loading) {
         this.setState({loading: true});
         let query = this.TRAPIQuery();
-        this.makeARSQuery(query);
 
         axios.post('https://api.bte.ncats.io/v1/query', query).then((response) => {
-          this.setState({loading: false, response: response.data});
-          if (callback !== undefined) {
-            callback();
-          }
+          this.setState({loading: false, response: response.data}, () => {
+            if (callback !== undefined) {
+              callback();
+            }
+          });
           console.log("Response", response.data);
         }).catch((error) => {
           this.setState({loading: false});
@@ -212,35 +257,37 @@ class AdvancedQuery extends Component {
         
         <AdvancedQueryGraph ref={this.graphRef} edgeQuery={this.edgeQuery} nodeQuery={this.nodeQuery} cy={this.state.cy} setCy={this.setCy}/>
         
-        <Button onClick={this.defaultQuery} loading={this.state.loading}>Query</Button>
+        <Button color='violet' onClick={this.defaultQuery} loading={this.state.loading}>Query BTE</Button>
+        <Button color='violet' onClick={this.makeARSQuery} loading={this.state.loadingARS}>Query ARS</Button>
         
         <TRAPIQueryButton TRAPIQuery={this.TRAPIQuery}/>
 
-        {
-          this.state.arsPK && 
-          <Button 
-            as='a' href={`https://arax.ncats.io/?source=ARS&id=${this.state.arsPK}`} 
-            icon='external' labelPosition='left' content="Open ARS" target="_blank" 
+        <Menu pointing secondary>
+          <Menu.Item 
+            name='BTE'
+            active={this.state.activeItem === 'BTE'}
+            onClick={this.handleMenuClick}
           />
-        }
-
-        {
-          this.state.arsPK && this.state.messageVisible && 
-          <Message warning floating onDismiss={this.closeMessage}
-            content="ARS results may take a minute to show up, try waiting 
-            a minute and refreshing the page if results don't show up immediately."
+          <Menu.Item 
+            name='ARS'
+            active={this.state.activeItem === 'ARS'}
+            onClick={this.handleMenuClick}
           />
-        } 
+        </Menu>
 
-
-        <ResultsTable 
-          response={this.state.response}
-          mode={this.state.mode}
-          selectedElementID={this.state.selectedElementID}
-          cy={this.state.cy}
-          setCy={this.setCy}
-          key={this.state.selectedElementID} //force creation of new element when selected element changes
-        />
+        <div style={{display: this.state.activeItem === 'BTE' ? 'block' : 'none'}}>
+          <ResultsTable 
+            response={this.state.response}
+            mode={this.state.mode}
+            selectedElementID={this.state.selectedElementID}
+            cy={this.state.cy}
+            setCy={this.setCy}
+            key={this.state.selectedElementID} //force creation of new element when selected element changes
+          />
+        </div>
+        <div style={{display: this.state.activeItem === 'ARS' ? 'block' : 'none'}}>
+          <ARSDisplay arsPK={this.state.arsPK} />
+        </div>
       </Container>
     )
   }

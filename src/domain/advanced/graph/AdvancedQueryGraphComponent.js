@@ -108,6 +108,11 @@ export default class AdvancedQueryGraph extends Component {
         ReactDOM.render(tippyContent, content);
         return content;
       },
+      onShow(instance) {
+        instance.popper.querySelector('.close').addEventListener('click', () => {
+          instance.hide();
+        })
+      },
       onUntrigger(instance) {
         this.setState({tip: {}});
         instance.destroy();
@@ -198,6 +203,9 @@ export default class AdvancedQueryGraph extends Component {
       <Button onClick={() => { this.props.nodeQuery(node) }} style={{marginTop: "0.75em"}}>
         View Results for Node
       </Button>
+      <Button onClick={() => { this.removeElement(node) }} className="close">
+        Delete Node
+      </Button>
     </div>;
     return popupContent;
   }
@@ -245,6 +253,9 @@ export default class AdvancedQueryGraph extends Component {
       />
       <Button onClick={() => { this.props.edgeQuery(edge) }} style={{marginTop: "0.75em"}}>
         View Results for Edge
+      </Button>
+      <Button onClick={() => { this.removeElement(edge) }} className="close">
+        Delete Edge
       </Button>
     </div>;
     return popupContent;
@@ -315,14 +326,12 @@ export default class AdvancedQueryGraph extends Component {
 
     //handle left click
     cy.on('tap', (event) => {
-      if (this.state.mode === MODE.addNode) {
+      if (event.target !== cy && event.target.isNode()) {
+        this.showNodeOptions(event.target);
+      } else if (event.target !== cy && event.target.isEdge()) {
+        this.showEdgeOptions(event.target);
+      } else if (this.state.mode === MODE.addNode) {
         this.createNode(event);
-      } else if (this.state.mode === MODE.edit) {
-        if (event.target !== cy && event.target.isNode()) {
-          this.showNodeOptions(event.target);
-        } else if (event.target !== cy && event.target.isEdge()) {
-          this.showEdgeOptions(event.target);
-        }
       }
     });
 
