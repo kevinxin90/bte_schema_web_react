@@ -166,7 +166,6 @@ class AdvancedQuery extends Component {
 
     let resp_source_node = _.get(this.state.response, ['message', 'query_graph', 'nodes', _.get(resp_edge, 'subject')]);
     let query_source_node = _.get(this.TRAPIQuery(), ['message', 'query_graph', 'nodes', _.get(query_edge, 'subject')]);
-    console.log(resp_edge, query_edge, resp_source_node, query_source_node);
 
     if (_.isEqual(resp_edge, query_edge) && _.isEqual(resp_source_node, query_source_node)) { //use existing results if the query graph for the edge is unchanged
       this.setState({mode: "edge", activeItem: "BTE"});
